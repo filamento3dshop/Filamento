@@ -41,8 +41,16 @@
     </div>
     {% endif %}
     <div class="conferma-detail">
+      <span>Codice fiscale</span>
+      <strong>{{ order.codice_fiscale }}</strong>
+    </div>
+    <div class="conferma-detail">
+      <span>Residenza</span>
+      <strong>{{ order.res_indirizzo }}, {{ order.res_citta }} {{ order.res_cap }}</strong>
+    </div>
+    <div class="conferma-detail">
       <span>Spedizione a</span>
-      <strong>{{ order.indirizzo }}, {{ order.citta }} {{ order.cap }}</strong>
+      <strong>{{ order.indirizzo_spedizione }}</strong>
     </div>
     <div class="conferma-detail" style="border-bottom:none;padding-top:16px;margin-top:4px;">
       <span style="font-weight:500;color:var(--text);">Totale pagato</span>

@@ -196,7 +196,10 @@
 
     <!-- ══ STEP 2: SPEDIZIONE ══ -->
     <div class="wizard-panel" id="panel-2">
-      <h2 class="panel-title">Dati di spedizione</h2>
+      <h2 class="panel-title">Dati e spedizione</h2>
+
+      <!-- Dati anagrafici -->
+      <div class="form-section-title" style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--c200);">Dati anagrafici</div>
 
       <div class="form-row">
         <div class="form-group">
@@ -211,10 +214,18 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="email">Email <span class="req">*</span></label>
-        <input class="form-control" type="email" id="email" name="email"
-               placeholder="mario@esempio.it" value="{{ form.get('email','') }}">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="codice_fiscale">Codice fiscale <span class="req">*</span></label>
+          <input class="form-control" type="text" id="codice_fiscale" name="codice_fiscale"
+                 placeholder="RSSMRA80A01H501U" maxlength="16" style="text-transform:uppercase;"
+                 value="{{ form.get('codice_fiscale','') }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email <span class="req">*</span></label>
+          <input class="form-control" type="email" id="email" name="email"
+                 placeholder="mario@esempio.it" value="{{ form.get('email','') }}">
+        </div>
       </div>
 
       <div class="form-group">
@@ -223,37 +234,69 @@
                placeholder="+39 333 1234567" value="{{ form.get('telefono','') }}">
       </div>
 
+      <!-- Indirizzo di residenza -->
+      <div class="form-section-title" style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--c200);">Indirizzo di residenza</div>
+
       <div class="form-group">
-        <label class="form-label" for="indirizzo">Via e numero civico <span class="req">*</span></label>
-        <input class="form-control" type="text" id="indirizzo" name="indirizzo"
-               placeholder="Via Roma 1" value="{{ form.get('indirizzo','') }}">
+        <label class="form-label" for="res_indirizzo">Via e numero civico <span class="req">*</span></label>
+        <input class="form-control" type="text" id="res_indirizzo" name="res_indirizzo"
+               placeholder="Via Roma 1" value="{{ form.get('res_indirizzo','') }}">
       </div>
-
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" for="citta">Città <span class="req">*</span></label>
-          <input class="form-control" type="text" id="citta" name="citta"
-                 placeholder="Milano" value="{{ form.get('citta','') }}">
+          <label class="form-label" for="res_citta">Città <span class="req">*</span></label>
+          <input class="form-control" type="text" id="res_citta" name="res_citta"
+                 placeholder="Milano" value="{{ form.get('res_citta','') }}">
         </div>
         <div class="form-group">
-          <label class="form-label" for="cap">CAP <span class="req">*</span></label>
-          <input class="form-control" type="text" id="cap" name="cap"
-                 placeholder="20100" maxlength="5" value="{{ form.get('cap','') }}">
+          <label class="form-label" for="res_cap">CAP <span class="req">*</span></label>
+          <input class="form-control" type="text" id="res_cap" name="res_cap"
+                 placeholder="20100" maxlength="5" value="{{ form.get('res_cap','') }}">
         </div>
       </div>
+      <div class="form-group">
+        <label class="form-label" for="res_provincia">Provincia</label>
+        <input class="form-control" type="text" id="res_provincia" name="res_provincia"
+               placeholder="MI" maxlength="2" value="{{ form.get('res_provincia','') }}">
+      </div>
 
-      <div class="form-row">
+      <!-- Spedizione diversa -->
+      <label class="spedizione-toggle">
+        <input type="checkbox" id="spedizione_diversa" name="spedizione_diversa" value="1"
+               {% if form.get('spedizione_diversa') %}checked{% endif %}>
+        <span class="spedizione-toggle-box"></span>
+        <span class="spedizione-toggle-label">L'indirizzo di spedizione è diverso da quello di residenza</span>
+      </label>
+
+      <!-- Indirizzo di spedizione (visibile solo se spunta attiva) -->
+      <div id="spedizione-extra" style="display:none; margin-top:20px;">
+        <div class="form-section-title" style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--c200);">Indirizzo di spedizione</div>
+        <div class="form-group">
+          <label class="form-label" for="indirizzo">Via e numero civico <span class="req">*</span></label>
+          <input class="form-control" type="text" id="indirizzo" name="indirizzo"
+                 placeholder="Via Roma 1" value="{{ form.get('indirizzo','') }}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="citta">Città <span class="req">*</span></label>
+            <input class="form-control" type="text" id="citta" name="citta"
+                   placeholder="Milano" value="{{ form.get('citta','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cap">CAP <span class="req">*</span></label>
+            <input class="form-control" type="text" id="cap" name="cap"
+                   placeholder="20100" maxlength="5" value="{{ form.get('cap','') }}">
+          </div>
+        </div>
         <div class="form-group">
           <label class="form-label" for="provincia">Provincia</label>
           <input class="form-control" type="text" id="provincia" name="provincia"
                  placeholder="MI" maxlength="2" value="{{ form.get('provincia','') }}">
         </div>
-        <div class="form-group">
-          <label class="form-label">Spedizione</label>
-          <div style="padding:12px 16px;background:var(--c100);border:1.5px solid var(--c200);border-radius:2px;font-size:0.9rem;color:var(--text2);">
-            <i class="fas fa-truck" style="color:var(--c500);margin-right:8px;"></i>Standard Italia — <strong style="color:var(--text);">€3,00</strong>
-          </div>
-        </div>
+      </div>
+
+      <div style="margin-top:20px;padding:12px 16px;background:var(--c100);border:1.5px solid var(--c200);border-radius:2px;font-size:0.9rem;color:var(--text2);">
+        <i class="fas fa-truck" style="color:var(--c500);margin-right:8px;"></i>Spedizione standard Italia — <strong style="color:var(--text);">€3,00</strong>
       </div>
 
       <div class="wizard-nav">
@@ -433,6 +476,18 @@ textarea.form-control { resize: vertical; }
 #stripe-error { color: var(--c500); font-size: 0.85rem; margin-top: 8px; min-height: 18px; }
 .paypal-note { font-size: 0.85rem; color: var(--text2); text-align: center; padding: 14px; background: var(--c100); border-radius: 2px; }
 
+/* Spedizione toggle */
+.spedizione-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-top: 8px; padding: 14px 16px; border: 1.5px solid var(--c200); border-radius: 2px; background: var(--c100); transition: border-color .2s; }
+.spedizione-toggle:hover { border-color: var(--c300); }
+.spedizione-toggle input[type="checkbox"] { display: none; }
+.spedizione-toggle-box { width: 20px; height: 20px; border: 1.5px solid var(--c300); border-radius: 2px; background: var(--white); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.spedizione-toggle input:checked ~ .spedizione-toggle-box,
+.spedizione-toggle-box.checked { background: var(--c500); border-color: var(--c500); }
+.spedizione-toggle-box::after { content: '✓'; color: #fff; font-size: 0.7rem; font-weight: 700; display: none; }
+.spedizione-toggle input:checked ~ * .spedizione-toggle-box::after,
+.spedizione-toggle input:checked + .spedizione-toggle-box::after { display: block; }
+.spedizione-toggle-label { font-size: 0.88rem; color: var(--text2); }
+
 @media (max-width: 600px) {
   .ordina-wrap { padding: 32px 20px 60px; }
   .form-row { grid-template-columns: 1fr; }
@@ -541,10 +596,18 @@ function validateStep(step) {
     }
   }
   if (step === 2) {
-    const fields = ['nome','cognome','email','indirizzo','citta','cap'];
-    for (const id of fields) {
+    const base = ['nome','cognome','codice_fiscale','email','res_indirizzo','res_citta','res_cap'];
+    for (const id of base) {
       if (!document.getElementById(id).value.trim()) {
         alert('Compila tutti i campi obbligatori'); return false;
+      }
+    }
+    // se spedizione diversa, valida anche quei campi
+    if (document.getElementById('spedizione_diversa').checked) {
+      for (const id of ['indirizzo','citta','cap']) {
+        if (!document.getElementById(id).value.trim()) {
+          alert('Compila l\'indirizzo di spedizione'); return false;
+        }
       }
     }
   }
@@ -583,6 +646,24 @@ function updateRecap() {
   document.getElementById('r-colore').textContent = colore ? colore.closest('label').querySelector('.cname').textContent : '—';
   document.getElementById('r-totale').textContent = '€' + totale.toFixed(2);
 }
+
+// ── Toggle spedizione diversa ──
+const chkSpedizione = document.getElementById('spedizione_diversa');
+const extraSpedizione = document.getElementById('spedizione-extra');
+const toggleBox = document.querySelector('.spedizione-toggle-box');
+
+function aggiornaToggleSpedizione() {
+  extraSpedizione.style.display = chkSpedizione.checked ? 'block' : 'none';
+  if (chkSpedizione.checked) {
+    toggleBox.classList.add('checked');
+    toggleBox.innerHTML = '<span style="color:#fff;font-size:0.7rem;font-weight:700;">✓</span>';
+  } else {
+    toggleBox.classList.remove('checked');
+    toggleBox.innerHTML = '';
+  }
+}
+chkSpedizione.addEventListener('change', aggiornaToggleSpedizione);
+aggiornaToggleSpedizione();
 
 // ── Payment tabs ──
 document.querySelectorAll('.pay-tab').forEach(tab => {
