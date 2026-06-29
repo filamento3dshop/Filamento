@@ -154,6 +154,21 @@ async def ordina_post(
     })
 
 
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy(request: Request):
+    return templates.TemplateResponse("privacy.html", {"request": request, "config": CONFIG})
+
+
+@app.get("/termini", response_class=HTMLResponse)
+async def termini(request: Request):
+    return templates.TemplateResponse("termini.html", {"request": request, "config": CONFIG})
+
+
+@app.get("/spedizioni", response_class=HTMLResponse)
+async def spedizioni(request: Request):
+    return templates.TemplateResponse("spedizioni.html", {"request": request, "config": CONFIG})
+
+
 @app.get("/conferma", response_class=HTMLResponse)
 async def conferma(request: Request):
     order = {
