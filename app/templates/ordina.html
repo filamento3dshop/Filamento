@@ -66,31 +66,47 @@
         <p class="form-hint">Verrà scritto a mano in piccolo sulla lettera</p>
       </div>
 
+      {% set colori = [
+        ('corallo',  '#ff6b6b', 'Corallo'),
+        ('pesca',    '#F0A898', 'Pesca'),
+        ('cipria',   '#F5C4BC', 'Cipria'),
+        ('lilla',    '#C8A8D0', 'Lilla'),
+        ('azzurro',  '#88B4C8', 'Azzurro'),
+        ('salvia',   '#9BB8A0', 'Salvia'),
+        ('oro',      '#E8C84A', 'Oro'),
+        ('tortora',  '#eed7c1', 'Tortora'),
+        ('bianco',   '#F8F6F3', 'Bianco'),
+        ('nero',     '#1A1A1A', 'Nero'),
+      ] %}
+
       <div class="form-group">
-        <label class="form-label">Colore <span class="req">*</span></label>
-        <div class="color-picker" id="color-picker">
-          {% set colori = [
-            ('corallo',  '#ff6b6b', 'Corallo'),
-            ('pesca',    '#F0A898', 'Pesca'),
-            ('cipria',   '#F5C4BC', 'Cipria'),
-            ('lilla',    '#C8A8D0', 'Lilla'),
-            ('azzurro',  '#88B4C8', 'Azzurro'),
-            ('salvia',   '#9BB8A0', 'Salvia'),
-            ('oro',      '#E8C84A', 'Oro'),
-            ('tortora',  '#eed7c1', 'Tortora'),
-            ('bianco',   '#F8F6F3', 'Bianco'),
-            ('nero',     '#1A1A1A', 'Nero'),
-          ] %}
+        <label class="form-label">Colore della lettera / numero <span class="req">*</span></label>
+        <div class="color-picker" id="color-picker-lettera">
           {% for val, hex, label in colori %}
           <label class="color-opt" title="{{ label }}">
-            <input type="radio" name="colore" value="{{ val }}"
-                   {% if form.get('colore','corallo') == val %}checked{% endif %}>
+            <input type="radio" name="colore_lettera" value="{{ val }}"
+                   {% if form.get('colore_lettera','corallo') == val %}checked{% endif %}>
             <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#eed7c1') %}box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);{% endif %}"></span>
             <span class="cname">{{ label }}</span>
           </label>
           {% endfor %}
         </div>
-        <p class="form-hint" id="color-selected">Nessun colore selezionato</p>
+        <p class="form-hint" id="color-lettera-selected">Nessun colore selezionato</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Colore della scritta (nome) <span class="req">*</span></label>
+        <div class="color-picker" id="color-picker-scritta">
+          {% for val, hex, label in colori %}
+          <label class="color-opt" title="{{ label }}">
+            <input type="radio" name="colore_scritta" value="{{ val }}"
+                   {% if form.get('colore_scritta','bianco') == val %}checked{% endif %}>
+            <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#eed7c1') %}box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);{% endif %}"></span>
+            <span class="cname">{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <p class="form-hint" id="color-scritta-selected">Nessun colore selezionato</p>
       </div>
 
       <div class="form-group">
@@ -114,16 +130,6 @@
             </div>
           </label>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="tipo_evento">Tipo di evento <span class="req">*</span></label>
-        <select class="form-control" id="tipo_evento" name="tipo_evento" required>
-          <option value="">— Scegli —</option>
-          {% for ev in ['Battesimo','Compleanno','Baby Shower','Nascita','Matrimonio','Comunione','Cresima','Laurea','Altro'] %}
-          <option value="{{ ev }}" {% if form.get('tipo_evento')==ev %}selected{% endif %}>{{ ev }}</option>
-          {% endfor %}
-        </select>
       </div>
 
       <div class="form-group">
@@ -458,7 +464,7 @@ function validateStep(step) {
   if (step === 1) {
     const lettera = document.getElementById('lettera').value;
     const nome = document.getElementById('nome_bimbo').value.trim();
-    const colore = document.querySelector('input[name="colore"]:checked');
+    const colore = document.querySelector('input[name="colore_lettera"]:checked');
     const dim = document.querySelector('input[name="dimensione"]:checked');
     const evento = document.getElementById('tipo_evento').value;
     if (!lettera) { alert('Scegli la lettera iniziale'); return false; }
@@ -479,24 +485,25 @@ function validateStep(step) {
 }
 
 // ── Colore label ──
-document.querySelectorAll('input[name="colore"]').forEach(r => {
-  r.addEventListener('change', () => {
-    document.getElementById('color-selected').textContent =
-      'Colore selezionato: ' + r.closest('label').querySelector('.cname').textContent;
-  });
-});
-// init
-const preselected = document.querySelector('input[name="colore"]:checked');
-if (preselected) {
-  document.getElementById('color-selected').textContent =
-    'Colore selezionato: ' + preselected.closest('label').querySelector('.cname').textContent;
+function initColorPicker(name, hintId) {
+  const update = () => {
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    if (checked) {
+      document.getElementById(hintId).textContent =
+        'Colore selezionato: ' + checked.closest('label').querySelector('.cname').textContent;
+    }
+  };
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.addEventListener('change', update));
+  update();
 }
+initColorPicker('colore_lettera', 'color-lettera-selected');
+initColorPicker('colore_scritta', 'color-scritta-selected');
 
 // ── Recap step 3 ──
 function updateRecap() {
   const lettera = document.getElementById('lettera').value || '—';
   const dim = document.querySelector('input[name="dimensione"]:checked');
-  const colore = document.querySelector('input[name="colore"]:checked');
+  const colore = document.querySelector('input[name="colore_lettera"]:checked');
 
   const dimVal = dim ? dim.value : '20';
   const basePrice = PREZZI_DIM[dimVal] || 29.90;

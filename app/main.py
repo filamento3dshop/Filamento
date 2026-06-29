@@ -55,9 +55,9 @@ async def ordina_post(
     # step 1
     lettera: str = Form(...),
     nome_bimbo: str = Form(...),
-    colore: str = Form("corallo"),
+    colore_lettera: str = Form("corallo"),
+    colore_scritta: str = Form("bianco"),
     dimensione: str = Form("20"),
-    tipo_evento: str = Form(...),
     note: Optional[str] = Form(None),
     tema: str = Form("nessuno"),
     num_deco: int = Form(0),
@@ -76,8 +76,9 @@ async def ordina_post(
     paypal_order_id: Optional[str] = Form(None),
 ):
     form_data = {
-        "lettera": lettera, "nome_bimbo": nome_bimbo, "colore": colore,
-        "dimensione": dimensione, "tipo_evento": tipo_evento, "note": note, "tema": tema,
+        "lettera": lettera, "nome_bimbo": nome_bimbo,
+        "colore_lettera": colore_lettera, "colore_scritta": colore_scritta,
+        "dimensione": dimensione, "note": note, "tema": tema,
         "nome": nome, "cognome": cognome, "email": email, "telefono": telefono,
         "indirizzo": indirizzo, "citta": citta, "cap": cap, "provincia": provincia,
     }
@@ -95,7 +96,7 @@ async def ordina_post(
                 currency="eur",
                 payment_method=stripe_token,
                 confirm=True,
-                description=f"Filamento #{order_id} — Lettera {lettera} per {nome_bimbo}",
+                description=f"Filamento #{order_id} — Lettera {lettera} ({colore_lettera}) per {nome_bimbo}",
                 receipt_email=email,
             )
 
@@ -121,9 +122,9 @@ async def ordina_post(
         "cognome": cognome,
         "lettera": lettera,
         "nome_bimbo": nome_bimbo,
-        "colore": colore,
+        "colore_lettera": colore_lettera,
+        "colore_scritta": colore_scritta,
         "dimensione": dimensione,
-        "tipo_evento": tipo_evento,
         "tema": tema,
         "indirizzo": indirizzo,
         "citta": citta,
@@ -140,8 +141,9 @@ async def ordina_post(
 async def conferma(request: Request):
     order = {
         "id": "—", "email": "—", "nome": "—", "cognome": "—",
-        "lettera": "—", "nome_bimbo": "—", "colore": "—", "dimensione": "—",
-        "tipo_evento": "—", "tema": "—",
+        "lettera": "—", "nome_bimbo": "—",
+        "colore_lettera": "—", "colore_scritta": "—",
+        "dimensione": "—", "tema": "—",
         "indirizzo": "—", "citta": "—", "cap": "—", "totale": "—",
     }
     return templates.TemplateResponse("conferma.html", {

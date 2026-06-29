@@ -27,19 +27,19 @@
       <strong>{{ order.dimensione }} cm</strong>
     </div>
     <div class="conferma-detail">
-      <span>Colore</span>
-      <strong>{{ order.colore | title }}</strong>
+      <span>Colore lettera</span>
+      <strong>{{ order.colore_lettera | title }}</strong>
+    </div>
+    <div class="conferma-detail">
+      <span>Colore scritta</span>
+      <strong>{{ order.colore_scritta | title }}</strong>
     </div>
     {% if order.tema and order.tema != 'nessuno' %}
     <div class="conferma-detail">
       <span>Tema decorazione</span>
-      <strong>{{ order.tema | title }} (+€5,00)</strong>
+      <strong>{{ order.tema | title }}</strong>
     </div>
     {% endif %}
-    <div class="conferma-detail">
-      <span>Tipo di evento</span>
-      <strong>{{ order.tipo_evento }}</strong>
-    </div>
     <div class="conferma-detail">
       <span>Spedizione a</span>
       <strong>{{ order.indirizzo }}, {{ order.citta }} {{ order.cap }}</strong>
