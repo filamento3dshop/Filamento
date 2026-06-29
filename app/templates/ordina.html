@@ -529,12 +529,16 @@ function validateStep(step) {
     const nome = document.getElementById('nome_bimbo').value.trim();
     const colore = document.querySelector('input[name="colore_lettera"]:checked');
     const dim = document.querySelector('input[name="dimensione"]:checked');
-    const evento = document.getElementById('tipo_evento').value;
     if (!lettera) { alert('Scegli la lettera iniziale'); return false; }
     if (!nome) { alert('Inserisci il nome da personalizzare'); return false; }
-    if (!colore) { alert('Scegli un colore'); return false; }
+    if (!colore) { alert('Scegli il colore della lettera'); return false; }
     if (!dim) { alert('Scegli la dimensione'); return false; }
-    if (!evento) { alert('Scegli il tipo di evento'); return false; }
+    // verifica decorazioni: se ne ha scelte meno del numero selezionato, avvisa
+    const decoScelte = document.querySelectorAll('.deco-check:checked').length;
+    if (numDeco > 0 && decoScelte < numDeco) {
+      alert(`Hai selezionato ${numDeco} decorazioni ma ne hai scelte solo ${decoScelte}. Seleziona le decorazioni dal catalogo o scegli "Nessuna".`);
+      return false;
+    }
   }
   if (step === 2) {
     const fields = ['nome','cognome','email','indirizzo','citta','cap'];
