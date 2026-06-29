@@ -1,14 +1,230 @@
 {% extends "base.html" %}
-{% block title %}Filamento — Lettere e numeri 3D personalizzati{% endblock %}
+{% block title %}Filamento – Lettere, numeri e decorazioni 3D personalizzate{% endblock %}
 
 {% block content %}
-<!-- PLACEHOLDER: sostituire con il contenuto reale di index.html -->
-<section>
-  <div class="section-inner" style="text-align:center;padding:120px 0;">
-    <span class="section-label">In arrivo</span>
-    <h2 class="section-title">Homepage in costruzione</h2>
-    <p class="section-desc" style="margin:0 auto 40px;">Incolla il contenuto di index.html per completare la pagina.</p>
-    <a href="/ordina" class="btn-primary">Ordina ora</a>
+
+<!-- HERO -->
+<div style="background: var(--white);">
+  <div class="hero">
+    <div class="hero-text">
+      <span class="hero-overline">Fatto a mano in Italia</span>
+      <h1>Composizioni che<br><em>raccontano</em><br>la tua storia.</h1>
+      <p class="hero-desc">Lettere, numeri e decorazioni personalizzate con stampa 3D — elementi unici per ogni occasione speciale.</p>
+      <div class="hero-actions">
+        <a href="/ordina" class="btn-primary">Personalizza ora</a>
+        <a href="#prezzi" class="btn-ghost">Scopri i prezzi</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-image-bg"></div>
+      <div class="hero-placeholder">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" style="width:140px;margin-bottom:14px;">
+          <text x="60" y="46" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="38" font-weight="600" fill="none" stroke="#E09888" stroke-width="1">EMMA</text>
+        </svg>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:#E09888;font-style:italic;">Le tue lettere qui</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STRIP SCORREVOLE -->
+<div class="strip">
+  <div class="strip-track">
+    <div class="strip-item"><div class="strip-dot"></div>Stampa 3D artigianale</div>
+    <div class="strip-item"><div class="strip-dot"></div>Personalizzazione totale</div>
+    <div class="strip-item"><div class="strip-dot"></div>Consegna in 10 giorni lavorativi</div>
+    <div class="strip-item"><div class="strip-dot"></div>Finiture di alta precisione</div>
+    <div class="strip-item"><div class="strip-dot"></div>Stampa 3D artigianale</div>
+    <div class="strip-item"><div class="strip-dot"></div>Personalizzazione totale</div>
+    <div class="strip-item"><div class="strip-dot"></div>Consegna in 10 giorni lavorativi</div>
+    <div class="strip-item"><div class="strip-dot"></div>Finiture di alta precisione</div>
+  </div>
+</div>
+
+<!-- COME FUNZIONA -->
+<section id="come-funziona" style="background: var(--c100);">
+  <div class="section-inner">
+    <div class="section-header centered">
+      <span class="section-label">Processo</span>
+      <h2 class="section-title">Come funziona</h2>
+      <div class="divider centered"></div>
+      <p class="section-desc">Quattro passaggi semplici per ricevere la tua composizione personalizzata.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Scegli la tua lettera o numero</div>
+        <p class="step-desc">Seleziona il carattere o il numero che vuoi — ogni pezzo è stampato singolarmente.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Scegli il nome</div>
+        <p class="step-desc">Inserisci il nome o la parola da comporre.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Scegli i colori</div>
+        <p class="step-desc">Tanti colori disponibili, scegli quelli che più ti piacciono.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-title">Scegli il tema</div>
+        <p class="step-desc">Diversi temi disponibili: safari, spazio, mare, cielo, principesse, sport.</p>
+      </div>
+    </div>
   </div>
 </section>
+
+<!-- PREZZI -->
+<section id="prezzi" style="background: var(--white);">
+  <div class="section-inner">
+    <div class="section-header centered">
+      <span class="section-label">Tariffe</span>
+      <h2 class="section-title">Prezzi chiari, senza sorprese</h2>
+      <div class="divider centered"></div>
+      <p class="section-desc">Due dimensioni disponibili. Spedizione €3 in tutta Italia.</p>
+    </div>
+    <div class="prices-grid">
+      <div class="price-card">
+        <div class="price-label">Lettera / Numero</div>
+        <div class="price-name">20 cm</div>
+        <div class="price-sub">Dimensione standard</div>
+        <div class="price-amount"><span class="price-eur">€</span><span class="price-num">29</span><span class="price-unit">.90 / cad.</span></div>
+        <ul class="price-features">
+          <li>Stampa 3D in PLA</li>
+          <li>Numero o Lettera iniziale + Nome</li>
+          <li>Colori a scelta</li>
+          <li>Tema a scelta</li>
+        </ul>
+        <a href="/ordina" class="btn-price">Scegli</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-label">Lettera / Numero</div>
+        <div class="price-name">30 cm</div>
+        <div class="price-sub">Dimensione grande</div>
+        <div class="price-amount"><span class="price-eur">€</span><span class="price-num">39</span><span class="price-unit">.90 / cad.</span></div>
+        <ul class="price-features">
+          <li>Stampa 3D in PLA</li>
+          <li>Numero o Lettera iniziale + Nome</li>
+          <li>Colori a scelta</li>
+          <li>Tema a scelta</li>
+        </ul>
+        <a href="/ordina" class="btn-price">Scegli</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OCCASIONI -->
+<section id="occasioni" style="background: var(--c150);">
+  <div class="section-inner">
+    <div class="section-header centered">
+      <span class="section-label">Occasioni</span>
+      <h2 class="section-title">Per ogni momento speciale</h2>
+      <div class="divider centered"></div>
+    </div>
+    <div class="occasions-grid">
+      <div class="occasion-card">
+        <span class="occasion-icon"><i class="fas fa-dove"></i></span>
+        <div class="occasion-name">Battesimo</div>
+        <p class="occasion-desc">Un ricordo prezioso e duraturo per un giorno speciale.</p>
+      </div>
+      <div class="occasion-card">
+        <span class="occasion-icon"><i class="fas fa-cake-candles"></i></span>
+        <div class="occasion-name">Compleanno</div>
+        <p class="occasion-desc">Il regalo che resta — decora la festa e poi la cameretta.</p>
+      </div>
+      <div class="occasion-card">
+        <span class="occasion-icon"><i class="fas fa-baby"></i></span>
+        <div class="occasion-name">Baby Shower</div>
+        <p class="occasion-desc">Sorprendi la futura mamma con una decorazione unica già prima del parto.</p>
+      </div>
+      <div class="occasion-card">
+        <span class="occasion-icon"><i class="fas fa-ribbon"></i></span>
+        <div class="occasion-name">Nascita</div>
+        <p class="occasion-desc">La lettera col nome del nuovo/a arrivata da esporre in cameretta come primo ricordo di vita.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEMI -->
+<section id="temi" class="temi-section">
+  <div class="section-inner">
+    <div class="section-header centered">
+      <span class="temi-badge">Novità</span>
+      <h2 class="section-title">Aggiungi un tema</h2>
+      <div class="divider centered"></div>
+      <p class="section-desc">Piccole decorazioni stampate in 3D da abbinare alla tua lettera — circa 8 cm di altezza.<br>Scegli da 1 a 4 decorazioni: più ne aggiungi, meno paghi per ciascuna.</p>
+    </div>
+    <div class="pricing-strip">
+      <div class="pricing-slot"><div class="pricing-slot-num">1 deco</div><div class="pricing-slot-price">€8</div><div class="pricing-slot-each">€8,00 cad.</div></div>
+      <div class="pricing-slot"><div class="pricing-slot-num">2 deco</div><div class="pricing-slot-price">€15</div><div class="pricing-slot-each">€7,50 cad.</div></div>
+      <div class="pricing-slot"><div class="pricing-slot-num">3 deco</div><div class="pricing-slot-price">€20</div><div class="pricing-slot-each">€6,67 cad.</div></div>
+      <div class="pricing-slot best"><div class="pricing-slot-num">4 deco</div><div class="pricing-slot-price">€25</div><div class="pricing-slot-each">€6,25 cad.</div></div>
+    </div>
+    <div class="temi-grid">
+      <div class="tema-card"><span class="tema-icon"><i class="fas fa-paw"></i></span><div class="tema-name">Safari</div></div>
+      <div class="tema-card"><span class="tema-icon"><i class="fas fa-rocket"></i></span><div class="tema-name">Spazio</div></div>
+      <div class="tema-card"><span class="tema-icon"><i class="fas fa-fish"></i></span><div class="tema-name">Mare</div></div>
+      <div class="tema-card"><span class="tema-icon"><i class="fas fa-cloud-sun"></i></span><div class="tema-name">Cielo</div></div>
+      <div class="tema-card"><span class="tema-icon"><i class="fas fa-crown"></i></span><div class="tema-name">Principesse</div></div>
+      <div class="tema-card"><span class="tema-icon"><i class="fas fa-futbol"></i></span><div class="tema-name">Sport</div></div>
+    </div>
+    <div style="text-align:center;"><a href="/ordina" class="btn-primary">Personalizza con un tema</a></div>
+  </div>
+</section>
+
+<!-- PERCHÉ NOI -->
+<section style="background: var(--white);">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Perché Filamento</span>
+      <h2 class="section-title">Ogni dettaglio,<br>pensato per te</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="why-grid">
+      <div class="why-card"><div class="why-line"></div><div class="why-title">Personalizzazione totale</div><p class="why-desc">Nome, testo, tema, colori — ogni elemento è scelto da te. Il risultato è unico.</p></div>
+      <div class="why-card"><div class="why-line"></div><div class="why-title">Produzione artigianale</div><p class="why-desc">Ogni composizione è prodotta personalmente, con cura manuale.</p></div>
+      <div class="why-card"><div class="why-line"></div><div class="why-title">Spedizione sicura</div><p class="why-desc">Imballaggio su misura per ogni ordine. Consegna tracciata in tutta Italia.</p></div>
+      <div class="why-card"><div class="why-line"></div><div class="why-title">Consegna rapida</div><p class="why-desc">10 giorni lavorativi dalla conferma. Anche per eventi dell'ultimo momento.</p></div>
+      <div class="why-card"><div class="why-line"></div><div class="why-title">Materiali ecologici</div><p class="why-desc">PLA da fonti rinnovabili, certificato non tossico. Sicuro per bambini e ambienti chiusi.</p></div>
+      <div class="why-card"><div class="why-line"></div><div class="why-title">Assistenza dedicata</div><p class="why-desc">Seguiamo ogni ordine con attenzione. Risposta garantita entro 24 ore.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COLORI -->
+<section style="background: var(--c100); padding: 96px 32px;">
+  <div class="section-inner">
+    <div class="section-header centered">
+      <span class="section-label">Palette</span>
+      <h2 class="section-title">Scegli il tuo colore</h2>
+      <div class="divider centered"></div>
+      <p class="section-desc">Ogni pezzo viene stampato nel colore che preferisci.</p>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(5,1fr); gap: 20px; max-width: 780px; margin: 0 auto;">
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#ff6b6b; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Corallo</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#F0A898; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Pesca</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#F5C4BC; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Cipria</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#C8A8D0; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Lilla</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#88B4C8; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Azzurro</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#9BB8A0; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Salvia</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#E8C84A; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Oro</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#eed7c1; border: 1px solid var(--c200); margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Tortora</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#F8F6F3; border: 1px solid var(--c200); margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Bianco</span></div>
+      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#1A1A1A; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Nero</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <span class="section-label">Inizia ora</span>
+  <h2 class="section-title">Pronta a creare<br>qualcosa di speciale?</h2>
+  <div class="divider centered"></div>
+  <p class="section-desc">Personalizza la tua composizione in pochi minuti. Spedizione €3 in tutta Italia.</p>
+  <a href="/ordina" class="btn-primary">Crea la tua composizione</a>
+</div>
+
 {% endblock %}
