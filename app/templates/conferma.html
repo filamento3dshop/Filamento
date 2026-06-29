@@ -8,46 +8,53 @@
   </div>
   <h1 class="conferma-title">Grazie per il tuo ordine!</h1>
   <p class="conferma-sub">
-    Abbiamo ricevuto il tuo ordine e ti abbiamo inviato una conferma via email a <strong>{{ order.email }}</strong>.<br>
+    Abbiamo ricevuto il tuo ordine e ti abbiamo inviato una conferma a <strong>{{ order.email }}</strong>.<br>
     Inizieremo la stampa entro 24 ore — ti aggiorneremo non appena il pacco è in partenza.
   </p>
 
   <div class="conferma-box">
     <div class="conferma-box-title">Riepilogo ordine #{{ order.id }}</div>
     <div class="conferma-detail">
-      <span>Testo</span>
-      <strong>{{ order.testo }}</strong>
+      <span>Lettera iniziale</span>
+      <strong>{{ order.lettera }}</strong>
     </div>
     <div class="conferma-detail">
-      <span>Altezza</span>
-      <strong>{{ order.altezza }} cm</strong>
+      <span>Nome personalizzato</span>
+      <strong>{{ order.nome_bimbo }}</strong>
+    </div>
+    <div class="conferma-detail">
+      <span>Dimensione</span>
+      <strong>{{ order.dimensione }} cm</strong>
     </div>
     <div class="conferma-detail">
       <span>Colore</span>
       <strong>{{ order.colore | title }}</strong>
     </div>
+    {% if order.tema and order.tema != 'nessuno' %}
     <div class="conferma-detail">
-      <span>Tema</span>
-      <strong>{{ order.tema | title }}</strong>
+      <span>Tema decorazione</span>
+      <strong>{{ order.tema | title }} (+€5,00)</strong>
+    </div>
+    {% endif %}
+    <div class="conferma-detail">
+      <span>Tipo di evento</span>
+      <strong>{{ order.tipo_evento }}</strong>
     </div>
     <div class="conferma-detail">
-      <span>Quantità</span>
-      <strong>{{ order.quantita }} set</strong>
-    </div>
-    <div class="conferma-detail">
-      <span>Spedizione</span>
+      <span>Spedizione a</span>
       <strong>{{ order.indirizzo }}, {{ order.citta }} {{ order.cap }}</strong>
     </div>
-    <div class="conferma-detail">
-      <span>Totale pagato</span>
-      <strong style="color:var(--c500);">€{{ order.totale }}</strong>
+    <div class="conferma-detail" style="border-bottom:none;padding-top:16px;margin-top:4px;">
+      <span style="font-weight:500;color:var(--text);">Totale pagato</span>
+      <strong style="color:var(--c500);font-size:1.1rem;">€{{ order.totale }}</strong>
     </div>
   </div>
 
-  <div style="background:var(--c100);border:1px solid var(--c200);border-radius:4px;padding:24px;margin-bottom:40px;text-align:left;">
-    <p style="font-size:0.88rem;color:var(--text2);line-height:1.7;">
-      <i class="fas fa-truck" style="color:var(--c500);margin-right:8px;"></i>
-      <strong>Tempi di consegna:</strong> 5–7 giorni lavorativi in Italia. Riceverai un'email con il numero di tracking non appena il tuo pacco sarà spedito.
+  <div style="background:var(--c100);border:1px solid var(--c200);border-radius:4px;padding:20px 24px;margin-bottom:40px;text-align:left;display:flex;gap:12px;align-items:flex-start;">
+    <i class="fas fa-truck" style="color:var(--c500);margin-top:2px;flex-shrink:0;"></i>
+    <p style="font-size:0.88rem;color:var(--text2);line-height:1.7;margin:0;">
+      <strong style="color:var(--text);">Tempi di consegna:</strong> 7–10 giorni lavorativi in Italia.
+      Riceverai un'email con il numero di tracking non appena il pacco sarà spedito.
     </p>
   </div>
 

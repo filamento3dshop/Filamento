@@ -3,246 +3,468 @@
 
 {% block head %}
 <script src="https://js.stripe.com/v3/"></script>
-<script src="https://www.paypal.com/sdk/js?client-id={{ config.get('paypal_client_id', '') }}&currency=EUR"></script>
 {% endblock %}
 
 {% block content %}
-<div class="ordina-page">
 
-  <!-- Colonna form -->
-  <div class="ordina-form-col">
-    <h1 class="ordina-title">Personalizza il tuo ordine</h1>
-    <p class="ordina-subtitle">Lettere e numeri stampati in 3D, spediti in tutta Italia in 5–7 giorni lavorativi.</p>
+<!-- Page header -->
+<div style="background:var(--c100);border-bottom:1px solid var(--c200);padding:32px 32px 0;">
+  <div style="max-width:760px;margin:0 auto;">
+    <span class="section-label">Personalizzazione</span>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3vw,2.4rem);color:var(--text);margin-bottom:6px;">Crea la tua lettera</h1>
+    <p style="font-size:0.9rem;color:var(--text2);margin-bottom:28px;font-weight:300;">Ci vuole solo <strong style="font-weight:500;color:var(--text);">2 minuti</strong> — la ricevi a casa in 7–10 giorni lavorativi</p>
 
-    {% if error %}
-    <div style="background:#fff0f0;border:1px solid #ffcccc;border-radius:4px;padding:16px;margin-bottom:24px;color:#c00;font-size:0.9rem;">
-      {{ error }}
-    </div>
-    {% endif %}
-
-    <form id="order-form" method="post" action="/ordina">
-
-      <!-- Dati personali -->
-      <div class="form-section">
-        <div class="form-section-title">Dati personali</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="nome">Nome</label>
-            <input class="form-control" type="text" id="nome" name="nome" placeholder="Mario" required value="{{ form.get('nome','') }}">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="cognome">Cognome</label>
-            <input class="form-control" type="text" id="cognome" name="cognome" placeholder="Rossi" required value="{{ form.get('cognome','') }}">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="email">Email</label>
-          <input class="form-control" type="email" id="email" name="email" placeholder="mario@esempio.it" required value="{{ form.get('email','') }}">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="telefono">Telefono (opzionale)</label>
-          <input class="form-control" type="tel" id="telefono" name="telefono" placeholder="+39 333 1234567" value="{{ form.get('telefono','') }}">
-        </div>
+    <!-- Stepper -->
+    <div class="wizard-steps">
+      <div class="wstep active" data-step="1">
+        <div class="wstep-num">1</div>
+        <div class="wstep-label">Personalizza</div>
       </div>
-
-      <!-- Indirizzo di spedizione -->
-      <div class="form-section">
-        <div class="form-section-title">Indirizzo di spedizione</div>
-        <div class="form-group">
-          <label class="form-label" for="indirizzo">Via e numero civico</label>
-          <input class="form-control" type="text" id="indirizzo" name="indirizzo" placeholder="Via Roma 1" required value="{{ form.get('indirizzo','') }}">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="citta">Città</label>
-            <input class="form-control" type="text" id="citta" name="citta" placeholder="Milano" required value="{{ form.get('citta','') }}">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="cap">CAP</label>
-            <input class="form-control" type="text" id="cap" name="cap" placeholder="20100" required maxlength="5" value="{{ form.get('cap','') }}">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="provincia">Provincia</label>
-            <input class="form-control" type="text" id="provincia" name="provincia" placeholder="MI" maxlength="2" value="{{ form.get('provincia','') }}">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="paese">Paese</label>
-            <select class="form-control" id="paese" name="paese">
-              <option value="IT" selected>Italia</option>
-            </select>
-          </div>
-        </div>
+      <div class="wstep-line"></div>
+      <div class="wstep" data-step="2">
+        <div class="wstep-num">2</div>
+        <div class="wstep-label">Spedizione</div>
       </div>
-
-      <!-- Personalizzazione -->
-      <div class="form-section">
-        <div class="form-section-title">Personalizzazione</div>
-        <div class="form-group">
-          <label class="form-label" for="testo">Testo da stampare</label>
-          <input class="form-control" type="text" id="testo" name="testo" placeholder="Es. SOFIA, BUON COMPLEANNO, 2025…" required maxlength="80" value="{{ form.get('testo','') }}">
-          <p style="font-size:0.78rem;color:var(--text2);margin-top:6px;">Lettere, numeri e spazi — max 80 caratteri</p>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="altezza">Altezza lettere</label>
-          <select class="form-control" id="altezza" name="altezza">
-            <option value="10" {% if form.get('altezza')=='10' %}selected{% endif %}>10 cm</option>
-            <option value="15" {% if form.get('altezza','15')=='15' %}selected{% endif %}>15 cm — più popolare</option>
-            <option value="20" {% if form.get('altezza')=='20' %}selected{% endif %}>20 cm</option>
-            <option value="25" {% if form.get('altezza')=='25' %}selected{% endif %}>25 cm — grande impatto</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Colore</label>
-          <div class="color-grid" id="color-grid">
-            {% set colori = [
-              ('bianco',   '#F5F5F0', 'Bianco'),
-              ('nero',     '#2C2C2C', 'Nero'),
-              ('oro',      '#D4AF37', 'Oro'),
-              ('argento',  '#C0C0C0', 'Argento'),
-              ('rosa',     '#F4A0A0', 'Rosa'),
-              ('rosso',    '#D93B3B', 'Rosso'),
-              ('azzurro',  '#7BB8D4', 'Azzurro'),
-              ('verde',    '#6BAA6B', 'Verde'),
-              ('viola',    '#9B72CF', 'Viola'),
-              ('panna',    '#F2E8D9', 'Panna'),
-            ] %}
-            {% for val, hex, label in colori %}
-            <label class="color-option">
-              <input type="radio" name="colore" value="{{ val }}" {% if form.get('colore', 'bianco') == val %}checked{% endif %}>
-              <div class="color-swatch" style="background:{{ hex }};box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></div>
-              <span class="color-name">{{ label }}</span>
-            </label>
-            {% endfor %}
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="tema">Tema / Stile</label>
-          <select class="form-control" id="tema" name="tema">
-            <option value="classico" {% if form.get('tema','classico')=='classico' %}selected{% endif %}>Classico — linee pulite, elegante</option>
-            <option value="corsivo" {% if form.get('tema')=='corsivo' %}selected{% endif %}>Corsivo — romantico, festa</option>
-            <option value="bubble" {% if form.get('tema')=='bubble' %}selected{% endif %}>Bubble — rotondo, giocoso</option>
-            <option value="serif" {% if form.get('tema')=='serif' %}selected{% endif %}>Serif — raffinato, cerimonia</option>
-            <option value="bold" {% if form.get('tema')=='bold' %}selected{% endif %}>Bold — impatto, moderno</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="quantita">Quantità set</label>
-          <div class="qty-selector">
-            <button type="button" class="qty-btn" id="qty-minus">−</button>
-            <input class="form-control qty-input" type="number" id="quantita" name="quantita" value="{{ form.get('quantita', '1') }}" min="1" max="20" readonly>
-            <button type="button" class="qty-btn" id="qty-plus">+</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="note">Note aggiuntive (opzionale)</label>
-          <textarea class="form-control" id="note" name="note" placeholder="Istruzioni speciali, occasione, preferenze di consegna…">{{ form.get('note','') }}</textarea>
-        </div>
-      </div>
-
-      <!-- Pagamento -->
-      <div class="form-section">
-        <div class="form-section-title">Pagamento</div>
-        <div class="payment-tabs">
-          <button type="button" class="pay-tab active" data-tab="stripe">
-            <i class="fab fa-cc-visa" style="margin-right:6px;"></i>Carta di credito
-          </button>
-          <button type="button" class="pay-tab" data-tab="paypal">
-            <i class="fab fa-paypal" style="margin-right:6px;"></i>PayPal
-          </button>
-        </div>
-
-        <div class="pay-panel active" id="panel-stripe">
-          <div id="card-element"></div>
-          <div id="stripe-error"></div>
-          <input type="hidden" name="payment_method" id="payment_method" value="stripe">
-          <input type="hidden" name="stripe_token" id="stripe_token">
-        </div>
-
-        <div class="pay-panel" id="panel-paypal">
-          <p class="paypal-note">Clicca "Ordina con PayPal" per completare il pagamento in modo sicuro.</p>
-          <div id="paypal-button-container" style="margin-top:16px;"></div>
-        </div>
-      </div>
-
-      <button type="submit" class="btn-ordina" id="submit-btn">
-        <i class="fas fa-lock" style="margin-right:8px;"></i>Completa l'ordine
-      </button>
-      <p style="font-size:0.75rem;color:var(--text2);text-align:center;margin-top:12px;">
-        Pagamento sicuro · 256-bit SSL · Dati protetti
-      </p>
-    </form>
-  </div>
-
-  <!-- Sidebar riepilogo -->
-  <div class="ordina-sidebar">
-    <div class="order-summary">
-      <div class="summary-title">Riepilogo ordine</div>
-      <div class="summary-line">
-        <span>Prezzo per lettera/numero</span>
-        <span id="s-unit">—</span>
-      </div>
-      <div class="summary-line">
-        <span>Lunghezza testo</span>
-        <span id="s-chars">—</span>
-      </div>
-      <div class="summary-line">
-        <span>Quantità set</span>
-        <span id="s-qty">1</span>
-      </div>
-      <div class="summary-line">
-        <span>Spedizione</span>
-        <span>Gratuita <i class="fas fa-check-circle" style="color:var(--c500);margin-left:4px;"></i></span>
-      </div>
-      <div class="summary-total">
-        <span>Totale</span>
-        <span id="s-total">—</span>
-      </div>
-      <div class="summary-trust">
-        <div class="trust-item"><i class="fas fa-truck"></i> Spedizione gratuita in Italia</div>
-        <div class="trust-item"><i class="fas fa-redo"></i> Reso gratuito entro 30 giorni</div>
-        <div class="trust-item"><i class="fas fa-shield-alt"></i> Pagamento 100% sicuro</div>
-        <div class="trust-item"><i class="fas fa-star"></i> Fatto a mano in Italia</div>
+      <div class="wstep-line"></div>
+      <div class="wstep" data-step="3">
+        <div class="wstep-num">3</div>
+        <div class="wstep-label">Pagamento</div>
       </div>
     </div>
   </div>
 </div>
 
+<div class="ordina-wrap">
+  <form id="order-form" method="post" action="/ordina">
+
+    <!-- ══ STEP 1: PERSONALIZZA ══ -->
+    <div class="wizard-panel active" id="panel-1">
+      <h2 class="panel-title">Personalizza la lettera</h2>
+
+      {% if error %}
+      <div class="form-alert">{{ error }}</div>
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label" for="lettera">Lettera iniziale <span class="req">*</span></label>
+        <select class="form-control" id="lettera" name="lettera" required>
+          <option value="">— Scegli la lettera —</option>
+          {% for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+          <option value="{{ c }}" {% if form.get('lettera')==c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+          {% for n in range(10) %}
+          <option value="{{ n }}" {% if form.get('lettera')==(n|string) %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="nome_bimbo">Nome da personalizzare <span class="req">*</span></label>
+        <input class="form-control" type="text" id="nome_bimbo" name="nome_bimbo"
+               placeholder="Es. Greta, Matteo…" required
+               value="{{ form.get('nome_bimbo','') }}">
+        <p class="form-hint">Verrà scritto a mano in piccolo sulla lettera</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Colore <span class="req">*</span></label>
+        <div class="color-picker" id="color-picker">
+          {% set colori = [
+            ('corallo',  '#ff6b6b', 'Corallo'),
+            ('pesca',    '#F0A898', 'Pesca'),
+            ('cipria',   '#F5C4BC', 'Cipria'),
+            ('lilla',    '#C8A8D0', 'Lilla'),
+            ('azzurro',  '#88B4C8', 'Azzurro'),
+            ('salvia',   '#9BB8A0', 'Salvia'),
+            ('oro',      '#E8C84A', 'Oro'),
+            ('tortora',  '#eed7c1', 'Tortora'),
+            ('bianco',   '#F8F6F3', 'Bianco'),
+            ('nero',     '#1A1A1A', 'Nero'),
+          ] %}
+          {% for val, hex, label in colori %}
+          <label class="color-opt" title="{{ label }}">
+            <input type="radio" name="colore" value="{{ val }}"
+                   {% if form.get('colore','corallo') == val %}checked{% endif %}>
+            <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#eed7c1') %}box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);{% endif %}"></span>
+            <span class="cname">{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <p class="form-hint" id="color-selected">Nessun colore selezionato</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Dimensione <span class="req">*</span></label>
+        <div class="dim-grid" style="grid-template-columns:1fr 1fr;">
+          <label class="dim-opt">
+            <input type="radio" name="dimensione" value="20" {% if form.get('dimensione','20')=='20' or not form.get('dimensione') %}checked{% endif %}>
+            <div class="dim-card">
+              <div class="dim-price">€29,90</div>
+              <div class="dim-size">20 cm</div>
+              <div style="font-size:0.72rem;color:var(--text2);margin-top:4px;">Standard</div>
+            </div>
+          </label>
+          <label class="dim-opt">
+            <input type="radio" name="dimensione" value="30" {% if form.get('dimensione')=='30' %}checked{% endif %}>
+            <div class="dim-card dim-popular">
+              <div class="dim-badge">Grande impatto</div>
+              <div class="dim-price">€39,90</div>
+              <div class="dim-size">30 cm</div>
+              <div style="font-size:0.72rem;color:var(--text2);margin-top:4px;">Formato grande</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="tipo_evento">Tipo di evento <span class="req">*</span></label>
+        <select class="form-control" id="tipo_evento" name="tipo_evento" required>
+          <option value="">— Scegli —</option>
+          {% for ev in ['Battesimo','Compleanno','Baby Shower','Nascita','Matrimonio','Comunione','Cresima','Laurea','Altro'] %}
+          <option value="{{ ev }}" {% if form.get('tipo_evento')==ev %}selected{% endif %}>{{ ev }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="note">Note (opzionale)</label>
+        <textarea class="form-control" id="note" name="note"
+                  placeholder="Es: richieste particolari…" rows="3">{{ form.get('note','') }}</textarea>
+      </div>
+
+      <!-- Tema opzionale -->
+      <div class="form-group tema-box">
+        <label class="form-label">Aggiungi un tema <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">· +€5 per decorazione</span></label>
+        <p class="form-hint" style="margin-bottom:14px;">Piccole stampe a tema da aggiungere alla tua lettera</p>
+        <div class="tema-pills">
+          {% set temi = [
+            ('nessuno', '—',  'Nessun tema'),
+            ('safari',  '🐾', 'Safari'),
+            ('principessa', '👑', 'Principessa'),
+            ('spazio',  '🚀', 'Spazio'),
+            ('mare',    '🐟', 'Mare'),
+            ('dinosauri','🦕','Dinosauri'),
+            ('fiori',   '🌸', 'Fiori'),
+          ] %}
+          {% for val, ico, label in temi %}
+          <label class="tema-pill">
+            <input type="radio" name="tema" value="{{ val }}"
+                   {% if form.get('tema','nessuno') == val %}checked{% endif %}>
+            <span>{{ ico }} {{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="wizard-nav">
+        <span></span>
+        <button type="button" class="btn-next" onclick="goStep(2)">
+          Continua → Dati di spedizione
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2: SPEDIZIONE ══ -->
+    <div class="wizard-panel" id="panel-2">
+      <h2 class="panel-title">Dati di spedizione</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="nome">Nome <span class="req">*</span></label>
+          <input class="form-control" type="text" id="nome" name="nome"
+                 placeholder="Mario" value="{{ form.get('nome','') }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cognome">Cognome <span class="req">*</span></label>
+          <input class="form-control" type="text" id="cognome" name="cognome"
+                 placeholder="Rossi" value="{{ form.get('cognome','') }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email <span class="req">*</span></label>
+        <input class="form-control" type="email" id="email" name="email"
+               placeholder="mario@esempio.it" value="{{ form.get('email','') }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="telefono">Telefono</label>
+        <input class="form-control" type="tel" id="telefono" name="telefono"
+               placeholder="+39 333 1234567" value="{{ form.get('telefono','') }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="indirizzo">Via e numero civico <span class="req">*</span></label>
+        <input class="form-control" type="text" id="indirizzo" name="indirizzo"
+               placeholder="Via Roma 1" value="{{ form.get('indirizzo','') }}">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="citta">Città <span class="req">*</span></label>
+          <input class="form-control" type="text" id="citta" name="citta"
+                 placeholder="Milano" value="{{ form.get('citta','') }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cap">CAP <span class="req">*</span></label>
+          <input class="form-control" type="text" id="cap" name="cap"
+                 placeholder="20100" maxlength="5" value="{{ form.get('cap','') }}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="provincia">Provincia</label>
+          <input class="form-control" type="text" id="provincia" name="provincia"
+                 placeholder="MI" maxlength="2" value="{{ form.get('provincia','') }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Spedizione</label>
+          <div style="padding:12px 16px;background:var(--c100);border:1.5px solid var(--c200);border-radius:2px;font-size:0.9rem;color:var(--text2);">
+            <i class="fas fa-truck" style="color:var(--c500);margin-right:8px;"></i>Standard Italia — <strong style="color:var(--text);">€3,00</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="wizard-nav">
+        <button type="button" class="btn-back" onclick="goStep(1)">← Indietro</button>
+        <button type="button" class="btn-next" onclick="goStep(3)">
+          Continua → Pagamento
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: PAGAMENTO ══ -->
+    <div class="wizard-panel" id="panel-3">
+      <h2 class="panel-title">Pagamento</h2>
+
+      <!-- Riepilogo compatto -->
+      <div class="recap-bar">
+        <div class="recap-col">
+          <span class="recap-lbl">Lettera</span>
+          <span class="recap-val" id="r-lettera">—</span>
+        </div>
+        <div class="recap-col">
+          <span class="recap-lbl">Dimensione</span>
+          <span class="recap-val" id="r-dim">—</span>
+        </div>
+        <div class="recap-col">
+          <span class="recap-lbl">Colore</span>
+          <span class="recap-val" id="r-colore">—</span>
+        </div>
+        <div class="recap-col">
+          <span class="recap-lbl">Totale</span>
+          <span class="recap-val recap-total" id="r-totale">—</span>
+        </div>
+      </div>
+
+      <div class="payment-tabs">
+        <button type="button" class="pay-tab active" data-tab="stripe">
+          <i class="fas fa-credit-card" style="margin-right:6px;"></i>Carta
+        </button>
+        <button type="button" class="pay-tab" data-tab="paypal">
+          <i class="fab fa-paypal" style="margin-right:6px;"></i>PayPal
+        </button>
+      </div>
+
+      <div class="pay-panel active" id="panel-stripe">
+        <div id="card-element"></div>
+        <div id="stripe-error"></div>
+        <input type="hidden" name="payment_method" id="payment_method" value="stripe">
+        <input type="hidden" name="stripe_token" id="stripe_token">
+      </div>
+
+      <div class="pay-panel" id="panel-paypal">
+        <p class="paypal-note">Verrai reindirizzato su PayPal per completare il pagamento in sicurezza.</p>
+        <div id="paypal-button-container" style="margin-top:16px;"></div>
+        <input type="hidden" name="paypal_order_id" id="paypal_order_id">
+      </div>
+
+      <p style="font-size:0.75rem;color:var(--text2);margin-top:12px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-lock" style="color:var(--c500);"></i>Pagamento sicuro 256-bit SSL
+      </p>
+
+      <div class="wizard-nav">
+        <button type="button" class="btn-back" onclick="goStep(2)">← Indietro</button>
+        <button type="submit" class="btn-next" id="submit-btn">
+          <i class="fas fa-lock" style="margin-right:6px;"></i>Conferma e paga
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<style>
+/* ── Wizard layout ── */
+.ordina-wrap { max-width: 640px; margin: 0 auto; padding: 48px 32px 80px; }
+
+.wizard-steps { display: flex; align-items: center; gap: 0; margin-bottom: -1px; }
+.wstep { display: flex; align-items: center; gap: 10px; padding: 16px 0; cursor: default; opacity: .45; transition: opacity .2s; }
+.wstep.active { opacity: 1; }
+.wstep.done { opacity: .7; }
+.wstep-num { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--c300); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: var(--text2); background: var(--white); transition: all .2s; }
+.wstep.active .wstep-num { background: var(--c500); border-color: var(--c500); color: var(--white); }
+.wstep.done .wstep-num { background: var(--c300); border-color: var(--c300); color: var(--white); }
+.wstep-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); }
+.wstep.active .wstep-label { color: var(--text); }
+.wstep-line { flex: 1; height: 1px; background: var(--c200); margin: 0 16px; }
+
+.wizard-panel { display: none; }
+.wizard-panel.active { display: block; }
+.panel-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--c200); }
+
+.form-group { margin-bottom: 24px; }
+.form-label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+.req { color: var(--c500); }
+.form-control { display: block; width: 100%; padding: 12px 16px; border: 1.5px solid var(--c200); border-radius: 2px; font-family: 'Jost', sans-serif; font-size: 0.95rem; color: var(--text); background: var(--white); transition: border-color .2s; outline: none; }
+.form-control:focus { border-color: var(--c500); }
+select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath fill='%237A6560' d='M6 7L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
+textarea.form-control { resize: vertical; }
+.form-hint { font-size: 0.78rem; color: var(--text2); margin-top: 6px; font-weight: 300; }
+.form-alert { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 4px; padding: 14px 16px; color: #c00; font-size: 0.88rem; margin-bottom: 24px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Color picker */
+.color-picker { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+.color-opt { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+.color-opt input { display: none; }
+.cswatch { display: block; width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent; outline: 2px solid transparent; transition: outline-color .15s, transform .15s; }
+.color-opt input:checked + .cswatch { outline-color: var(--c500); transform: scale(1.12); }
+.cname { font-size: 0.62rem; color: var(--text2); text-align: center; }
+
+/* Dimensione */
+.dim-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.dim-opt input { display: none; }
+.dim-card { padding: 20px 12px; border: 1.5px solid var(--c200); border-radius: 2px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
+.dim-opt input:checked + .dim-card { border-color: var(--c500); background: #fff5f5; }
+.dim-price { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--text); }
+.dim-size { font-size: 0.78rem; color: var(--text2); margin-top: 2px; }
+.dim-popular { }
+.dim-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--c500); color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; }
+
+/* Tema pills */
+.tema-box { background: var(--c100); border: 1px solid var(--c200); border-radius: 4px; padding: 20px; }
+.tema-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.tema-pill { cursor: pointer; }
+.tema-pill input { display: none; }
+.tema-pill span { display: inline-block; padding: 7px 14px; border: 1.5px solid var(--c200); border-radius: 20px; font-size: 0.82rem; color: var(--text2); background: var(--white); transition: all .2s; }
+.tema-pill input:checked + span { border-color: var(--c500); color: var(--c500); background: #fff5f5; font-weight: 500; }
+
+/* Wizard nav */
+.wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--c200); }
+.btn-next { display: inline-block; padding: 14px 28px; background: var(--c500); color: var(--white); border: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: background .2s; }
+.btn-next:hover { background: var(--c600); }
+.btn-back { display: inline-block; padding: 13px 20px; border: 1.5px solid var(--c200); background: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--text2); border-radius: 2px; cursor: pointer; transition: border-color .2s, color .2s; }
+.btn-back:hover { border-color: var(--text2); color: var(--text); }
+
+/* Recap bar */
+.recap-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--c200); border: 1px solid var(--c200); border-radius: 4px; overflow: hidden; margin-bottom: 28px; }
+.recap-col { background: var(--white); padding: 14px 12px; text-align: center; }
+.recap-lbl { display: block; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
+.recap-val { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; color: var(--text); }
+.recap-total { color: var(--c500); font-size: 1.2rem; }
+
+/* Payment */
+.payment-tabs { display: flex; gap: 2px; margin-bottom: 20px; border: 1px solid var(--c200); border-radius: 2px; overflow: hidden; }
+.pay-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); background: var(--c100); border: none; transition: background .2s, color .2s; }
+.pay-tab.active { background: var(--c500); color: var(--white); }
+.pay-panel { display: none; }
+.pay-panel.active { display: block; }
+#card-element { padding: 14px 16px; border: 1.5px solid var(--c200); border-radius: 2px; }
+#card-element.StripeElement--focus { border-color: var(--c500); }
+#stripe-error { color: var(--c500); font-size: 0.85rem; margin-top: 8px; min-height: 18px; }
+.paypal-note { font-size: 0.85rem; color: var(--text2); text-align: center; padding: 14px; background: var(--c100); border-radius: 2px; }
+
+@media (max-width: 600px) {
+  .ordina-wrap { padding: 32px 20px 60px; }
+  .form-row { grid-template-columns: 1fr; }
+  .dim-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .recap-bar { grid-template-columns: repeat(2,1fr); }
+  .wstep-label { display: none; }
+}
+</style>
+
 <script>
-// Prezzi per altezza (€ per carattere)
-const PREZZI = { '10': 3.5, '15': 5.0, '20': 7.0, '25': 9.5 };
+const PREZZI_DIM = { '20': 29.90, '30': 39.90 };
 
-function aggiornaRiepilogo() {
-  const testo = document.getElementById('testo').value.trim();
-  const altezza = document.getElementById('altezza').value;
-  const qty = parseInt(document.getElementById('quantita').value) || 1;
-  const chars = testo.replace(/\s/g, '').length;
-  const unitPrice = PREZZI[altezza] || 5.0;
-  const total = chars > 0 ? (chars * unitPrice * qty).toFixed(2) : null;
+// ── Stepper ──
+function goStep(n) {
+  if (n > 1 && !validateStep(currentStep)) return;
 
-  document.getElementById('s-unit').textContent = '€' + unitPrice.toFixed(2) + ' / car.';
-  document.getElementById('s-chars').textContent = chars > 0 ? chars + ' caratteri' : '—';
-  document.getElementById('s-qty').textContent = qty;
-  document.getElementById('s-total').textContent = total ? '€' + total : '—';
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.wstep').forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i + 1 < n) s.classList.add('done');
+    if (i + 1 === n) s.classList.add('active');
+  });
+  document.getElementById('panel-' + n).classList.add('active');
+  currentStep = n;
+
+  if (n === 3) updateRecap();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.getElementById('testo').addEventListener('input', aggiornaRiepilogo);
-document.getElementById('altezza').addEventListener('change', aggiornaRiepilogo);
-document.getElementById('quantita').addEventListener('change', aggiornaRiepilogo);
-aggiornaRiepilogo();
+let currentStep = 1;
 
-// Qty buttons
-document.getElementById('qty-plus').addEventListener('click', () => {
-  const el = document.getElementById('quantita');
-  if (parseInt(el.value) < 20) { el.value = parseInt(el.value) + 1; aggiornaRiepilogo(); }
-});
-document.getElementById('qty-minus').addEventListener('click', () => {
-  const el = document.getElementById('quantita');
-  if (parseInt(el.value) > 1) { el.value = parseInt(el.value) - 1; aggiornaRiepilogo(); }
-});
+function validateStep(step) {
+  if (step === 1) {
+    const lettera = document.getElementById('lettera').value;
+    const nome = document.getElementById('nome_bimbo').value.trim();
+    const colore = document.querySelector('input[name="colore"]:checked');
+    const dim = document.querySelector('input[name="dimensione"]:checked');
+    const evento = document.getElementById('tipo_evento').value;
+    if (!lettera) { alert('Scegli la lettera iniziale'); return false; }
+    if (!nome) { alert('Inserisci il nome da personalizzare'); return false; }
+    if (!colore) { alert('Scegli un colore'); return false; }
+    if (!dim) { alert('Scegli la dimensione'); return false; }
+    if (!evento) { alert('Scegli il tipo di evento'); return false; }
+  }
+  if (step === 2) {
+    const fields = ['nome','cognome','email','indirizzo','citta','cap'];
+    for (const id of fields) {
+      if (!document.getElementById(id).value.trim()) {
+        alert('Compila tutti i campi obbligatori'); return false;
+      }
+    }
+  }
+  return true;
+}
 
-// Payment tabs
+// ── Colore label ──
+document.querySelectorAll('input[name="colore"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('color-selected').textContent =
+      'Colore selezionato: ' + r.closest('label').querySelector('.cname').textContent;
+  });
+});
+// init
+const preselected = document.querySelector('input[name="colore"]:checked');
+if (preselected) {
+  document.getElementById('color-selected').textContent =
+    'Colore selezionato: ' + preselected.closest('label').querySelector('.cname').textContent;
+}
+
+// ── Recap step 3 ──
+function updateRecap() {
+  const lettera = document.getElementById('lettera').value || '—';
+  const dim = document.querySelector('input[name="dimensione"]:checked');
+  const colore = document.querySelector('input[name="colore"]:checked');
+  const tema = document.querySelector('input[name="tema"]:checked');
+
+  const dimVal = dim ? dim.value : '20';
+  const basePrice = PREZZI_DIM[dimVal] || 30;
+  const temaPrice = (tema && tema.value !== 'nessuno') ? 5 : 0;
+  const spedizione = 3;
+  const totale = basePrice + temaPrice + spedizione;
+
+  document.getElementById('r-lettera').textContent = lettera;
+  document.getElementById('r-dim').textContent = dim ? dim.value + ' cm' : '—';
+  document.getElementById('r-colore').textContent = colore ? colore.closest('label').querySelector('.cname').textContent : '—';
+  document.getElementById('r-totale').textContent = '€' + totale.toFixed(2);
+}
+
+// ── Payment tabs ──
 document.querySelectorAll('.pay-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
@@ -253,32 +475,33 @@ document.querySelectorAll('.pay-tab').forEach(tab => {
   });
 });
 
-// Stripe
+// ── Stripe ──
 const stripeKey = '{{ config.get("stripe_publishable_key", "") }}';
+let stripeReady = false;
 if (stripeKey) {
   const stripe = Stripe(stripeKey);
   const elements = stripe.elements();
-  const cardElement = elements.create('card', {
-    style: {
-      base: { fontFamily: 'Jost, sans-serif', fontSize: '16px', color: '#1A1714', '::placeholder': { color: '#bbb' } }
-    }
+  const cardEl = elements.create('card', {
+    style: { base: { fontFamily: 'Jost, sans-serif', fontSize: '16px', color: '#1A1714', '::placeholder': { color: '#bbb' } } }
   });
-  cardElement.mount('#card-element');
-  cardElement.on('change', e => {
+  cardEl.mount('#card-element');
+  cardEl.on('change', e => {
     document.getElementById('stripe-error').textContent = e.error ? e.error.message : '';
   });
+  stripeReady = true;
 
   document.getElementById('order-form').addEventListener('submit', async e => {
     if (document.getElementById('payment_method').value !== 'stripe') return;
     e.preventDefault();
+    if (!validateStep(2)) return;
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
     btn.textContent = 'Elaborazione…';
-    const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
+    const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: cardEl });
     if (error) {
       document.getElementById('stripe-error').textContent = error.message;
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-lock" style="margin-right:8px;"></i>Completa l\'ordine';
+      btn.innerHTML = '<i class="fas fa-lock" style="margin-right:6px;"></i>Conferma e paga';
     } else {
       document.getElementById('stripe_token').value = paymentMethod.id;
       e.target.submit();
@@ -286,26 +509,26 @@ if (stripeKey) {
   });
 }
 
-// PayPal
+// ── PayPal ──
 if (window.paypal) {
   paypal.Buttons({
     createOrder: (data, actions) => {
-      const testo = document.getElementById('testo').value.trim();
-      const altezza = document.getElementById('altezza').value;
-      const qty = parseInt(document.getElementById('quantita').value) || 1;
-      const chars = testo.replace(/\s/g, '').length || 1;
-      const total = (chars * (PREZZI[altezza] || 5.0) * qty).toFixed(2);
-      return actions.order.create({ purchase_units: [{ amount: { value: total, currency_code: 'EUR' }, description: 'Filamento — ' + testo }] });
+      const dim = document.querySelector('input[name="dimensione"]:checked');
+      const tema = document.querySelector('input[name="tema"]:checked');
+      const base = PREZZI_DIM[dim ? dim.value : '20'] || 30;
+      const extra = (tema && tema.value !== 'nessuno') ? 5 : 0;
+      const total = (base + extra + 3).toFixed(2);
+      const lettera = document.getElementById('lettera').value;
+      return actions.order.create({ purchase_units: [{ amount: { value: total, currency_code: 'EUR' }, description: 'Filamento — Lettera ' + lettera }] });
     },
-    onApprove: (data, actions) => actions.order.capture().then(details => {
+    onApprove: (data, actions) => actions.order.capture().then(() => {
       document.getElementById('payment_method').value = 'paypal';
-      const inp = document.createElement('input');
-      inp.type = 'hidden'; inp.name = 'paypal_order_id'; inp.value = data.orderID;
-      document.getElementById('order-form').appendChild(inp);
+      document.getElementById('paypal_order_id').value = data.orderID;
       document.getElementById('order-form').submit();
     }),
     onError: err => console.error(err)
   }).render('#paypal-button-container');
 }
 </script>
+
 {% endblock %}

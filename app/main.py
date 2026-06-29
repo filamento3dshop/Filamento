@@ -15,7 +15,9 @@ app = FastAPI(title="Filamento")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
-PREZZI_PER_CHAR = {"10": 3.5, "15": 5.0, "20": 7.0, "25": 9.5}
+PREZZI_DIM = {"20": 29.90, "30": 39.90}
+PREZZO_TEMA = 5.0
+SPEDIZIONE = 3.0
 
 CONFIG = {
     "nome_negozio": "Filamento",
@@ -26,10 +28,10 @@ CONFIG = {
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 
 
-def calcola_totale(testo: str, altezza: str, quantita: int) -> float:
-    chars = len(testo.replace(" ", ""))
-    prezzo_unit = PREZZI_PER_CHAR.get(altezza, 5.0)
-    return round(chars * prezzo_unit * quantita, 2)
+def calcola_totale(dimensione: str, tema: str) -> float:
+    base = PREZZI_DIM.get(dimensione, 29.90)
+    extra = PREZZO_TEMA if tema and tema != "nessuno" else 0.0
+    return round(base + extra + SPEDIZIONE, 2)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -50,6 +52,15 @@ async def ordina_get(request: Request):
 @app.post("/ordina", response_class=HTMLResponse)
 async def ordina_post(
     request: Request,
+    # step 1
+    lettera: str = Form(...),
+    nome_bimbo: str = Form(...),
+    colore: str = Form("corallo"),
+    dimensione: str = Form("20"),
+    tipo_evento: str = Form(...),
+    note: Optional[str] = Form(None),
+    tema: str = Form("nessuno"),
+    # step 2
     nome: str = Form(...),
     cognome: str = Form(...),
     email: str = Form(...),
@@ -58,32 +69,19 @@ async def ordina_post(
     citta: str = Form(...),
     cap: str = Form(...),
     provincia: Optional[str] = Form(None),
-    paese: str = Form("IT"),
-    testo: str = Form(...),
-    altezza: str = Form("15"),
-    colore: str = Form("bianco"),
-    tema: str = Form("classico"),
-    quantita: int = Form(1),
-    note: Optional[str] = Form(None),
+    # step 3
     payment_method: str = Form("stripe"),
     stripe_token: Optional[str] = Form(None),
     paypal_order_id: Optional[str] = Form(None),
 ):
     form_data = {
+        "lettera": lettera, "nome_bimbo": nome_bimbo, "colore": colore,
+        "dimensione": dimensione, "tipo_evento": tipo_evento, "note": note, "tema": tema,
         "nome": nome, "cognome": cognome, "email": email, "telefono": telefono,
         "indirizzo": indirizzo, "citta": citta, "cap": cap, "provincia": provincia,
-        "testo": testo, "altezza": altezza, "colore": colore, "tema": tema,
-        "quantita": str(quantita), "note": note,
     }
 
-    totale = calcola_totale(testo, altezza, quantita)
-
-    if totale <= 0:
-        return templates.TemplateResponse("ordina.html", {
-            "request": request, "config": CONFIG, "form": form_data,
-            "error": "Inserisci almeno un carattere nel campo testo.",
-        })
-
+    totale = calcola_totale(dimensione, tema)
     totale_centesimi = int(totale * 100)
     order_id = str(uuid.uuid4())[:8].upper()
 
@@ -96,15 +94,13 @@ async def ordina_post(
                 currency="eur",
                 payment_method=stripe_token,
                 confirm=True,
-                description=f"Filamento #{order_id} — {testo}",
+                description=f"Filamento #{order_id} — Lettera {lettera} per {nome_bimbo}",
                 receipt_email=email,
             )
 
         elif payment_method == "paypal":
             if not paypal_order_id:
                 raise ValueError("ID ordine PayPal mancante.")
-            # La verifica lato PayPal avviene tramite webhook o SDK server
-            # Per ora accettiamo l'order_id restituito dal client
 
     except stripe.error.CardError as e:
         return templates.TemplateResponse("ordina.html", {
@@ -122,31 +118,30 @@ async def ordina_post(
         "email": email,
         "nome": nome,
         "cognome": cognome,
-        "testo": testo,
-        "altezza": altezza,
+        "lettera": lettera,
+        "nome_bimbo": nome_bimbo,
         "colore": colore,
+        "dimensione": dimensione,
+        "tipo_evento": tipo_evento,
         "tema": tema,
-        "quantita": quantita,
         "indirizzo": indirizzo,
         "citta": citta,
         "cap": cap,
         "totale": f"{totale:.2f}",
     }
 
-    request.session = getattr(request, "session", {})
-    response = templates.TemplateResponse("conferma.html", {
+    return templates.TemplateResponse("conferma.html", {
         "request": request, "config": CONFIG, "order": order,
     })
-    return response
 
 
 @app.get("/conferma", response_class=HTMLResponse)
 async def conferma(request: Request):
     order = {
         "id": "—", "email": "—", "nome": "—", "cognome": "—",
-        "testo": "—", "altezza": "—", "colore": "—", "tema": "—",
-        "quantita": "—", "indirizzo": "—", "citta": "—", "cap": "—",
-        "totale": "—",
+        "lettera": "—", "nome_bimbo": "—", "colore": "—", "dimensione": "—",
+        "tipo_evento": "—", "tema": "—",
+        "indirizzo": "—", "citta": "—", "cap": "—", "totale": "—",
     }
     return templates.TemplateResponse("conferma.html", {
         "request": request, "config": CONFIG, "order": order,
