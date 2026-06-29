@@ -34,10 +34,10 @@
       <span>Colore scritta</span>
       <strong>{{ order.colore_scritta | title }}</strong>
     </div>
-    {% if order.tema and order.tema != 'nessuno' %}
+    {% if order.decorazioni_scelte %}
     <div class="conferma-detail">
-      <span>Tema decorazione</span>
-      <strong>{{ order.tema | title }}</strong>
+      <span>Decorazioni scelte</span>
+      <strong>{{ order.decorazioni_scelte }}</strong>
     </div>
     {% endif %}
     <div class="conferma-detail">

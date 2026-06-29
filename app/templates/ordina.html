@@ -138,38 +138,50 @@
                   placeholder="Es: richieste particolari…" rows="3">{{ form.get('note','') }}</textarea>
       </div>
 
-      <!-- Tema opzionale -->
+      <!-- Decorazioni opzionali -->
       <div class="form-group tema-box">
-        <label class="form-label">Aggiungi un tema <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
-        <p class="form-hint" style="margin-bottom:16px;">Piccole stampe a tema da aggiungere alla tua lettera — circa 8 cm di altezza</p>
+        <label class="form-label">Aggiungi decorazioni <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
+        <p class="form-hint" style="margin-bottom:16px;">Piccole stampe 3D da aggiungere alla tua lettera — circa 8 cm. Puoi mescolare decorazioni da temi diversi.</p>
 
-        <!-- Pricing strip decorazioni -->
+        <!-- Pricing strip -->
         <div class="deco-pricing">
-          <div class="deco-slot" data-n="0"><div class="deco-slot-lbl">Nessuna</div><div class="deco-slot-price">—</div></div>
+          <div class="deco-slot selected" data-n="0"><div class="deco-slot-lbl">Nessuna</div><div class="deco-slot-price">—</div></div>
           <div class="deco-slot" data-n="1"><div class="deco-slot-lbl">1 decorazione</div><div class="deco-slot-price">€8</div><div class="deco-slot-each">€8,00 cad.</div></div>
           <div class="deco-slot" data-n="2"><div class="deco-slot-lbl">2 decorazioni</div><div class="deco-slot-price">€15</div><div class="deco-slot-each">€7,50 cad.</div></div>
           <div class="deco-slot" data-n="3"><div class="deco-slot-lbl">3 decorazioni</div><div class="deco-slot-price">€20</div><div class="deco-slot-each">€6,67 cad.</div></div>
           <div class="deco-slot best" data-n="4"><div class="deco-slot-lbl">4 decorazioni</div><div class="deco-slot-price">€25</div><div class="deco-slot-each">€6,25 cad.</div></div>
         </div>
         <input type="hidden" name="num_deco" id="num_deco" value="{{ form.get('num_deco','0') }}">
+        <input type="hidden" name="decorazioni_scelte" id="decorazioni_scelte" value="{{ form.get('decorazioni_scelte','') }}">
 
-        <!-- Scelta tema -->
-        <div class="tema-pills" id="tema-pills" style="margin-top:16px;">
-          {% set temi = [
-            ('nessuno',     '—',  'Nessun tema'),
-            ('safari',      '🐾', 'Safari'),
-            ('spazio',      '🚀', 'Spazio'),
-            ('mare',        '🐟', 'Mare'),
-            ('cielo',       '☁️', 'Cielo'),
-            ('principessa', '👑', 'Principessa'),
-            ('sport',       '⚽', 'Sport'),
+        <!-- Catalogo decorazioni per tema -->
+        <div id="deco-catalog" style="display:none; margin-top:20px;">
+          <div class="deco-counter-bar">
+            <span id="deco-counter-text">Seleziona <strong id="deco-max">0</strong> decorazioni</span>
+            <span class="deco-counter-badge"><span id="deco-count">0</span> / <span id="deco-max2">0</span></span>
+          </div>
+
+          {% set catalogo = [
+            ('🐾', 'Safari', ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
+            ('🚀', 'Spazio', ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
+            ('🐟', 'Mare', ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
+            ('☁️', 'Cielo', ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Aeroplano','Aquilone','Palloncino']),
+            ('👑', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
+            ('⚽', 'Sport', ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
           ] %}
-          {% for val, ico, label in temi %}
-          <label class="tema-pill">
-            <input type="radio" name="tema" value="{{ val }}"
-                   {% if form.get('tema','nessuno') == val %}checked{% endif %}>
-            <span>{{ ico }} {{ label }}</span>
-          </label>
+
+          {% for ico, nome_tema, items in catalogo %}
+          <div class="deco-tema-block">
+            <div class="deco-tema-title">{{ ico }} {{ nome_tema }}</div>
+            <div class="deco-items">
+              {% for item in items %}
+              <label class="deco-item">
+                <input type="checkbox" name="deco_item" value="{{ item }}" class="deco-check">
+                <span class="deco-item-label">{{ item }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
           {% endfor %}
         </div>
       </div>
@@ -381,6 +393,21 @@ textarea.form-control { resize: vertical; }
 .deco-slot.selected .deco-slot-price { color: var(--c500); }
 .deco-slot-each { font-size: 0.65rem; color: var(--text2); margin-top: 2px; }
 
+/* Deco counter bar */
+.deco-counter-bar { display: flex; justify-content: space-between; align-items: center; background: var(--c150); border-radius: 2px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: var(--text2); }
+.deco-counter-badge { background: var(--c500); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
+
+/* Deco catalogo */
+.deco-tema-block { margin-bottom: 20px; }
+.deco-tema-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--c200); }
+.deco-items { display: flex; flex-wrap: wrap; gap: 8px; }
+.deco-item { cursor: pointer; }
+.deco-item input[type="checkbox"] { display: none; }
+.deco-item-label { display: inline-block; padding: 6px 14px; border: 1.5px solid var(--c200); border-radius: 20px; font-size: 0.82rem; color: var(--text2); background: var(--white); transition: all .15s; user-select: none; }
+.deco-item input:checked + .deco-item-label { border-color: var(--c500); color: var(--c500); background: #fff5f5; font-weight: 500; }
+.deco-item.disabled .deco-item-label { opacity: .4; cursor: not-allowed; }
+.deco-item.disabled input:not(:checked) { pointer-events: none; }
+
 /* Wizard nav */
 .wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--c200); }
 .btn-next { display: inline-block; padding: 14px 28px; background: var(--c500); color: var(--white); border: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: background .2s; }
@@ -420,26 +447,62 @@ const PREZZI_DIM = { '20': 29.90, '30': 39.90 };
 const PREZZI_DECO = { 0: 0, 1: 8, 2: 15, 3: 20, 4: 25 };
 let numDeco = parseInt(document.getElementById('num_deco').value) || 0;
 
-// Deco slot click
+// ── Deco slot click ──
+function aggiornaDecoUI() {
+  const catalog = document.getElementById('deco-catalog');
+  catalog.style.display = numDeco > 0 ? 'block' : 'none';
+  document.getElementById('deco-max').textContent = numDeco;
+  document.getElementById('deco-max2').textContent = numDeco;
+
+  // deseleziona le caselle in eccesso
+  const checked = [...document.querySelectorAll('.deco-check:checked')];
+  if (checked.length > numDeco) {
+    checked.slice(numDeco).forEach(c => { c.checked = false; });
+  }
+  aggiornaDecoCount();
+}
+
+function aggiornaDecoCount() {
+  const checked = document.querySelectorAll('.deco-check:checked');
+  const count = checked.length;
+  document.getElementById('deco-count').textContent = count;
+
+  // blocca le non-selezionate se al limite
+  document.querySelectorAll('.deco-item').forEach(item => {
+    const cb = item.querySelector('.deco-check');
+    if (!cb.checked && count >= numDeco) {
+      item.classList.add('disabled');
+      cb.disabled = true;
+    } else {
+      item.classList.remove('disabled');
+      cb.disabled = false;
+    }
+  });
+
+  // salva la lista scelta
+  const nomi = [...checked].map(c => c.value).join(', ');
+  document.getElementById('decorazioni_scelte').value = nomi;
+}
+
 document.querySelectorAll('.deco-slot').forEach(slot => {
   slot.addEventListener('click', () => {
     numDeco = parseInt(slot.dataset.n);
     document.getElementById('num_deco').value = numDeco;
     document.querySelectorAll('.deco-slot').forEach(s => s.classList.remove('selected'));
     slot.classList.add('selected');
-    // nascondi/mostra scelta tema
-    document.getElementById('tema-pills').style.display = numDeco > 0 ? 'flex' : 'none';
-    if (numDeco === 0) {
-      const nessuno = document.querySelector('input[name="tema"][value="nessuno"]');
-      if (nessuno) nessuno.checked = true;
-    }
+    aggiornaDecoUI();
   });
 });
-// init slot selezionato
+
+document.querySelectorAll('.deco-check').forEach(cb => {
+  cb.addEventListener('change', aggiornaDecoCount);
+});
+
+// init
 document.querySelectorAll('.deco-slot').forEach(s => {
   if (parseInt(s.dataset.n) === numDeco) s.classList.add('selected');
 });
-if (numDeco === 0) document.getElementById('tema-pills').style.display = 'none';
+aggiornaDecoUI();
 
 // ── Stepper ──
 function goStep(n) {

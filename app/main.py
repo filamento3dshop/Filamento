@@ -61,6 +61,7 @@ async def ordina_post(
     note: Optional[str] = Form(None),
     tema: str = Form("nessuno"),
     num_deco: int = Form(0),
+    decorazioni_scelte: Optional[str] = Form(None),
     # step 2
     nome: str = Form(...),
     cognome: str = Form(...),
@@ -79,6 +80,7 @@ async def ordina_post(
         "lettera": lettera, "nome_bimbo": nome_bimbo,
         "colore_lettera": colore_lettera, "colore_scritta": colore_scritta,
         "dimensione": dimensione, "note": note, "tema": tema,
+        "decorazioni_scelte": decorazioni_scelte,
         "nome": nome, "cognome": cognome, "email": email, "telefono": telefono,
         "indirizzo": indirizzo, "citta": citta, "cap": cap, "provincia": provincia,
     }
@@ -126,6 +128,7 @@ async def ordina_post(
         "colore_scritta": colore_scritta,
         "dimensione": dimensione,
         "tema": tema,
+        "decorazioni_scelte": decorazioni_scelte,
         "indirizzo": indirizzo,
         "citta": citta,
         "cap": cap,
