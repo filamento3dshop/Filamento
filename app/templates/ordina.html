@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% block title %}Ordina — Filamento{% endblock %}
+
+{% block head %}
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ config.get('paypal_client_id', '') }}&currency=EUR"></script>
+{% endblock %}
+
+{% block content %}
+<div class="ordina-page">
+
+  <!-- Colonna form -->
+  <div class="ordina-form-col">
+    <h1 class="ordina-title">Personalizza il tuo ordine</h1>
+    <p class="ordina-subtitle">Lettere e numeri stampati in 3D, spediti in tutta Italia in 5–7 giorni lavorativi.</p>
+
+    {% if error %}
+    <div style="background:#fff0f0;border:1px solid #ffcccc;border-radius:4px;padding:16px;margin-bottom:24px;color:#c00;font-size:0.9rem;">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form id="order-form" method="post" action="/ordina">
+
+      <!-- Dati personali -->
+      <div class="form-section">
+        <div class="form-section-title">Dati personali</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="nome">Nome</label>
+            <input class="form-control" type="text" id="nome" name="nome" placeholder="Mario" required value="{{ form.get('nome','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cognome">Cognome</label>
+            <input class="form-control" type="text" id="cognome" name="cognome" placeholder="Rossi" required value="{{ form.get('cognome','') }}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-control" type="email" id="email" name="email" placeholder="mario@esempio.it" required value="{{ form.get('email','') }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="telefono">Telefono (opzionale)</label>
+          <input class="form-control" type="tel" id="telefono" name="telefono" placeholder="+39 333 1234567" value="{{ form.get('telefono','') }}">
+        </div>
+      </div>
+
+      <!-- Indirizzo di spedizione -->
+      <div class="form-section">
+        <div class="form-section-title">Indirizzo di spedizione</div>
+        <div class="form-group">
+          <label class="form-label" for="indirizzo">Via e numero civico</label>
+          <input class="form-control" type="text" id="indirizzo" name="indirizzo" placeholder="Via Roma 1" required value="{{ form.get('indirizzo','') }}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="citta">Città</label>
+            <input class="form-control" type="text" id="citta" name="citta" placeholder="Milano" required value="{{ form.get('citta','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cap">CAP</label>
+            <input class="form-control" type="text" id="cap" name="cap" placeholder="20100" required maxlength="5" value="{{ form.get('cap','') }}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="provincia">Provincia</label>
+            <input class="form-control" type="text" id="provincia" name="provincia" placeholder="MI" maxlength="2" value="{{ form.get('provincia','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="paese">Paese</label>
+            <select class="form-control" id="paese" name="paese">
+              <option value="IT" selected>Italia</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personalizzazione -->
+      <div class="form-section">
+        <div class="form-section-title">Personalizzazione</div>
+        <div class="form-group">
+          <label class="form-label" for="testo">Testo da stampare</label>
+          <input class="form-control" type="text" id="testo" name="testo" placeholder="Es. SOFIA, BUON COMPLEANNO, 2025…" required maxlength="80" value="{{ form.get('testo','') }}">
+          <p style="font-size:0.78rem;color:var(--text2);margin-top:6px;">Lettere, numeri e spazi — max 80 caratteri</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="altezza">Altezza lettere</label>
+          <select class="form-control" id="altezza" name="altezza">
+            <option value="10" {% if form.get('altezza')=='10' %}selected{% endif %}>10 cm</option>
+            <option value="15" {% if form.get('altezza','15')=='15' %}selected{% endif %}>15 cm — più popolare</option>
+            <option value="20" {% if form.get('altezza')=='20' %}selected{% endif %}>20 cm</option>
+            <option value="25" {% if form.get('altezza')=='25' %}selected{% endif %}>25 cm — grande impatto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Colore</label>
+          <div class="color-grid" id="color-grid">
+            {% set colori = [
+              ('bianco',   '#F5F5F0', 'Bianco'),
+              ('nero',     '#2C2C2C', 'Nero'),
+              ('oro',      '#D4AF37', 'Oro'),
+              ('argento',  '#C0C0C0', 'Argento'),
+              ('rosa',     '#F4A0A0', 'Rosa'),
+              ('rosso',    '#D93B3B', 'Rosso'),
+              ('azzurro',  '#7BB8D4', 'Azzurro'),
+              ('verde',    '#6BAA6B', 'Verde'),
+              ('viola',    '#9B72CF', 'Viola'),
+              ('panna',    '#F2E8D9', 'Panna'),
+            ] %}
+            {% for val, hex, label in colori %}
+            <label class="color-option">
+              <input type="radio" name="colore" value="{{ val }}" {% if form.get('colore', 'bianco') == val %}checked{% endif %}>
+              <div class="color-swatch" style="background:{{ hex }};box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></div>
+              <span class="color-name">{{ label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tema">Tema / Stile</label>
+          <select class="form-control" id="tema" name="tema">
+            <option value="classico" {% if form.get('tema','classico')=='classico' %}selected{% endif %}>Classico — linee pulite, elegante</option>
+            <option value="corsivo" {% if form.get('tema')=='corsivo' %}selected{% endif %}>Corsivo — romantico, festa</option>
+            <option value="bubble" {% if form.get('tema')=='bubble' %}selected{% endif %}>Bubble — rotondo, giocoso</option>
+            <option value="serif" {% if form.get('tema')=='serif' %}selected{% endif %}>Serif — raffinato, cerimonia</option>
+            <option value="bold" {% if form.get('tema')=='bold' %}selected{% endif %}>Bold — impatto, moderno</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="quantita">Quantità set</label>
+          <div class="qty-selector">
+            <button type="button" class="qty-btn" id="qty-minus">−</button>
+            <input class="form-control qty-input" type="number" id="quantita" name="quantita" value="{{ form.get('quantita', '1') }}" min="1" max="20" readonly>
+            <button type="button" class="qty-btn" id="qty-plus">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="note">Note aggiuntive (opzionale)</label>
+          <textarea class="form-control" id="note" name="note" placeholder="Istruzioni speciali, occasione, preferenze di consegna…">{{ form.get('note','') }}</textarea>
+        </div>
+      </div>
+
+      <!-- Pagamento -->
+      <div class="form-section">
+        <div class="form-section-title">Pagamento</div>
+        <div class="payment-tabs">
+          <button type="button" class="pay-tab active" data-tab="stripe">
+            <i class="fab fa-cc-visa" style="margin-right:6px;"></i>Carta di credito
+          </button>
+          <button type="button" class="pay-tab" data-tab="paypal">
+            <i class="fab fa-paypal" style="margin-right:6px;"></i>PayPal
+          </button>
+        </div>
+
+        <div class="pay-panel active" id="panel-stripe">
+          <div id="card-element"></div>
+          <div id="stripe-error"></div>
+          <input type="hidden" name="payment_method" id="payment_method" value="stripe">
+          <input type="hidden" name="stripe_token" id="stripe_token">
+        </div>
+
+        <div class="pay-panel" id="panel-paypal">
+          <p class="paypal-note">Clicca "Ordina con PayPal" per completare il pagamento in modo sicuro.</p>
+          <div id="paypal-button-container" style="margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-ordina" id="submit-btn">
+        <i class="fas fa-lock" style="margin-right:8px;"></i>Completa l'ordine
+      </button>
+      <p style="font-size:0.75rem;color:var(--text2);text-align:center;margin-top:12px;">
+        Pagamento sicuro · 256-bit SSL · Dati protetti
+      </p>
+    </form>
+  </div>
+
+  <!-- Sidebar riepilogo -->
+  <div class="ordina-sidebar">
+    <div class="order-summary">
+      <div class="summary-title">Riepilogo ordine</div>
+      <div class="summary-line">
+        <span>Prezzo per lettera/numero</span>
+        <span id="s-unit">—</span>
+      </div>
+      <div class="summary-line">
+        <span>Lunghezza testo</span>
+        <span id="s-chars">—</span>
+      </div>
+      <div class="summary-line">
+        <span>Quantità set</span>
+        <span id="s-qty">1</span>
+      </div>
+      <div class="summary-line">
+        <span>Spedizione</span>
+        <span>Gratuita <i class="fas fa-check-circle" style="color:var(--c500);margin-left:4px;"></i></span>
+      </div>
+      <div class="summary-total">
+        <span>Totale</span>
+        <span id="s-total">—</span>
+      </div>
+      <div class="summary-trust">
+        <div class="trust-item"><i class="fas fa-truck"></i> Spedizione gratuita in Italia</div>
+        <div class="trust-item"><i class="fas fa-redo"></i> Reso gratuito entro 30 giorni</div>
+        <div class="trust-item"><i class="fas fa-shield-alt"></i> Pagamento 100% sicuro</div>
+        <div class="trust-item"><i class="fas fa-star"></i> Fatto a mano in Italia</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Prezzi per altezza (€ per carattere)
+const PREZZI = { '10': 3.5, '15': 5.0, '20': 7.0, '25': 9.5 };
+
+function aggiornaRiepilogo() {
+  const testo = document.getElementById('testo').value.trim();
+  const altezza = document.getElementById('altezza').value;
+  const qty = parseInt(document.getElementById('quantita').value) || 1;
+  const chars = testo.replace(/\s/g, '').length;
+  const unitPrice = PREZZI[altezza] || 5.0;
+  const total = chars > 0 ? (chars * unitPrice * qty).toFixed(2) : null;
+
+  document.getElementById('s-unit').textContent = '€' + unitPrice.toFixed(2) + ' / car.';
+  document.getElementById('s-chars').textContent = chars > 0 ? chars + ' caratteri' : '—';
+  document.getElementById('s-qty').textContent = qty;
+  document.getElementById('s-total').textContent = total ? '€' + total : '—';
+}
+
+document.getElementById('testo').addEventListener('input', aggiornaRiepilogo);
+document.getElementById('altezza').addEventListener('change', aggiornaRiepilogo);
+document.getElementById('quantita').addEventListener('change', aggiornaRiepilogo);
+aggiornaRiepilogo();
+
+// Qty buttons
+document.getElementById('qty-plus').addEventListener('click', () => {
+  const el = document.getElementById('quantita');
+  if (parseInt(el.value) < 20) { el.value = parseInt(el.value) + 1; aggiornaRiepilogo(); }
+});
+document.getElementById('qty-minus').addEventListener('click', () => {
+  const el = document.getElementById('quantita');
+  if (parseInt(el.value) > 1) { el.value = parseInt(el.value) - 1; aggiornaRiepilogo(); }
+});
+
+// Payment tabs
+document.querySelectorAll('.pay-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.pay-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    document.getElementById('payment_method').value = tab.dataset.tab;
+  });
+});
+
+// Stripe
+const stripeKey = '{{ config.get("stripe_publishable_key", "") }}';
+if (stripeKey) {
+  const stripe = Stripe(stripeKey);
+  const elements = stripe.elements();
+  const cardElement = elements.create('card', {
+    style: {
+      base: { fontFamily: 'Jost, sans-serif', fontSize: '16px', color: '#1A1714', '::placeholder': { color: '#bbb' } }
+    }
+  });
+  cardElement.mount('#card-element');
+  cardElement.on('change', e => {
+    document.getElementById('stripe-error').textContent = e.error ? e.error.message : '';
+  });
+
+  document.getElementById('order-form').addEventListener('submit', async e => {
+    if (document.getElementById('payment_method').value !== 'stripe') return;
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Elaborazione…';
+    const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
+    if (error) {
+      document.getElementById('stripe-error').textContent = error.message;
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock" style="margin-right:8px;"></i>Completa l\'ordine';
+    } else {
+      document.getElementById('stripe_token').value = paymentMethod.id;
+      e.target.submit();
+    }
+  });
+}
+
+// PayPal
+if (window.paypal) {
+  paypal.Buttons({
+    createOrder: (data, actions) => {
+      const testo = document.getElementById('testo').value.trim();
+      const altezza = document.getElementById('altezza').value;
+      const qty = parseInt(document.getElementById('quantita').value) || 1;
+      const chars = testo.replace(/\s/g, '').length || 1;
+      const total = (chars * (PREZZI[altezza] || 5.0) * qty).toFixed(2);
+      return actions.order.create({ purchase_units: [{ amount: { value: total, currency_code: 'EUR' }, description: 'Filamento — ' + testo }] });
+    },
+    onApprove: (data, actions) => actions.order.capture().then(details => {
+      document.getElementById('payment_method').value = 'paypal';
+      const inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = 'paypal_order_id'; inp.value = data.orderID;
+      document.getElementById('order-form').appendChild(inp);
+      document.getElementById('order-form').submit();
+    }),
+    onError: err => console.error(err)
+  }).render('#paypal-button-container');
+}
+</script>
+{% endblock %}
