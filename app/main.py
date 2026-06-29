@@ -16,7 +16,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 PREZZI_DIM = {"20": 29.90, "30": 39.90}
-PREZZO_TEMA = 5.0
+PREZZI_DECO = {0: 0.0, 1: 8.0, 2: 15.0, 3: 20.0, 4: 25.0}
 SPEDIZIONE = 3.0
 
 CONFIG = {
@@ -28,9 +28,9 @@ CONFIG = {
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 
 
-def calcola_totale(dimensione: str, tema: str) -> float:
+def calcola_totale(dimensione: str, num_deco: int) -> float:
     base = PREZZI_DIM.get(dimensione, 29.90)
-    extra = PREZZO_TEMA if tema and tema != "nessuno" else 0.0
+    extra = PREZZI_DECO.get(min(num_deco, 4), 0.0)
     return round(base + extra + SPEDIZIONE, 2)
 
 
@@ -60,6 +60,7 @@ async def ordina_post(
     tipo_evento: str = Form(...),
     note: Optional[str] = Form(None),
     tema: str = Form("nessuno"),
+    num_deco: int = Form(0),
     # step 2
     nome: str = Form(...),
     cognome: str = Form(...),
@@ -81,7 +82,7 @@ async def ordina_post(
         "indirizzo": indirizzo, "citta": citta, "cap": cap, "provincia": provincia,
     }
 
-    totale = calcola_totale(dimensione, tema)
+    totale = calcola_totale(dimensione, num_deco)
     totale_centesimi = int(totale * 100)
     order_id = str(uuid.uuid4())[:8].upper()
 
