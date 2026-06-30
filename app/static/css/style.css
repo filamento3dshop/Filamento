@@ -215,9 +215,17 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 }
 @media (max-width: 600px) {
   section { padding: 64px 20px; }
-  .steps-grid { grid-template-columns: 1fr; }
-  .occasions-grid { grid-template-columns: 1fr; }
-  .why-grid { grid-template-columns: 1fr; }
+  .hero { margin-bottom: 24px; }
+  .steps-grid { grid-template-columns: 1fr 1fr; }
+  .step-card { padding: 24px 16px; border-bottom: 1px solid var(--c200); }
+  .step-card:nth-child(2n) { border-right: none; }
+  .step-card:nth-child(n+3) { border-bottom: none; }
+  .step-num { font-size: 2.2rem; margin-bottom: 10px; }
+  .prices-grid { grid-template-columns: 1fr 1fr; }
+  .price-card { padding: 24px 16px; }
+  .occasions-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .occasion-card { padding: 24px 18px; }
+  .why-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
   .footer-top { grid-template-columns: 1fr; }
   .nav-links { display: none; }
   .form-row { grid-template-columns: 1fr; }
