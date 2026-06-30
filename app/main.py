@@ -12,19 +12,6 @@ load_dotenv()
 
 app = FastAPI(title="Filamento")
 
-OLD_DOMAINS = {"toto3d.it", "www.toto3d.it"}
-NEW_DOMAIN = "filamentoshop.it"
-
-
-@app.middleware("http")
-async def redirect_old_domain(request: Request, call_next):
-    host = request.url.hostname
-    if host in OLD_DOMAINS:
-        new_url = request.url.replace(scheme="https", netloc=NEW_DOMAIN)
-        return RedirectResponse(url=str(new_url), status_code=301)
-    return await call_next(request)
-
-
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
