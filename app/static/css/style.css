@@ -224,7 +224,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   .step-num { font-size: 2.2rem; margin-bottom: 10px; }
   .prices-grid { grid-template-columns: 1fr 1fr; }
   .price-card { padding: 24px 16px; }
-  .occasions-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .occasions-grid { grid-template-columns: 1fr 1fr; gap: 2px; }
   .occasion-card { padding: 24px 18px; }
   .why-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
   .footer-top { grid-template-columns: 1fr; }
