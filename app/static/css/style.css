@@ -111,6 +111,7 @@ section { padding: 96px 32px; }
 .pricing-slot:last-child { border-right: none; }
 .pricing-slot.best { background: rgba(255,255,255,.85); }
 .pricing-slot-num { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(60,30,10,.5); margin-bottom: 6px; }
+.pricing-slot-num .num-short { display: none; }
 .pricing-slot-price { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--text); }
 .pricing-slot.best .pricing-slot-price { color: #ff6b6b; }
 .pricing-slot-each { font-size: 0.68rem; color: rgba(60,30,10,.45); margin-top: 2px; }
@@ -231,6 +232,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   .form-row { grid-template-columns: 1fr; }
   .color-grid { grid-template-columns: repeat(4, 1fr); }
   .ordina-page { padding: 40px 20px; }
+  .pricing-slot-num .num-full { display: none; }
+  .pricing-slot-num .num-short { display: inline; }
 }
 
 /* ── Legal Pages ── */
