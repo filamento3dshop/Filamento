@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Ordine #{{ order.id }} — Admin — Filamento{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+  <div class="legal-inner">
+    <div class="legal-header">
+      <span class="section-label">Admin</span>
+      <h1>Ordine #{{ order.id }}</h1>
+      <div class="divider"></div>
+      <p class="legal-meta">{{ order.created_at[:16].replace('T', ' ') }}</p>
+    </div>
+
+    <div class="legal-body">
+      <div class="legal-info-box">
+        <div class="legal-info-row"><span class="legal-info-label">Cliente</span><strong>{{ order.nome }} {{ order.cognome }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Email</span><strong>{{ order.email }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Telefono</span><strong>{{ order.telefono }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Codice fiscale</span><strong>{{ order.codice_fiscale }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Indirizzo spedizione</span><strong>{{ order.indirizzo_spedizione }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Pagamento</span><strong>{{ order.payment_method }}</strong></div>
+        <div class="legal-info-row" style="border-bottom:none;"><span class="legal-info-label">Totale</span><strong>€{{ order.totale }}</strong></div>
+      </div>
+
+      <h2>Prodotto</h2>
+      <div class="legal-info-box">
+        <div class="legal-info-row"><span class="legal-info-label">Lettera/numero</span><strong>{{ order.lettera }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Nome bambino/a</span><strong>{{ order.nome_bimbo }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Colore lettera</span><strong>{{ order.colore_lettera }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Colore scritta</span><strong>{{ order.colore_scritta }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Dimensione</span><strong>{{ order.dimensione }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Tema</span><strong>{{ order.tema }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Decorazioni</span><strong>{{ order.decorazioni_scelte or '—' }}</strong></div>
+        <div class="legal-info-row" style="border-bottom:none;"><span class="legal-info-label">Note</span><strong>{{ order.note or '—' }}</strong></div>
+      </div>
+    </div>
+
+    <div class="legal-footer-nav">
+      <a href="/admin" class="btn-ghost">← Torna agli ordini</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

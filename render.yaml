@@ -11,5 +11,13 @@ services:
         sync: false
       - key: PAYPAL_CLIENT_ID
         sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
       - key: PORT
         value: "10000"
+    disk:
+      name: filamento-data
+      mountPath: /var/data
+      sizeGB: 1

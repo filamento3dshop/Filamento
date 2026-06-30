@@ -1,8 +1,12 @@
 import os
+import secrets
+import sqlite3
 import uuid
 import stripe
-from fastapi import FastAPI, Request, Form
+from datetime import datetime
+from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from typing import Optional
@@ -39,6 +43,55 @@ CONFIG = {
 }
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+
+DB_PATH = os.getenv("DB_PATH", "/var/data/orders.db" if os.path.isdir("/var/data") else "orders.db")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+
+security = HTTPBasic()
+
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id TEXT PRIMARY KEY,
+            created_at TEXT NOT NULL,
+            payment_method TEXT,
+            email TEXT, nome TEXT, cognome TEXT, telefono TEXT,
+            lettera TEXT, nome_bimbo TEXT,
+            colore_lettera TEXT, colore_scritta TEXT,
+            dimensione TEXT, tema TEXT, decorazioni_scelte TEXT, note TEXT,
+            codice_fiscale TEXT,
+            indirizzo_spedizione TEXT,
+            totale TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+init_db()
+
+
+def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    if not ADMIN_PASSWORD:
+        raise HTTPException(status_code=503, detail="Admin non configurato.")
+    valid_user = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
+    valid_pass = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    if not (valid_user and valid_pass):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenziali non valide.",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 
 def calcola_totale(dimensione: str, num_deco: int) -> float:
@@ -162,6 +215,22 @@ async def ordina_post(
         "totale": f"{totale:.2f}",
     }
 
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO orders (
+            id, created_at, payment_method, email, nome, cognome, telefono,
+            lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
+            tema, decorazioni_scelte, note, codice_fiscale, indirizzo_spedizione, totale
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (
+            order["id"], datetime.utcnow().isoformat(), payment_method, email, nome, cognome, telefono,
+            lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
+            tema, decorazioni_scelte, note, codice_fiscale, order["indirizzo_spedizione"], order["totale"],
+        ),
+    )
+    conn.commit()
+    conn.close()
+
     return templates.TemplateResponse("conferma.html", {
         "request": request, "config": CONFIG, "order": order,
     })
@@ -193,4 +262,27 @@ async def conferma(request: Request):
     }
     return templates.TemplateResponse("conferma.html", {
         "request": request, "config": CONFIG, "order": order,
+    })
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_orders(request: Request, username: str = Depends(verify_admin)):
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM orders ORDER BY created_at DESC").fetchall()
+    conn.close()
+    orders = [dict(row) for row in rows]
+    return templates.TemplateResponse("admin.html", {
+        "request": request, "config": CONFIG, "orders": orders,
+    })
+
+
+@app.get("/admin/ordine/{order_id}", response_class=HTMLResponse)
+async def admin_order_detail(request: Request, order_id: str, username: str = Depends(verify_admin)):
+    conn = get_db()
+    row = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+    conn.close()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Ordine non trovato.")
+    return templates.TemplateResponse("admin_order.html", {
+        "request": request, "config": CONFIG, "order": dict(row),
     })

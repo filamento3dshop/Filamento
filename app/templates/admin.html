@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Admin — Ordini — Filamento{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+  <div class="legal-inner">
+    <div class="legal-header">
+      <span class="section-label">Admin</span>
+      <h1>Ordini ricevuti</h1>
+      <div class="divider"></div>
+      <p class="legal-meta">{{ orders|length }} ordini totali</p>
+    </div>
+
+    <div class="legal-body">
+      {% if orders %}
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Bambino/a</th>
+            <th>Lettera</th>
+            <th>Pagamento</th>
+            <th>Totale</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr onclick="window.location='/admin/ordine/{{ o.id }}'" style="cursor:pointer;">
+            <td>{{ o.created_at[:16].replace('T', ' ') }}</td>
+            <td>#{{ o.id }}</td>
+            <td>{{ o.nome }} {{ o.cognome }}</td>
+            <td>{{ o.nome_bimbo }}</td>
+            <td>{{ o.lettera }}</td>
+            <td>{{ o.payment_method }}</td>
+            <td>€{{ o.totale }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Nessun ordine ricevuto finora.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.admin-table th, .admin-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--c200); }
+.admin-table th { font-weight: 600; color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+.admin-table tbody tr:hover { background: var(--c100); }
+</style>
+{% endblock %}
