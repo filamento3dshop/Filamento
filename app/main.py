@@ -67,7 +67,7 @@ async def ordina_post(
     cognome: str = Form(...),
     codice_fiscale: str = Form(...),
     email: str = Form(...),
-    telefono: Optional[str] = Form(None),
+    telefono: str = Form(...),
     res_indirizzo: str = Form(...),
     res_citta: str = Form(...),
     res_cap: str = Form(...),
