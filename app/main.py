@@ -1,8 +1,9 @@
 import os
 import secrets
-import sqlite3
 import uuid
 import stripe
+import psycopg2
+import psycopg2.extras
 from datetime import datetime
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -44,7 +45,7 @@ CONFIG = {
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 
-DB_PATH = os.getenv("DB_PATH", "/var/data/orders.db" if os.path.isdir("/var/data") else "orders.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 
@@ -52,14 +53,16 @@ security = HTTPBasic()
 
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
     return conn
 
 
 def init_db():
+    if not DATABASE_URL:
+        return
     conn = get_db()
-    conn.execute("""
+    cur = conn.cursor()
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY,
             created_at TEXT NOT NULL,
@@ -74,6 +77,7 @@ def init_db():
         )
     """)
     conn.commit()
+    cur.close()
     conn.close()
 
 
@@ -215,21 +219,24 @@ async def ordina_post(
         "totale": f"{totale:.2f}",
     }
 
-    conn = get_db()
-    conn.execute(
-        """INSERT INTO orders (
-            id, created_at, payment_method, email, nome, cognome, telefono,
-            lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
-            tema, decorazioni_scelte, note, codice_fiscale, indirizzo_spedizione, totale
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (
-            order["id"], datetime.utcnow().isoformat(), payment_method, email, nome, cognome, telefono,
-            lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
-            tema, decorazioni_scelte, note, codice_fiscale, order["indirizzo_spedizione"], order["totale"],
-        ),
-    )
-    conn.commit()
-    conn.close()
+    if DATABASE_URL:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO orders (
+                id, created_at, payment_method, email, nome, cognome, telefono,
+                lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
+                tema, decorazioni_scelte, note, codice_fiscale, indirizzo_spedizione, totale
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (
+                order["id"], datetime.utcnow().isoformat(), payment_method, email, nome, cognome, telefono,
+                lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
+                tema, decorazioni_scelte, note, codice_fiscale, order["indirizzo_spedizione"], order["totale"],
+            ),
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
 
     return templates.TemplateResponse("conferma.html", {
         "request": request, "config": CONFIG, "order": order,
@@ -267,10 +274,14 @@ async def conferma(request: Request):
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_orders(request: Request, username: str = Depends(verify_admin)):
-    conn = get_db()
-    rows = conn.execute("SELECT * FROM orders ORDER BY created_at DESC").fetchall()
-    conn.close()
-    orders = [dict(row) for row in rows]
+    orders = []
+    if DATABASE_URL:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM orders ORDER BY created_at DESC")
+        orders = [dict(row) for row in cur.fetchall()]
+        cur.close()
+        conn.close()
     return templates.TemplateResponse("admin.html", {
         "request": request, "config": CONFIG, "orders": orders,
     })
@@ -278,8 +289,13 @@ async def admin_orders(request: Request, username: str = Depends(verify_admin)):
 
 @app.get("/admin/ordine/{order_id}", response_class=HTMLResponse)
 async def admin_order_detail(request: Request, order_id: str, username: str = Depends(verify_admin)):
+    if not DATABASE_URL:
+        raise HTTPException(status_code=503, detail="Database non configurato.")
     conn = get_db()
-    row = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM orders WHERE id = %s", (order_id,))
+    row = cur.fetchone()
+    cur.close()
     conn.close()
     if row is None:
         raise HTTPException(status_code=404, detail="Ordine non trovato.")
