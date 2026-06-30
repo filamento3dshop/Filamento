@@ -27,6 +27,9 @@ nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.96)
 .nav-links a:hover { color: var(--text); }
 .btn-nav { display: inline-block; padding: 10px 24px; background: var(--c500); color: var(--white) !important; border-radius: 2px; font-size: 0.78rem !important; font-weight: 600 !important; letter-spacing: 0.14em !important; text-transform: uppercase !important; text-decoration: none; transition: background .2s; }
 .btn-nav:hover { background: var(--c600) !important; }
+.nav-social { display: flex; align-items: center; gap: 10px; }
+.nav-social a { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--c200); color: var(--text2); font-size: 0.95rem; text-decoration: none; transition: border-color .2s, color .2s; }
+.nav-social a:hover { border-color: var(--c500); color: var(--c500); }
 
 .hero { min-height: calc(100vh - 72px); display: grid; grid-template-columns: 1fr 1fr; max-width: 1100px; margin: 0 auto; padding: 0 32px; align-items: center; gap: 80px; }
 .hero-text { padding: 80px 0; }
