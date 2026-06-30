@@ -198,9 +198,9 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .conferma-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; gap: 32px; padding: 32px 24px; min-height: auto; }
-  .hero-text { padding: 0; }
-  .hero-image { height: 220px; }
+  .hero { grid-template-columns: 1fr; gap: 24px; padding: 24px 24px 0; min-height: auto; }
+  .hero-text { padding: 0; margin: 0; }
+  .hero-image { height: 200px; }
   .steps-grid { grid-template-columns: 1fr 1fr; }
   .step-card { border-bottom: 1px solid var(--c200); }
   .prices-grid { grid-template-columns: 1fr; }
