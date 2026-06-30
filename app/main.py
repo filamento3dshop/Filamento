@@ -2,8 +2,8 @@ import os
 import secrets
 import uuid
 import stripe
-import psycopg2
-import psycopg2.extras
+import psycopg
+from psycopg.rows import dict_row
 from datetime import datetime
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -53,7 +53,7 @@ security = HTTPBasic()
 
 
 def get_db():
-    conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+    conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
     return conn
 
 
