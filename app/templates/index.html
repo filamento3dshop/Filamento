@@ -6,6 +6,7 @@
 {# ═══════════════════════════════════════════════════════
    HERO
    Layout: 2 colonne desktop (testo sx, foto dx) → 1 colonna mobile
+   CTA unica: "Crea la tua composizione"
    ═══════════════════════════════════════════════════════ #}
 <section class="hero-section" aria-label="Hero">
   <div class="hero-inner">
@@ -21,9 +22,6 @@
         <a href="/ordina" class="btn-primary btn-lg" aria-label="Crea la tua composizione personalizzata">
           Crea la tua composizione
         </a>
-        <a href="#come-funziona" class="btn-ghost" aria-label="Scopri come funziona il processo">
-          Scopri come funziona ↓
-        </a>
       </div>
     </div>
 
@@ -36,23 +34,25 @@
         width="640"
         height="720"
         fetchpriority="high"
+        decoding="sync"
       >
     </div>
 
   </div>
 
-  {# Striscia benefici #}
-  <div class="benefits-strip" role="list" aria-label="I nostri punti di forza">
-    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Personalizzato</div>
-    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Realizzato in Italia</div>
-    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Materiali selezionati</div>
-    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Spedizione in 7–10 giorni</div>
+  {# Striscia benefici — tono editoriale, discreta #}
+  <div class="benefits-strip" role="list" aria-label="Caratteristiche del prodotto">
+    <div class="benefit" role="listitem">Personalizzato</div>
+    <div class="benefit" role="listitem">Realizzato in Italia</div>
+    <div class="benefit" role="listitem">Materiali selezionati</div>
+    <div class="benefit" role="listitem">Spedizione in 7–10 giorni</div>
   </div>
 </section>
 
 {# ═══════════════════════════════════════════════════════
-   I TEMI
-   6 card tema con link al configuratore (?tema=...)
+   I TEMI — CTA principale n. 2
+   Le 6 card sono le CTA: ogni card linka a /ordina?tema=...
+   Le decorazioni sono opzionali e si aggiungono nel configuratore
    ═══════════════════════════════════════════════════════ #}
 <section class="themes-section" id="temi" aria-labelledby="themes-heading">
   <div class="section-inner">
@@ -62,66 +62,66 @@
       <h2 class="section-title" id="themes-heading">Scegli il tema del tuo bambino</h2>
       <div class="divider" aria-hidden="true"></div>
       <p class="section-desc">Ogni tema è una piccola storia. Scegli quello che racconta di più il tuo bambino.</p>
-      <p class="section-note">Le decorazioni sono opzionali e puoi aggiungerne quante desideri durante la personalizzazione.</p>
+      <p class="section-note">Le decorazioni sono opzionali e puoi aggiungerne quante desideri durante la personalizzazione. Non sono prodotti separati — si scelgono all'interno del configuratore.</p>
     </header>
 
     <div class="themes-grid" role="list">
 
-      <a href="/ordina?tema=safari" class="theme-card" role="listitem" aria-label="Personalizza con tema Safari">
+      <a href="/ordina?tema=safari" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Safari">
         <div class="theme-media">
-          {# IMMAGINE: foto reale decorazione stampata tema Safari — sostituire con immagine definitiva #}
+          {# IMMAGINE: foto reale decorazione stampata tema Safari (circa 8cm, ~180×180px) — sostituire con immagine definitiva #}
           <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-paw" aria-hidden="true"></i>
+            <i class="fas fa-paw"></i>
           </div>
         </div>
         <div class="theme-name">Safari</div>
       </a>
 
-      <a href="/ordina?tema=spazio" class="theme-card" role="listitem" aria-label="Personalizza con tema Spazio">
+      <a href="/ordina?tema=spazio" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Spazio">
         <div class="theme-media">
           {# IMMAGINE: foto reale decorazione stampata tema Spazio #}
           <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-rocket" aria-hidden="true"></i>
+            <i class="fas fa-rocket"></i>
           </div>
         </div>
         <div class="theme-name">Spazio</div>
       </a>
 
-      <a href="/ordina?tema=mare" class="theme-card" role="listitem" aria-label="Personalizza con tema Mare">
+      <a href="/ordina?tema=mare" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Mare">
         <div class="theme-media">
           {# IMMAGINE: foto reale decorazione stampata tema Mare #}
           <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-fish" aria-hidden="true"></i>
+            <i class="fas fa-fish"></i>
           </div>
         </div>
         <div class="theme-name">Mare</div>
       </a>
 
-      <a href="/ordina?tema=cielo" class="theme-card" role="listitem" aria-label="Personalizza con tema Cielo">
+      <a href="/ordina?tema=cielo" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Cielo">
         <div class="theme-media">
           {# IMMAGINE: foto reale decorazione stampata tema Cielo #}
           <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-cloud-sun" aria-hidden="true"></i>
+            <i class="fas fa-cloud-sun"></i>
           </div>
         </div>
         <div class="theme-name">Cielo</div>
       </a>
 
-      <a href="/ordina?tema=principesse" class="theme-card" role="listitem" aria-label="Personalizza con tema Principesse">
+      <a href="/ordina?tema=principesse" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Principesse">
         <div class="theme-media">
           {# IMMAGINE: foto reale decorazione stampata tema Principesse #}
           <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-crown" aria-hidden="true"></i>
+            <i class="fas fa-crown"></i>
           </div>
         </div>
         <div class="theme-name">Principesse</div>
       </a>
 
-      <a href="/ordina?tema=sport" class="theme-card" role="listitem" aria-label="Personalizza con tema Sport">
+      <a href="/ordina?tema=sport" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Sport">
         <div class="theme-media">
           {# IMMAGINE: foto reale decorazione stampata tema Sport #}
           <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-futbol" aria-hidden="true"></i>
+            <i class="fas fa-futbol"></i>
           </div>
         </div>
         <div class="theme-name">Sport</div>
@@ -133,7 +133,9 @@
 
 {# ═══════════════════════════════════════════════════════
    SCEGLI IL FORMATO
-   2 card formato con nota su decorazioni opzionali
+   Sezione informativa: nessuna CTA propria.
+   Il prezzo si riferisce alla composizione base (lettera iniziale + nome + colore).
+   Le decorazioni sono opzionali.
    ═══════════════════════════════════════════════════════ #}
 <section class="formats-section" id="prezzi" aria-labelledby="formats-heading">
   <div class="section-inner">
@@ -146,9 +148,9 @@
 
     <div class="formats-grid">
 
-      <article class="format-card" aria-label="Formato 20 centimetri">
+      <article class="format-card" aria-label="Composizione 20 centimetri">
         <div class="format-media">
-          {# IMMAGINE: foto lettera 20cm in contesto reale — sostituire con immagine definitiva #}
+          {# IMMAGINE: foto composizione 20cm in contesto reale — sostituire con immagine definitiva #}
           <div class="format-photo-placeholder" aria-hidden="true">20 cm</div>
         </div>
         <div class="format-body">
@@ -157,15 +159,14 @@
           <div class="format-price">
             <span class="price-currency" aria-hidden="true">€</span>
             <span class="price-amount">29,90</span>
-            <span class="price-unit">a lettera</span>
+            <span class="price-unit">per composizione</span>
           </div>
-          <a href="/ordina" class="btn-primary" aria-label="Scegli il formato 20 centimetri">Scegli</a>
         </div>
       </article>
 
-      <article class="format-card format-featured" aria-label="Formato 30 centimetri">
+      <article class="format-card format-featured" aria-label="Composizione 30 centimetri">
         <div class="format-media">
-          {# IMMAGINE: foto lettera 30cm in contesto reale — sostituire con immagine definitiva #}
+          {# IMMAGINE: foto composizione 30cm in contesto reale — sostituire con immagine definitiva #}
           <div class="format-photo-placeholder" aria-hidden="true">30 cm</div>
         </div>
         <div class="format-body">
@@ -174,35 +175,28 @@
           <div class="format-price">
             <span class="price-currency" aria-hidden="true">€</span>
             <span class="price-amount">39,90</span>
-            <span class="price-unit">a lettera</span>
+            <span class="price-unit">per composizione</span>
           </div>
-          <a href="/ordina" class="btn-primary" aria-label="Scegli il formato 30 centimetri">Scegli</a>
         </div>
       </article>
 
     </div>
 
     <p class="formats-note">
-      Il prezzo include lettera o numero&nbsp;+ nome nella forma scelta + colore a scelta.<br>
-      Le decorazioni sono opzionali e si aggiungono nel configuratore.
+      Ogni composizione include: lettera o numero iniziale nel formato scelto, nome, colore a scelta.<br>
+      Le decorazioni tematiche sono opzionali e si aggiungono nel configuratore.
     </p>
     <p class="formats-shipping">
       <i class="fas fa-truck" aria-hidden="true"></i>
       Spedizione €3 in tutta Italia
     </p>
 
-    <div class="formats-cta">
-      <a href="/ordina" class="btn-primary btn-lg" aria-label="Crea la tua composizione personalizzata">
-        Crea la tua composizione
-      </a>
-    </div>
-
   </div>
 </section>
 
 {# ═══════════════════════════════════════════════════════
    MANIFESTO
-   Citazione centrata, sfondo caldo, Cormorant Garamond italic
+   Blockquote centrata, sfondo c150, Cormorant Garamond italic
    ═══════════════════════════════════════════════════════ #}
 <section class="manifesto-section" aria-label="Il manifesto di Filamento">
   <div class="section-inner">
@@ -218,7 +212,7 @@
 
 {# ═══════════════════════════════════════════════════════
    COME NASCE
-   3 passi con foto di processo
+   3 passi con foto di processo — sezione informativa, nessuna CTA
    ═══════════════════════════════════════════════════════ #}
 <section class="process-section" id="come-funziona" aria-labelledby="process-heading">
   <div class="section-inner">
@@ -229,11 +223,11 @@
       <div class="divider" aria-hidden="true"></div>
     </header>
 
-    <ol class="process-steps" aria-label="Passi del processo">
+    <ol class="process-steps" aria-label="I tre passi del processo">
 
       <li class="process-step">
         <div class="process-media">
-          {# IMMAGINE: foto reale del processo — configuratore o schermo con ordine — sostituire con immagine definitiva #}
+          {# IMMAGINE: configuratore o schermo con l'ordine in corso (~4:3, loading="lazy") — sostituire con immagine definitiva #}
           <div class="process-photo-placeholder" aria-hidden="true">01</div>
         </div>
         <div class="process-body">
@@ -245,7 +239,7 @@
 
       <li class="process-step">
         <div class="process-media">
-          {# IMMAGINE: foto reale del processo — stampa 3D in corso — sostituire con immagine definitiva #}
+          {# IMMAGINE: stampa 3D in corso, dettaglio artigianale (~4:3, loading="lazy") — sostituire con immagine definitiva #}
           <div class="process-photo-placeholder" aria-hidden="true">02</div>
         </div>
         <div class="process-body">
@@ -257,7 +251,7 @@
 
       <li class="process-step">
         <div class="process-media">
-          {# IMMAGINE: foto reale del processo — pacchetto pronto per la spedizione — sostituire con immagine definitiva #}
+          {# IMMAGINE: pacchetto pronto per la spedizione, cura del confezionamento (~4:3, loading="lazy") — sostituire con immagine definitiva #}
           <div class="process-photo-placeholder" aria-hidden="true">03</div>
         </div>
         <div class="process-body">
@@ -269,28 +263,24 @@
 
     </ol>
 
-    <div class="process-cta">
-      <a href="/ordina" class="btn-primary" aria-label="Inizia a creare la tua composizione">
-        Inizia ora
-      </a>
-    </div>
-
   </div>
 </section>
 
 {# ═══════════════════════════════════════════════════════
    RECENSIONI
-   Componente nascosto se array vuoto.
-   ATTENZIONE: inserire solo recensioni reali e verificabili.
+   Sezione nascosta automaticamente se l'array è vuoto.
+   Nessun margin/padding residuo: il blocco non esiste nel DOM se vuoto.
+   ATTENZIONE: inserire solo recensioni reali e verificabili, con nome e città.
    ═══════════════════════════════════════════════════════ #}
 {%- set reviews = [] -%}
-{# Quando disponibili, aggiungere le recensioni reali qui:
-   {% set reviews = [
+{# Per aggiungere recensioni reali, sostituire il set con:
+   {%- set reviews = [
      { "text": "...", "author": "Nome C.", "city": "Milano" },
-     ...
-   ] %}
+     { "text": "...", "author": "Nome C.", "city": "Roma" },
+     { "text": "...", "author": "Nome C.", "city": "Torino" }
+   ] -%}
 #}
-{% if reviews %}
+{%- if reviews -%}
 <section class="reviews-section" aria-labelledby="reviews-heading">
   <div class="section-inner">
 
@@ -301,7 +291,7 @@
     </header>
 
     <div class="reviews-grid" role="list">
-      {% for review in reviews %}
+      {%- for review in reviews -%}
       <article class="review-card" role="listitem">
         <p class="review-text">«{{ review.text }}»</p>
         <footer class="review-footer">
@@ -309,16 +299,18 @@
           <span class="review-city">{{ review.city }}</span>
         </footer>
       </article>
-      {% endfor %}
+      {%- endfor -%}
     </div>
 
   </div>
 </section>
-{% endif %}
+{%- endif -%}
 
 {# ═══════════════════════════════════════════════════════
    CHI SIAMO
-   Foto Camilla sx, testo autentico dx
+   Layout: foto sx (5 col) + testo dx (7 col)
+   Foto: Camilla al lavoro — autentica, non in posa
+   Copy: testo in prima persona, da scrivere con Camilla
    ═══════════════════════════════════════════════════════ #}
 <section class="about-section" aria-labelledby="about-heading">
   <div class="section-inner">
@@ -326,9 +318,9 @@
     <div class="about-inner">
 
       <div class="about-media">
-        {# IMMAGINE: Camilla al lavoro, foto autentica non in posa — sostituire con immagine definitiva #}
+        {# IMMAGINE: Camilla al lavoro — foto verticale autentica (~3:4, loading="lazy") — sostituire con immagine definitiva #}
         <div class="about-photo-placeholder" aria-hidden="true">
-          <i class="fas fa-user" aria-hidden="true"></i>
+          <i class="fas fa-user"></i>
         </div>
       </div>
 
@@ -336,7 +328,7 @@
         <span class="section-label">Chi siamo</span>
         <h2 class="section-title" id="about-heading">Chi c'è dietro Filamento</h2>
         <div class="divider" aria-hidden="true"></div>
-        {# COPY: testo autentico in prima persona — da scrivere con Camilla #}
+        {# COPY: testo autentico in prima persona — da scrivere con Camilla e inserire qui #}
         <p class="about-text about-text-placeholder">
           [Testo autentico in prima persona — da inserire]
         </p>
@@ -357,10 +349,10 @@
 </section>
 
 {# ═══════════════════════════════════════════════════════
-   CTA FINALE
-   Sfondo terracotta (c500), testo bianco, centrato
+   CTA FINALE — CTA principale n. 3
+   Sfondo: var(--c500), testo bianco, centrato
    ═══════════════════════════════════════════════════════ #}
-<section class="final-cta-section" aria-label="Inizia a creare">
+<section class="final-cta-section" aria-label="Crea la tua composizione">
   <div class="section-inner">
     <h2 class="final-cta-title">Crea qualcosa che resterà.</h2>
     <a href="/ordina" class="btn-primary btn-lg btn-white" aria-label="Crea la tua composizione personalizzata">

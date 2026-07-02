@@ -18,6 +18,12 @@
   --white: #FFFFFF;
 }
 
+/* Focus visibile globale — accessibilità tastiera */
+:focus-visible {
+  outline: 2px solid var(--c500);
+  outline-offset: 3px;
+}
+
 /* ════════════════════════════════════════════════
    BASE TYPOGRAPHY
    ════════════════════════════════════════════════ */
@@ -293,7 +299,7 @@ section { padding: 96px 32px; }
   display: block;
 }
 
-/* Benefits strip */
+/* Benefits strip — tono editoriale, discreta */
 .benefits-strip {
   display: flex;
   justify-content: center;
@@ -305,18 +311,27 @@ section { padding: 96px 32px; }
 .benefit {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 26px 48px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  padding: 18px 40px;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text2);
   border-right: 1px solid var(--c200);
+  position: relative;
 }
 
 .benefit:last-child { border-right: none; }
-.benefit-check { color: var(--c500); font-weight: 700; }
+
+/* Dot separator between benefit text and right border */
+.benefit::before {
+  content: '·';
+  position: absolute;
+  right: -1px;
+  font-size: 0.9rem;
+  color: var(--c300);
+  display: none; /* used only in single-line variant if needed */
+}
 
 /* ════════════════════════════════════════════════
    I TEMI
@@ -438,7 +453,7 @@ section { padding: 96px 32px; }
   padding: 28px 28px 32px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .format-size {
@@ -480,14 +495,12 @@ section { padding: 96px 32px; }
   text-align: center;
   font-size: 0.82rem;
   color: var(--text2);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.06em;
-  margin-bottom: 40px;
+  margin-bottom: 0;
 }
 
 .formats-shipping i { margin-right: 6px; color: var(--c500); }
-
-.formats-cta { text-align: center; }
 
 /* ════════════════════════════════════════════════
    MANIFESTO
@@ -989,6 +1002,18 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .legal-footer-nav { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--c200); }
 
 /* ════════════════════════════════════════════════
+   RESPONSIVE — LARGE TABLET (≤ 1024px)
+   Il contenitore è 1100px: a 1024px il padding laterale
+   assorbe la differenza senza layout break.
+   Solo aggiustamenti puntuali necessari.
+   ════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .hero-inner { gap: 48px; }
+  .hero-text { padding: 80px 0; }
+  .about-inner { gap: 48px; }
+}
+
+/* ════════════════════════════════════════════════
    RESPONSIVE — TABLET (≤ 900px)
    ════════════════════════════════════════════════ */
 @media (max-width: 900px) {
@@ -999,17 +1024,17 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
   /* Benefits */
   .benefits-strip { flex-wrap: wrap; }
-  .benefit { flex: 1 1 40%; justify-content: center; border-right: none; border-bottom: 1px solid var(--c200); padding: 20px 24px; }
+  .benefit { flex: 1 1 40%; justify-content: center; border-right: none; border-bottom: 1px solid var(--c200); padding: 16px 24px; }
   .benefit:nth-child(3), .benefit:nth-child(4) { border-bottom: none; }
 
-  /* Temi */
+  /* Temi — mantiene 3 colonne fino al tablet */
   .themes-grid { grid-template-columns: repeat(3, 1fr); }
 
   /* Formati */
   .formats-grid { grid-template-columns: 1fr 1fr; }
 
-  /* Process */
-  .process-steps { grid-template-columns: 1fr; }
+  /* Process — mantiene 3 colonne fino al tablet */
+  .process-steps { grid-template-columns: repeat(3, 1fr); }
 
   /* Reviews */
   .reviews-grid { grid-template-columns: 1fr; gap: 16px; }
@@ -1028,6 +1053,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 /* ════════════════════════════════════════════════
    RESPONSIVE — MOBILE (≤ 600px)
+   Breakpoint: 600px, 390px, 375px — stesso layout
    ════════════════════════════════════════════════ */
 @media (max-width: 600px) {
   section { padding: 64px 20px; }
@@ -1038,24 +1064,23 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Hero */
   .hero-inner { padding: 40px 20px 0; gap: 24px; }
   .hero-actions { flex-direction: column; align-items: stretch; }
-  .hero-actions .btn-primary,
-  .hero-actions .btn-ghost { text-align: center; }
+  .hero-actions .btn-primary { text-align: center; }
 
   /* Benefits */
   .benefits-strip { flex-direction: column; }
-  .benefit { flex: none; border-right: none; border-bottom: 1px solid var(--c200); padding: 18px 24px; }
+  .benefit { flex: none; border-right: none; border-bottom: 1px solid var(--c200); padding: 14px 20px; justify-content: flex-start; }
   .benefit:last-child { border-bottom: none; }
 
-  /* Temi */
+  /* Temi — 2 colonne su mobile */
   .themes-grid { grid-template-columns: repeat(2, 1fr); }
 
-  /* Formati */
+  /* Formati — 1 colonna su mobile */
   .formats-grid { grid-template-columns: 1fr; }
 
   /* Manifesto */
-  .manifesto-section { padding: 80px 24px; }
+  .manifesto-section { padding: 80px 20px; }
 
-  /* Process */
+  /* Process — 1 colonna su mobile */
   .process-steps { grid-template-columns: 1fr; }
 
   /* Reviews */
