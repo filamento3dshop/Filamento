@@ -110,11 +110,11 @@ async def index(request: Request):
 
 
 @app.get("/ordina", response_class=HTMLResponse)
-async def ordina_get(request: Request):
+async def ordina_get(request: Request, tema: str = None):
     return templates.TemplateResponse("ordina.html", {
         "request": request,
         "config": CONFIG,
-        "form": {},
+        "form": {"tema": tema or ""},
         "error": None,
     })
 

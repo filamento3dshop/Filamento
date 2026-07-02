@@ -1,219 +1,372 @@
 {% extends "base.html" %}
-{% block title %}Filamento – Lettere, numeri e decorazioni 3D personalizzate{% endblock %}
+{% block title %}Filamento – Decorazioni personalizzate con il nome del tuo bambino{% endblock %}
 
 {% block content %}
 
-<!-- HERO -->
-<div class="hero-wrap">
-  <div class="hero">
-    <div class="hero-text hero-fade">
-      <span class="hero-overline">Realizzato artigianalmente in Italia</span>
-      <h1>Ogni nome<br><em>racconta una storia.</em></h1>
-      <p class="hero-desc">Celebriamo nascite, battesimi e compleanni con composizioni personalizzate — elementi unici creati con cura per ogni occasione speciale.</p>
+{# ═══════════════════════════════════════════════════════
+   HERO
+   Layout: 2 colonne desktop (testo sx, foto dx) → 1 colonna mobile
+   ═══════════════════════════════════════════════════════ #}
+<section class="hero-section" aria-label="Hero">
+  <div class="hero-inner">
+
+    <div class="hero-text">
+      <span class="hero-badge">Realizzato artigianalmente in Italia</span>
+      <h1 class="hero-title">Ogni nome racconta una storia.</h1>
+      <p class="hero-subtitle">
+        Decorazioni personalizzate con il nome del tuo bambino.<br>
+        Realizzate a mano in Italia.
+      </p>
       <div class="hero-actions">
-        <a href="/ordina" class="btn-primary btn-primary-lg">Crea la tua composizione</a>
-        <a href="#come-funziona" class="btn-ghost">Scopri come funziona</a>
+        <a href="/ordina" class="btn-primary btn-lg" aria-label="Crea la tua composizione personalizzata">
+          Crea la tua composizione
+        </a>
+        <a href="#come-funziona" class="btn-ghost" aria-label="Scopri come funziona il processo">
+          Scopri come funziona ↓
+        </a>
       </div>
     </div>
-    <div class="hero-image hero-fade hero-fade-delay">
-      <div class="hero-image-bg"></div>
-      <img src="/static/img/hero-esempio.jpg" alt="Composizione personalizzata Filamento" class="hero-photo">
+
+    <div class="hero-media">
+      {# IMMAGINE: composizione reale su sfondo naturale — sostituire hero-esempio.jpg con foto definitiva #}
+      <img
+        src="/static/img/hero-esempio.jpg"
+        alt="Composizione personalizzata Filamento con lettere in 3D su sfondo naturale"
+        class="hero-photo"
+        width="640"
+        height="720"
+        fetchpriority="high"
+      >
     </div>
+
   </div>
-</div>
 
-<!-- BENEFICI -->
-<div class="benefits-row">
-  <div class="benefit-item"><span class="benefit-check">✓</span> Personalizzato</div>
-  <div class="benefit-item"><span class="benefit-check">✓</span> Realizzato in Italia</div>
-  <div class="benefit-item"><span class="benefit-check">✓</span> Materiali selezionati</div>
-  <div class="benefit-item"><span class="benefit-check">✓</span> Spedizione in 7–10 giorni</div>
-</div>
+  {# Striscia benefici #}
+  <div class="benefits-strip" role="list" aria-label="I nostri punti di forza">
+    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Personalizzato</div>
+    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Realizzato in Italia</div>
+    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Materiali selezionati</div>
+    <div class="benefit" role="listitem"><span class="benefit-check" aria-hidden="true">✓</span> Spedizione in 7–10 giorni</div>
+  </div>
+</section>
 
-<!-- COME FUNZIONA -->
-<section id="come-funziona" style="background: var(--c100);">
+{# ═══════════════════════════════════════════════════════
+   I TEMI
+   6 card tema con link al configuratore (?tema=...)
+   ═══════════════════════════════════════════════════════ #}
+<section class="themes-section" id="temi" aria-labelledby="themes-heading">
   <div class="section-inner">
-    <div class="section-header centered">
-      <span class="section-label">Processo</span>
-      <h2 class="section-title">Come funziona</h2>
-      <div class="divider centered"></div>
-      <p class="section-desc">Quattro passaggi semplici per ricevere la tua composizione personalizzata.</p>
-    </div>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-num">01</div>
-        <div class="step-title">Scegli la tua lettera o numero</div>
-        <p class="step-desc">Seleziona il carattere o il numero che vuoi — ogni pezzo è stampato singolarmente.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">02</div>
-        <div class="step-title">Scegli il nome</div>
-        <p class="step-desc">Inserisci il nome o la parola da comporre.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">03</div>
-        <div class="step-title">Scegli i colori</div>
-        <p class="step-desc">Tanti colori disponibili, scegli quelli che più ti piacciono.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">04</div>
-        <div class="step-title">Scegli il tema</div>
-        <p class="step-desc">Diversi temi disponibili: safari, spazio, mare, cielo, principesse, sport.</p>
-      </div>
+
+    <header class="section-header centered">
+      <span class="section-label">Temi</span>
+      <h2 class="section-title" id="themes-heading">Scegli il tema del tuo bambino</h2>
+      <div class="divider" aria-hidden="true"></div>
+      <p class="section-desc">Ogni tema è una piccola storia. Scegli quello che racconta di più il tuo bambino.</p>
+      <p class="section-note">Le decorazioni sono opzionali e puoi aggiungerne quante desideri durante la personalizzazione.</p>
+    </header>
+
+    <div class="themes-grid" role="list">
+
+      <a href="/ordina?tema=safari" class="theme-card" role="listitem" aria-label="Personalizza con tema Safari">
+        <div class="theme-media">
+          {# IMMAGINE: foto reale decorazione stampata tema Safari — sostituire con immagine definitiva #}
+          <div class="theme-photo-placeholder" aria-hidden="true">
+            <i class="fas fa-paw" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="theme-name">Safari</div>
+      </a>
+
+      <a href="/ordina?tema=spazio" class="theme-card" role="listitem" aria-label="Personalizza con tema Spazio">
+        <div class="theme-media">
+          {# IMMAGINE: foto reale decorazione stampata tema Spazio #}
+          <div class="theme-photo-placeholder" aria-hidden="true">
+            <i class="fas fa-rocket" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="theme-name">Spazio</div>
+      </a>
+
+      <a href="/ordina?tema=mare" class="theme-card" role="listitem" aria-label="Personalizza con tema Mare">
+        <div class="theme-media">
+          {# IMMAGINE: foto reale decorazione stampata tema Mare #}
+          <div class="theme-photo-placeholder" aria-hidden="true">
+            <i class="fas fa-fish" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="theme-name">Mare</div>
+      </a>
+
+      <a href="/ordina?tema=cielo" class="theme-card" role="listitem" aria-label="Personalizza con tema Cielo">
+        <div class="theme-media">
+          {# IMMAGINE: foto reale decorazione stampata tema Cielo #}
+          <div class="theme-photo-placeholder" aria-hidden="true">
+            <i class="fas fa-cloud-sun" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="theme-name">Cielo</div>
+      </a>
+
+      <a href="/ordina?tema=principesse" class="theme-card" role="listitem" aria-label="Personalizza con tema Principesse">
+        <div class="theme-media">
+          {# IMMAGINE: foto reale decorazione stampata tema Principesse #}
+          <div class="theme-photo-placeholder" aria-hidden="true">
+            <i class="fas fa-crown" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="theme-name">Principesse</div>
+      </a>
+
+      <a href="/ordina?tema=sport" class="theme-card" role="listitem" aria-label="Personalizza con tema Sport">
+        <div class="theme-media">
+          {# IMMAGINE: foto reale decorazione stampata tema Sport #}
+          <div class="theme-photo-placeholder" aria-hidden="true">
+            <i class="fas fa-futbol" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="theme-name">Sport</div>
+      </a>
+
     </div>
   </div>
 </section>
 
-<!-- PREZZI -->
-<section id="prezzi" style="background: var(--white);">
+{# ═══════════════════════════════════════════════════════
+   SCEGLI IL FORMATO
+   2 card formato con nota su decorazioni opzionali
+   ═══════════════════════════════════════════════════════ #}
+<section class="formats-section" id="prezzi" aria-labelledby="formats-heading">
   <div class="section-inner">
-    <div class="section-header centered">
-      <span class="section-label">Tariffe</span>
-      <h2 class="section-title">Prezzi chiari, senza sorprese</h2>
-      <div class="divider centered"></div>
-      <p class="section-desc">Due dimensioni disponibili. Spedizione €3 in tutta Italia.</p>
+
+    <header class="section-header centered">
+      <span class="section-label">Formati</span>
+      <h2 class="section-title" id="formats-heading">Scegli la dimensione</h2>
+      <div class="divider" aria-hidden="true"></div>
+    </header>
+
+    <div class="formats-grid">
+
+      <article class="format-card" aria-label="Formato 20 centimetri">
+        <div class="format-media">
+          {# IMMAGINE: foto lettera 20cm in contesto reale — sostituire con immagine definitiva #}
+          <div class="format-photo-placeholder" aria-hidden="true">20 cm</div>
+        </div>
+        <div class="format-body">
+          <div class="format-size">20 cm</div>
+          <div class="format-desc">Dimensione standard</div>
+          <div class="format-price">
+            <span class="price-currency" aria-hidden="true">€</span>
+            <span class="price-amount">29,90</span>
+            <span class="price-unit">a lettera</span>
+          </div>
+          <a href="/ordina" class="btn-primary" aria-label="Scegli il formato 20 centimetri">Scegli</a>
+        </div>
+      </article>
+
+      <article class="format-card format-featured" aria-label="Formato 30 centimetri">
+        <div class="format-media">
+          {# IMMAGINE: foto lettera 30cm in contesto reale — sostituire con immagine definitiva #}
+          <div class="format-photo-placeholder" aria-hidden="true">30 cm</div>
+        </div>
+        <div class="format-body">
+          <div class="format-size">30 cm</div>
+          <div class="format-desc">Dimensione grande</div>
+          <div class="format-price">
+            <span class="price-currency" aria-hidden="true">€</span>
+            <span class="price-amount">39,90</span>
+            <span class="price-unit">a lettera</span>
+          </div>
+          <a href="/ordina" class="btn-primary" aria-label="Scegli il formato 30 centimetri">Scegli</a>
+        </div>
+      </article>
+
     </div>
-    <div class="prices-grid">
-      <div class="price-card">
-        <div class="price-label">Lettera / Numero</div>
-        <div class="price-name">20 cm</div>
-        <div class="price-sub">Dimensione standard</div>
-        <div class="price-amount"><span class="price-eur">€</span><span class="price-num">29</span><span class="price-unit">.90 / cad.</span></div>
-        <ul class="price-features">
-          <li>Stampa 3D in PLA</li>
-          <li>Numero o Lettera iniziale + Nome</li>
-          <li>Colori a scelta</li>
-          <li>Tema a scelta</li>
-        </ul>
-        <a href="/ordina" class="btn-price">Scegli</a>
-      </div>
-      <div class="price-card featured">
-        <div class="price-label">Lettera / Numero</div>
-        <div class="price-name">30 cm</div>
-        <div class="price-sub">Dimensione grande</div>
-        <div class="price-amount"><span class="price-eur">€</span><span class="price-num">39</span><span class="price-unit">.90 / cad.</span></div>
-        <ul class="price-features">
-          <li>Stampa 3D in PLA</li>
-          <li>Numero o Lettera iniziale + Nome</li>
-          <li>Colori a scelta</li>
-          <li>Tema a scelta</li>
-        </ul>
-        <a href="/ordina" class="btn-price">Scegli</a>
-      </div>
+
+    <p class="formats-note">
+      Il prezzo include lettera o numero&nbsp;+ nome nella forma scelta + colore a scelta.<br>
+      Le decorazioni sono opzionali e si aggiungono nel configuratore.
+    </p>
+    <p class="formats-shipping">
+      <i class="fas fa-truck" aria-hidden="true"></i>
+      Spedizione €3 in tutta Italia
+    </p>
+
+    <div class="formats-cta">
+      <a href="/ordina" class="btn-primary btn-lg" aria-label="Crea la tua composizione personalizzata">
+        Crea la tua composizione
+      </a>
     </div>
+
   </div>
 </section>
 
-<!-- OCCASIONI -->
-<section id="occasioni" style="background: var(--c150);">
+{# ═══════════════════════════════════════════════════════
+   MANIFESTO
+   Citazione centrata, sfondo caldo, Cormorant Garamond italic
+   ═══════════════════════════════════════════════════════ #}
+<section class="manifesto-section" aria-label="Il manifesto di Filamento">
   <div class="section-inner">
-    <div class="section-header centered">
-      <span class="section-label">Occasioni</span>
-      <h2 class="section-title">Per ogni momento speciale</h2>
-      <div class="divider centered"></div>
-    </div>
-    <div class="occasions-grid">
-      <div class="occasion-card">
-        <span class="occasion-icon"><i class="fas fa-dove"></i></span>
-        <div class="occasion-name">Battesimo</div>
-        <p class="occasion-desc">Un ricordo prezioso e duraturo per un giorno speciale.</p>
-      </div>
-      <div class="occasion-card">
-        <span class="occasion-icon"><i class="fas fa-cake-candles"></i></span>
-        <div class="occasion-name">Compleanno</div>
-        <p class="occasion-desc">Il regalo che resta — decora la festa e poi la cameretta.</p>
-      </div>
-      <div class="occasion-card">
-        <span class="occasion-icon"><i class="fas fa-baby"></i></span>
-        <div class="occasion-name">Baby Shower</div>
-        <p class="occasion-desc">Sorprendi la futura mamma con una decorazione unica già prima del parto.</p>
-      </div>
-      <div class="occasion-card">
-        <span class="occasion-icon"><i class="fas fa-ribbon"></i></span>
-        <div class="occasion-name">Nascita</div>
-        <p class="occasion-desc">La lettera col nome del nuovo/a arrivata da esporre in cameretta come primo ricordo di vita.</p>
-      </div>
-    </div>
+    <blockquote class="manifesto-quote">
+      <p>
+        «Non produciamo oggetti in serie. Ogni pezzo nasce da un ordine,
+        con il nome di un bambino preciso, per una famiglia precisa.»
+      </p>
+      <cite class="manifesto-author">— Filamento</cite>
+    </blockquote>
   </div>
 </section>
 
-<!-- TEMI -->
-<section id="temi" class="temi-section">
+{# ═══════════════════════════════════════════════════════
+   COME NASCE
+   3 passi con foto di processo
+   ═══════════════════════════════════════════════════════ #}
+<section class="process-section" id="come-funziona" aria-labelledby="process-heading">
   <div class="section-inner">
-    <div class="section-header centered">
-      <span class="temi-badge">Novità</span>
-      <h2 class="section-title">Aggiungi un tema</h2>
-      <div class="divider centered"></div>
-      <p class="section-desc">Piccole decorazioni stampate in 3D da abbinare alla tua lettera — circa 8 cm di altezza.<br>Scegli da 1 a 4 decorazioni: più ne aggiungi, meno paghi per ciascuna.</p>
+
+    <header class="section-header centered">
+      <span class="section-label">Il processo</span>
+      <h2 class="section-title" id="process-heading">Come nasce la tua composizione</h2>
+      <div class="divider" aria-hidden="true"></div>
+    </header>
+
+    <ol class="process-steps" aria-label="Passi del processo">
+
+      <li class="process-step">
+        <div class="process-media">
+          {# IMMAGINE: foto reale del processo — configuratore o schermo con ordine — sostituire con immagine definitiva #}
+          <div class="process-photo-placeholder" aria-hidden="true">01</div>
+        </div>
+        <div class="process-body">
+          <div class="process-num" aria-hidden="true">01</div>
+          <h3 class="process-title">Progetti</h3>
+          <p class="process-desc">Scegli lettera, nome, colori, formato e — se vuoi — un tema.</p>
+        </div>
+      </li>
+
+      <li class="process-step">
+        <div class="process-media">
+          {# IMMAGINE: foto reale del processo — stampa 3D in corso — sostituire con immagine definitiva #}
+          <div class="process-photo-placeholder" aria-hidden="true">02</div>
+        </div>
+        <div class="process-body">
+          <div class="process-num" aria-hidden="true">02</div>
+          <h3 class="process-title">Stampiamo</h3>
+          <p class="process-desc">Ogni pezzo viene stampato singolarmente, a mano, in PLA da fonti rinnovabili.</p>
+        </div>
+      </li>
+
+      <li class="process-step">
+        <div class="process-media">
+          {# IMMAGINE: foto reale del processo — pacchetto pronto per la spedizione — sostituire con immagine definitiva #}
+          <div class="process-photo-placeholder" aria-hidden="true">03</div>
+        </div>
+        <div class="process-body">
+          <div class="process-num" aria-hidden="true">03</div>
+          <h3 class="process-title">Consegniamo</h3>
+          <p class="process-desc">Imballaggio su misura. Consegna tracciata in 7–10 giorni.</p>
+        </div>
+      </li>
+
+    </ol>
+
+    <div class="process-cta">
+      <a href="/ordina" class="btn-primary" aria-label="Inizia a creare la tua composizione">
+        Inizia ora
+      </a>
     </div>
-    <div class="pricing-strip">
-      <div class="pricing-slot"><div class="pricing-slot-num"><span class="num-full">1 decorazione</span><span class="num-short">1<br>deco</span></div><div class="pricing-slot-price">€8</div><div class="pricing-slot-each">€8,00 cad.</div></div>
-      <div class="pricing-slot"><div class="pricing-slot-num"><span class="num-full">2 decorazioni</span><span class="num-short">2 deco</span></div><div class="pricing-slot-price">€15</div><div class="pricing-slot-each">€7,50 cad.</div></div>
-      <div class="pricing-slot"><div class="pricing-slot-num"><span class="num-full">3 decorazioni</span><span class="num-short">3 deco</span></div><div class="pricing-slot-price">€20</div><div class="pricing-slot-each">€6,67 cad.</div></div>
-      <div class="pricing-slot best"><div class="pricing-slot-num"><span class="num-full">4 decorazioni</span><span class="num-short">4 deco</span></div><div class="pricing-slot-price">€25</div><div class="pricing-slot-each">€6,25 cad.</div></div>
-    </div>
-    <div class="temi-grid">
-      <div class="tema-card"><span class="tema-icon"><i class="fas fa-paw"></i></span><div class="tema-name">Safari</div></div>
-      <div class="tema-card"><span class="tema-icon"><i class="fas fa-rocket"></i></span><div class="tema-name">Spazio</div></div>
-      <div class="tema-card"><span class="tema-icon"><i class="fas fa-fish"></i></span><div class="tema-name">Mare</div></div>
-      <div class="tema-card"><span class="tema-icon"><i class="fas fa-cloud-sun"></i></span><div class="tema-name">Cielo</div></div>
-      <div class="tema-card"><span class="tema-icon"><i class="fas fa-crown"></i></span><div class="tema-name">Principesse</div></div>
-      <div class="tema-card"><span class="tema-icon"><i class="fas fa-futbol"></i></span><div class="tema-name">Sport</div></div>
-    </div>
-    <div style="text-align:center;"><a href="/ordina" class="btn-primary">Personalizza con un tema</a></div>
+
   </div>
 </section>
 
-<!-- PERCHÉ NOI -->
-<section style="background: var(--white);">
+{# ═══════════════════════════════════════════════════════
+   RECENSIONI
+   Componente nascosto se array vuoto.
+   ATTENZIONE: inserire solo recensioni reali e verificabili.
+   ═══════════════════════════════════════════════════════ #}
+{%- set reviews = [] -%}
+{# Quando disponibili, aggiungere le recensioni reali qui:
+   {% set reviews = [
+     { "text": "...", "author": "Nome C.", "city": "Milano" },
+     ...
+   ] %}
+#}
+{% if reviews %}
+<section class="reviews-section" aria-labelledby="reviews-heading">
   <div class="section-inner">
-    <div class="section-header">
-      <span class="section-label">Perché Filamento</span>
-      <h2 class="section-title">Ogni dettaglio,<br>pensato per te</h2>
-      <div class="divider"></div>
+
+    <header class="section-header centered">
+      <span class="section-label">Recensioni reali</span>
+      <h2 class="section-title" id="reviews-heading">Cosa dicono le mamme</h2>
+      <div class="divider" aria-hidden="true"></div>
+    </header>
+
+    <div class="reviews-grid" role="list">
+      {% for review in reviews %}
+      <article class="review-card" role="listitem">
+        <p class="review-text">«{{ review.text }}»</p>
+        <footer class="review-footer">
+          <span class="review-author">{{ review.author }}</span>
+          <span class="review-city">{{ review.city }}</span>
+        </footer>
+      </article>
+      {% endfor %}
     </div>
-    <div class="why-grid">
-      <div class="why-card"><div class="why-line"></div><div class="why-title">Personalizzazione totale</div><p class="why-desc">Nome, testo, tema, colori — ogni elemento è scelto da te. Il risultato è unico.</p></div>
-      <div class="why-card"><div class="why-line"></div><div class="why-title">Produzione artigianale</div><p class="why-desc">Ogni composizione è prodotta personalmente, con cura manuale.</p></div>
-      <div class="why-card"><div class="why-line"></div><div class="why-title">Spedizione sicura</div><p class="why-desc">Imballaggio su misura per ogni ordine. Consegna tracciata in tutta Italia.</p></div>
-      <div class="why-card"><div class="why-line"></div><div class="why-title">Consegna rapida</div><p class="why-desc">10 giorni lavorativi dalla conferma. Anche per eventi dell'ultimo momento.</p></div>
-      <div class="why-card"><div class="why-line"></div><div class="why-title">Materiali ecologici</div><p class="why-desc">PLA da fonti rinnovabili, certificato non tossico. Sicuro per bambini e ambienti chiusi.</p></div>
-      <div class="why-card"><div class="why-line"></div><div class="why-title">Assistenza dedicata</div><p class="why-desc">Seguiamo ogni ordine con attenzione. Risposta garantita entro 24 ore.</p></div>
+
+  </div>
+</section>
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════
+   CHI SIAMO
+   Foto Camilla sx, testo autentico dx
+   ═══════════════════════════════════════════════════════ #}
+<section class="about-section" aria-labelledby="about-heading">
+  <div class="section-inner">
+
+    <div class="about-inner">
+
+      <div class="about-media">
+        {# IMMAGINE: Camilla al lavoro, foto autentica non in posa — sostituire con immagine definitiva #}
+        <div class="about-photo-placeholder" aria-hidden="true">
+          <i class="fas fa-user" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div class="about-body">
+        <span class="section-label">Chi siamo</span>
+        <h2 class="section-title" id="about-heading">Chi c'è dietro Filamento</h2>
+        <div class="divider" aria-hidden="true"></div>
+        {# COPY: testo autentico in prima persona — da scrivere con Camilla #}
+        <p class="about-text about-text-placeholder">
+          [Testo autentico in prima persona — da inserire]
+        </p>
+        <a
+          href="https://wa.me/393494167428"
+          class="btn-ghost"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Scrivimi su WhatsApp"
+        >
+          Scrivimi su WhatsApp
+        </a>
+      </div>
+
     </div>
+
   </div>
 </section>
 
-<!-- COLORI -->
-<section style="background: var(--c100); padding: 96px 32px;">
+{# ═══════════════════════════════════════════════════════
+   CTA FINALE
+   Sfondo terracotta (c500), testo bianco, centrato
+   ═══════════════════════════════════════════════════════ #}
+<section class="final-cta-section" aria-label="Inizia a creare">
   <div class="section-inner">
-    <div class="section-header centered">
-      <span class="section-label">Palette</span>
-      <h2 class="section-title">Scegli il tuo colore</h2>
-      <div class="divider centered"></div>
-      <p class="section-desc">Ogni pezzo viene stampato nel colore che preferisci.</p>
-    </div>
-    <div style="display:grid; grid-template-columns: repeat(5,1fr); gap: 20px; max-width: 780px; margin: 0 auto;">
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#ff6b6b; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Corallo</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#F0A898; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Pesca</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#F5C4BC; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Cipria</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#C8A8D0; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Lilla</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#88B4C8; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Azzurro</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#9BB8A0; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Salvia</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#E8C84A; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Oro</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#eed7c1; border: 1px solid var(--c200); margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Tortora</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#F8F6F3; border: 1px solid var(--c200); margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Bianco</span></div>
-      <div style="text-align:center;"><div style="width:100%; aspect-ratio:1; border-radius:4px; background:#1A1A1A; margin-bottom:10px;"></div><span style="font-size:0.78rem; font-weight:500; color:var(--text2); letter-spacing:0.05em;">Nero</span></div>
-    </div>
+    <h2 class="final-cta-title">Crea qualcosa che resterà.</h2>
+    <a href="/ordina" class="btn-primary btn-lg btn-white" aria-label="Crea la tua composizione personalizzata">
+      Crea la tua composizione
+    </a>
   </div>
 </section>
-
-<!-- CTA -->
-<div class="cta-section">
-  <span class="section-label">Inizia ora</span>
-  <h2 class="section-title">Pronta a creare<br>qualcosa di speciale?</h2>
-  <div class="divider centered"></div>
-  <p class="section-desc">Personalizza la tua composizione in pochi minuti. Spedizione €3 in tutta Italia.</p>
-  <a href="/ordina" class="btn-primary">Crea la tua composizione</a>
-</div>
 
 {% endblock %}
