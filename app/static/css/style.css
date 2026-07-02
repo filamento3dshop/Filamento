@@ -480,13 +480,47 @@ section { padding: 96px 32px; }
 .price-unit { font-size: 0.82rem; color: var(--text2); margin-left: 2px; }
 
 .formats-note {
-  max-width: 600px;
-  margin: 32px auto 12px;
-  text-align: center;
+  max-width: 360px;
+  margin: 36px auto 16px;
+  text-align: left;
+}
+
+.formats-note-title {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.formats-note-list {
+  list-style: none;
+  margin-bottom: 14px;
+}
+
+.formats-note-list li {
   font-size: 0.88rem;
-  line-height: 1.65;
   color: var(--text2);
   font-weight: 300;
+  line-height: 1.7;
+  padding-left: 16px;
+  position: relative;
+}
+
+.formats-note-list li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--c300);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.formats-note-extra {
+  font-size: 0.82rem;
+  color: var(--text2);
+  font-weight: 300;
+  font-style: italic;
 }
 
 .formats-shipping {
