@@ -7,361 +7,450 @@
 
 {% block content %}
 
-<!-- Page header -->
-<div style="background:var(--c100);border-bottom:1px solid var(--c200);padding:32px 32px 0;">
-  <div style="max-width:760px;margin:0 auto;">
+<div class="ordina-header">
+  <div class="ordina-header-inner">
     <span class="section-label">Personalizzazione</span>
-    <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3vw,2.4rem);color:var(--text);margin-bottom:6px;">Crea la tua lettera</h1>
-    <p style="font-size:0.9rem;color:var(--text2);margin-bottom:28px;font-weight:300;">Ci vuole solo <strong style="font-weight:500;color:var(--text);">2 minuti</strong> — la ricevi a casa in 7–10 giorni lavorativi</p>
-
-    <!-- Stepper -->
+    <h1 class="ordina-h1">Crea la tua composizione</h1>
+    <p class="ordina-sub">Ci vuole solo <strong>2 minuti</strong> — la ricevi a casa in 7–10 giorni lavorativi</p>
     <div class="wizard-steps">
-      <div class="wstep active" data-step="1">
-        <div class="wstep-num">1</div>
-        <div class="wstep-label">Personalizza</div>
-      </div>
+      <div class="wstep active" data-step="1"><div class="wstep-num">1</div><div class="wstep-label">Personalizza</div></div>
       <div class="wstep-line"></div>
-      <div class="wstep" data-step="2">
-        <div class="wstep-num">2</div>
-        <div class="wstep-label">Spedizione</div>
-      </div>
+      <div class="wstep" data-step="2"><div class="wstep-num">2</div><div class="wstep-label">Spedizione</div></div>
       <div class="wstep-line"></div>
-      <div class="wstep" data-step="3">
-        <div class="wstep-num">3</div>
-        <div class="wstep-label">Pagamento</div>
-      </div>
+      <div class="wstep" data-step="3"><div class="wstep-num">3</div><div class="wstep-label">Pagamento</div></div>
     </div>
   </div>
 </div>
 
 <div class="ordina-wrap">
-  <form id="order-form" method="post" action="/ordina">
+  <form id="order-form" method="post" action="/ordina" enctype="multipart/form-data">
 
-    <!-- ══ STEP 1: PERSONALIZZA ══ -->
+    <!-- Hidden state fields -->
+    <input type="hidden" name="forma" id="forma" value="piena">
+    <input type="hidden" name="tema" id="tema" value="{{ form.get('tema','nessuno') }}">
+    <input type="hidden" name="num_deco" id="num_deco" value="{{ form.get('num_deco','0') }}">
+    <input type="hidden" name="decorazioni_scelte" id="decorazioni_scelte" value="{{ form.get('decorazioni_scelte','') }}">
+
+    {# ══ STEP 1 ══ #}
     <div class="wizard-panel active" id="panel-1">
-      <h2 class="panel-title">Personalizza la lettera</h2>
+      <div class="step1-layout">
 
-      {% if error %}
-      <div class="form-alert">{{ error }}</div>
-      {% endif %}
+        {# LEFT — preview + totale #}
+        <div class="preview-col">
+          <div class="preview-sticky">
 
-      <div class="form-group">
-        <label class="form-label" for="lettera">Lettera iniziale <span class="req">*</span></label>
-        <select class="form-control" id="lettera" name="lettera" required>
-          <option value="">— Scegli la lettera —</option>
-          {% for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
-          <option value="{{ c }}" {% if form.get('lettera')==c %}selected{% endif %}>{{ c }}</option>
-          {% endfor %}
-          {% for n in range(10) %}
-          <option value="{{ n }}" {% if form.get('lettera')==(n|string) %}selected{% endif %}>{{ n }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="nome_bimbo">Nome da personalizzare <span class="req">*</span></label>
-        <input class="form-control" type="text" id="nome_bimbo" name="nome_bimbo"
-               placeholder="Es. Greta, Matteo…" required
-               value="{{ form.get('nome_bimbo','') }}">
-        <p class="form-hint">Verrà scritto a mano in piccolo sulla lettera</p>
-      </div>
-
-      {% set colori = [
-        ('corallo',  '#ff6b6b', 'Corallo'),
-        ('pesca',    '#F0A898', 'Pesca'),
-        ('cipria',   '#F5C4BC', 'Cipria'),
-        ('lilla',    '#C8A8D0', 'Lilla'),
-        ('azzurro',  '#88B4C8', 'Azzurro'),
-        ('salvia',   '#9BB8A0', 'Salvia'),
-        ('oro',      '#E8C84A', 'Oro'),
-        ('tortora',  '#eed7c1', 'Tortora'),
-        ('bianco',   '#F8F6F3', 'Bianco'),
-        ('nero',     '#1A1A1A', 'Nero'),
-      ] %}
-
-      <div class="form-group">
-        <label class="form-label">Colore della lettera / numero <span class="req">*</span></label>
-        <div class="color-picker" id="color-picker-lettera">
-          {% for val, hex, label in colori %}
-          <label class="color-opt" title="{{ label }}">
-            <input type="radio" name="colore_lettera" value="{{ val }}"
-                   {% if form.get('colore_lettera','corallo') == val %}checked{% endif %}>
-            <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#eed7c1') %}box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);{% endif %}"></span>
-            <span class="cname">{{ label }}</span>
-          </label>
-          {% endfor %}
-        </div>
-        <p class="form-hint" id="color-lettera-selected">Nessun colore selezionato</p>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Colore della scritta (nome) <span class="req">*</span></label>
-        <div class="color-picker" id="color-picker-scritta">
-          {% for val, hex, label in colori %}
-          <label class="color-opt" title="{{ label }}">
-            <input type="radio" name="colore_scritta" value="{{ val }}"
-                   {% if form.get('colore_scritta','bianco') == val %}checked{% endif %}>
-            <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#eed7c1') %}box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);{% endif %}"></span>
-            <span class="cname">{{ label }}</span>
-          </label>
-          {% endfor %}
-        </div>
-        <p class="form-hint" id="color-scritta-selected">Nessun colore selezionato</p>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Dimensione <span class="req">*</span></label>
-        <div class="dim-grid" style="grid-template-columns:1fr 1fr;">
-          <label class="dim-opt">
-            <input type="radio" name="dimensione" value="20" {% if form.get('dimensione','20')=='20' or not form.get('dimensione') %}checked{% endif %}>
-            <div class="dim-card">
-              <div class="dim-price">€29,90</div>
-              <div class="dim-size">20 cm</div>
-              <div style="font-size:0.72rem;color:var(--text2);margin-top:4px;">Standard</div>
+            <div class="preview-card">
+              <div class="preview-card-label">Anteprima</div>
+              <canvas id="preview-canvas" width="300" height="320" aria-label="Anteprima composizione"></canvas>
+              <p class="preview-hint">L'anteprima è indicativa</p>
             </div>
-          </label>
-          <label class="dim-opt">
-            <input type="radio" name="dimensione" value="30" {% if form.get('dimensione')=='30' %}checked{% endif %}>
-            <div class="dim-card dim-popular">
-              <div class="dim-badge">Grande impatto</div>
-              <div class="dim-price">€39,90</div>
-              <div class="dim-size">30 cm</div>
-              <div style="font-size:0.72rem;color:var(--text2);margin-top:4px;">Formato grande</div>
+
+            <div class="live-total">
+              <div class="lt-row">
+                <span class="lt-label">Composizione <span id="lt-dim-label">20 cm</span></span>
+                <span class="lt-price" id="lt-base-price">€29,90</span>
+              </div>
+              <div class="lt-row" id="lt-deco-row" style="display:none;">
+                <span class="lt-label">Decorazioni (<span id="lt-deco-n">0</span>)</span>
+                <span class="lt-price" id="lt-deco-price">€0</span>
+              </div>
+              <div class="lt-row">
+                <span class="lt-label">Spedizione Italia</span>
+                <span class="lt-price">€3,00</span>
+              </div>
+              <div class="lt-divider"></div>
+              <div class="lt-row lt-row-total">
+                <span class="lt-label">Totale</span>
+                <span class="lt-total-price" id="lt-total">€32,90</span>
+              </div>
             </div>
-          </label>
+
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label" for="note">Note (opzionale)</label>
-        <textarea class="form-control" id="note" name="note"
-                  placeholder="Es: richieste particolari…" rows="3">{{ form.get('note','') }}</textarea>
-      </div>
+        {# RIGHT — configurazione #}
+        <div class="config-col">
 
-      <!-- Decorazioni opzionali -->
-      <div class="form-group tema-box">
-        <label class="form-label">Aggiungi decorazioni <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
-        <p class="form-hint" style="margin-bottom:16px;">Piccole stampe 3D da aggiungere alla tua lettera — circa 8 cm. Puoi mescolare decorazioni da temi diversi.</p>
+          {% if error %}<div class="form-alert">{{ error }}</div>{% endif %}
 
-        <!-- Pricing strip -->
-        <div class="deco-pricing">
-          <div class="deco-slot selected" data-n="0"><div class="deco-slot-lbl">Nessuna</div><div class="deco-slot-price">—</div></div>
-          <div class="deco-slot" data-n="1"><div class="deco-slot-lbl">1 decorazione</div><div class="deco-slot-price">€8</div><div class="deco-slot-each">€8,00 cad.</div></div>
-          <div class="deco-slot" data-n="2"><div class="deco-slot-lbl">2 decorazioni</div><div class="deco-slot-price">€15</div><div class="deco-slot-each">€7,50 cad.</div></div>
-          <div class="deco-slot" data-n="3"><div class="deco-slot-lbl">3 decorazioni</div><div class="deco-slot-price">€20</div><div class="deco-slot-each">€6,67 cad.</div></div>
-          <div class="deco-slot best" data-n="4"><div class="deco-slot-lbl">4 decorazioni</div><div class="deco-slot-price">€25</div><div class="deco-slot-each">€6,25 cad.</div></div>
-        </div>
-        <input type="hidden" name="num_deco" id="num_deco" value="{{ form.get('num_deco','0') }}">
-        <input type="hidden" name="decorazioni_scelte" id="decorazioni_scelte" value="{{ form.get('decorazioni_scelte','') }}">
-
-        <!-- Catalogo decorazioni per tema -->
-        <div id="deco-catalog" style="display:none; margin-top:20px;">
-          <div class="deco-counter-bar">
-            <span id="deco-counter-text">Seleziona <strong id="deco-max">0</strong> decorazioni</span>
-            <span class="deco-counter-badge"><span id="deco-count">0</span> / <span id="deco-max2">0</span></span>
+          {# Lettera #}
+          <div class="form-group">
+            <label class="form-label" for="lettera">Lettera iniziale <span class="req">*</span></label>
+            <select class="form-control" id="lettera" name="lettera" required onchange="renderPreview()">
+              <option value="">— Scegli —</option>
+              {% for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+              <option value="{{ c }}" {% if form.get('lettera')==c %}selected{% endif %}>{{ c }}</option>
+              {% endfor %}
+              {% for n in range(10) %}
+              <option value="{{ n }}" {% if form.get('lettera')==(n|string) %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+            </select>
           </div>
 
-          {% set catalogo = [
-            ('🐾', 'Safari', ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
-            ('🚀', 'Spazio', ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
-            ('🐟', 'Mare', ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
-            ('☁️', 'Cielo', ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Aeroplano','Aquilone','Palloncino']),
-            ('👑', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
-            ('⚽', 'Sport', ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
+          {# Nome bimbo #}
+          <div class="form-group">
+            <label class="form-label" for="nome_bimbo">Nome da personalizzare <span class="req">*</span></label>
+            <input class="form-control" type="text" id="nome_bimbo" name="nome_bimbo"
+                   placeholder="Es. Greta, Matteo…" required
+                   value="{{ form.get('nome_bimbo','') }}" oninput="renderPreview()">
+            <p class="form-hint">Verrà scritto sulla composizione</p>
+          </div>
+
+          {# Forma #}
+          <div class="form-group">
+            <label class="form-label">Forma della lettera <span class="req">*</span></label>
+            <div class="forma-grid">
+              <div class="forma-opt forma-opt-active" id="forma-piena-card" onclick="setForma('piena')" role="button" tabindex="0" aria-pressed="true">
+                <div class="forma-icon">
+                  <svg viewBox="0 0 56 56" width="44" height="44" aria-hidden="true"><rect x="6" y="6" width="44" height="44" rx="5" fill="currentColor"/></svg>
+                </div>
+                <div class="forma-name">Lettera piena</div>
+                <div class="forma-desc">Superficie solida</div>
+              </div>
+              <div class="forma-opt" id="forma-scatola-card" onclick="setForma('scatola')" role="button" tabindex="0" aria-pressed="false">
+                <div class="forma-icon">
+                  <svg viewBox="0 0 56 56" width="44" height="44" aria-hidden="true"><rect x="6" y="6" width="44" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="7"/></svg>
+                </div>
+                <div class="forma-name">Lettera a scatola</div>
+                <div class="forma-desc">Struttura aperta</div>
+              </div>
+            </div>
+          </div>
+
+          {# Colori #}
+          {% set colori = [
+            ('corallo',  '#ff6b6b', 'Corallo'),
+            ('pesca',    '#F0A898', 'Pesca'),
+            ('cipria',   '#F5C4BC', 'Cipria'),
+            ('lilla',    '#C8A8D0', 'Lilla'),
+            ('azzurro',  '#88B4C8', 'Azzurro'),
+            ('salvia',   '#9BB8A0', 'Salvia'),
+            ('oro',      '#E8C84A', 'Oro'),
+            ('tortora',  '#eed7c1', 'Tortora'),
+            ('bianco',   '#F8F6F3', 'Bianco'),
+            ('nero',     '#1A1A1A', 'Nero'),
           ] %}
 
-          {% for ico, nome_tema, items in catalogo %}
-          <div class="deco-tema-block">
-            <div class="deco-tema-title">{{ ico }} {{ nome_tema }}</div>
-            <div class="deco-items">
-              {% for item in items %}
-              <label class="deco-item">
-                <input type="checkbox" name="deco_item" value="{{ item }}" class="deco-check">
-                <span class="deco-item-label">{{ item }}</span>
+          <div class="form-group">
+            <label class="form-label">Colore della lettera <span class="req">*</span></label>
+            <div class="color-picker" id="color-picker-lettera">
+              {% for val, hex, label in colori %}
+              <label class="color-opt" title="{{ label }}">
+                <input type="radio" name="colore_lettera" value="{{ val }}"
+                       {% if form.get('colore_lettera','corallo') == val %}checked{% endif %}
+                       onchange="renderPreview()">
+                <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#eed7c1') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.15);{% endif %}"></span>
+                <span class="cname">{{ label }}</span>
               </label>
               {% endfor %}
             </div>
           </div>
-          {% endfor %}
-        </div>
-      </div>
 
-      <div class="wizard-nav">
-        <span></span>
-        <button type="button" class="btn-next" onclick="goStep(2)">
-          Continua → Dati di spedizione
-        </button>
-      </div>
+          <div class="form-group">
+            <label class="form-label">Colore della scritta (nome) <span class="req">*</span></label>
+            <div class="color-picker" id="color-picker-scritta">
+              {% for val, hex, label in colori %}
+              <label class="color-opt" title="{{ label }}">
+                <input type="radio" name="colore_scritta" value="{{ val }}"
+                       {% if form.get('colore_scritta','bianco') == val %}checked{% endif %}
+                       onchange="renderPreview()">
+                <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#eed7c1') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.15);{% endif %}"></span>
+                <span class="cname">{{ label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          {# Dimensione #}
+          <div class="form-group">
+            <label class="form-label">Dimensione <span class="req">*</span></label>
+            <div class="dim-grid">
+              <label class="dim-opt">
+                <input type="radio" name="dimensione" value="20"
+                       {% if form.get('dimensione','20')=='20' or not form.get('dimensione') %}checked{% endif %}
+                       onchange="updateTotal();renderPreview()">
+                <div class="dim-card">
+                  <div class="dim-price">€29,90</div>
+                  <div class="dim-size">20 cm</div>
+                  <div class="dim-tag">Standard</div>
+                </div>
+              </label>
+              <label class="dim-opt">
+                <input type="radio" name="dimensione" value="30"
+                       {% if form.get('dimensione')=='30' %}checked{% endif %}
+                       onchange="updateTotal();renderPreview()">
+                <div class="dim-card dim-popular">
+                  <div class="dim-badge">Grande impatto</div>
+                  <div class="dim-price">€39,90</div>
+                  <div class="dim-size">30 cm</div>
+                  <div class="dim-tag">Formato grande</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {# Note #}
+          <div class="form-group">
+            <label class="form-label" for="note">Note <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
+            <textarea class="form-control" id="note" name="note"
+                      placeholder="Richieste particolari, combinazioni di colori…" rows="3">{{ form.get('note','') }}</textarea>
+          </div>
+
+          {# Foto di ispirazione #}
+          <div class="form-group">
+            <label class="form-label">Foto di ispirazione <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
+            <p class="form-hint" style="margin-bottom:12px;">Una foto di riferimento per colori o stile. jpg, png, webp — max 10 MB.</p>
+            <div class="upload-zone" id="upload-zone">
+              <div id="upload-placeholder">
+                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                <span>Trascina qui o <u style="cursor:pointer;" onclick="document.getElementById('foto_personalizzata').click()">sfoglia</u></span>
+              </div>
+              <div id="upload-preview" style="display:none;">
+                <img id="upload-img" src="" alt="Anteprima foto caricata">
+                <button type="button" class="upload-remove" onclick="removeUpload()" aria-label="Rimuovi foto">✕</button>
+              </div>
+            </div>
+            <input type="file" id="foto_personalizzata" name="foto_personalizzata"
+                   accept="image/jpeg,image/png,image/webp" style="display:none;">
+          </div>
+
+          {# Decorazioni #}
+          <div class="form-group deco-box">
+            <label class="form-label">Decorazioni <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
+            <p class="form-hint" style="margin-bottom:16px;">Piccole stampe 3D da abbinare alla lettera — circa 8 cm.</p>
+
+            <div class="deco-pricing">
+              <div class="deco-slot selected" data-n="0">
+                <div class="deco-slot-lbl">Nessuna</div>
+                <div class="deco-slot-price">—</div>
+              </div>
+              <div class="deco-slot" data-n="1">
+                <div class="deco-slot-lbl">1 deco</div>
+                <div class="deco-slot-price">€8</div>
+                <div class="deco-slot-each">€8,00</div>
+              </div>
+              <div class="deco-slot" data-n="2">
+                <div class="deco-slot-lbl">2 deco</div>
+                <div class="deco-slot-price">€15</div>
+                <div class="deco-slot-each">€7,50</div>
+              </div>
+              <div class="deco-slot" data-n="3">
+                <div class="deco-slot-lbl">3 deco</div>
+                <div class="deco-slot-price">€20</div>
+                <div class="deco-slot-each">€6,67</div>
+              </div>
+              <div class="deco-slot best" data-n="4">
+                <div class="deco-slot-lbl">4 deco</div>
+                <div class="deco-slot-price">€25</div>
+                <div class="deco-slot-each">€6,25</div>
+              </div>
+            </div>
+
+            <div id="deco-catalog" style="display:none;margin-top:20px;">
+              <div class="deco-counter-bar">
+                <span>Seleziona <strong id="deco-max">0</strong> decorazioni dal catalogo</span>
+                <span class="deco-counter-badge"><span id="deco-count">0</span> / <span id="deco-max2">0</span></span>
+              </div>
+
+              {% set catalogo = [
+                ('🐾', 'Safari', ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
+                ('🚀', 'Spazio', ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
+                ('🐟', 'Mare', ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
+                ('☁️', 'Cielo', ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Aeroplano','Aquilone','Palloncino']),
+                ('👑', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
+                ('⚽', 'Sport', ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
+              ] %}
+
+              {% for ico, nome_tema, items in catalogo %}
+              <div class="deco-tema-block">
+                <div class="deco-tema-title">{{ ico }} {{ nome_tema }}</div>
+                <div class="deco-items">
+                  {% for item in items %}
+                  <label class="deco-item">
+                    <input type="checkbox" name="deco_item" value="{{ item }}" class="deco-check">
+                    <span class="deco-item-label">{{ item }}</span>
+                  </label>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="wizard-nav">
+            <span></span>
+            <button type="button" class="btn-next" onclick="goStep(2)">
+              Continua → Spedizione
+            </button>
+          </div>
+
+        </div>{# /config-col #}
+      </div>{# /step1-layout #}
     </div>
 
-    <!-- ══ STEP 2: SPEDIZIONE ══ -->
+    {# ══ STEP 2 ══ #}
     <div class="wizard-panel" id="panel-2">
-      <h2 class="panel-title">Dati e spedizione</h2>
+      <div class="step-single">
+        <h2 class="panel-title">Dati e spedizione</h2>
 
-      <!-- Dati anagrafici -->
-      <div class="form-section-title" style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--c200);">Dati anagrafici</div>
+        <div class="form-section-title">Dati anagrafici</div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="nome">Nome <span class="req">*</span></label>
-          <input class="form-control" type="text" id="nome" name="nome"
-                 placeholder="Mario" value="{{ form.get('nome','') }}">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="nome">Nome <span class="req">*</span></label>
+            <input class="form-control" type="text" id="nome" name="nome"
+                   placeholder="Mario" value="{{ form.get('nome','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cognome">Cognome <span class="req">*</span></label>
+            <input class="form-control" type="text" id="cognome" name="cognome"
+                   placeholder="Rossi" value="{{ form.get('cognome','') }}">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="cognome">Cognome <span class="req">*</span></label>
-          <input class="form-control" type="text" id="cognome" name="cognome"
-                 placeholder="Rossi" value="{{ form.get('cognome','') }}">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="codice_fiscale">Codice fiscale <span class="req">*</span></label>
+            <input class="form-control" type="text" id="codice_fiscale" name="codice_fiscale"
+                   placeholder="RSSMRA80A01H501U" maxlength="16" style="text-transform:uppercase;"
+                   value="{{ form.get('codice_fiscale','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Email <span class="req">*</span></label>
+            <input class="form-control" type="email" id="email" name="email"
+                   placeholder="mario@esempio.it" value="{{ form.get('email','') }}">
+          </div>
         </div>
-      </div>
 
-      <div class="form-row">
         <div class="form-group">
-          <label class="form-label" for="codice_fiscale">Codice fiscale <span class="req">*</span></label>
-          <input class="form-control" type="text" id="codice_fiscale" name="codice_fiscale"
-                 placeholder="RSSMRA80A01H501U" maxlength="16" style="text-transform:uppercase;"
-                 value="{{ form.get('codice_fiscale','') }}">
+          <label class="form-label" for="telefono">Telefono <span class="req">*</span></label>
+          <input class="form-control" type="tel" id="telefono" name="telefono" required
+                 placeholder="+39 333 1234567" value="{{ form.get('telefono','') }}">
         </div>
+
+        <div class="form-section-title" style="margin-top:24px;">Indirizzo di residenza</div>
+
         <div class="form-group">
-          <label class="form-label" for="email">Email <span class="req">*</span></label>
-          <input class="form-control" type="email" id="email" name="email"
-                 placeholder="mario@esempio.it" value="{{ form.get('email','') }}">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="telefono">Telefono <span class="req">*</span></label>
-        <input class="form-control" type="tel" id="telefono" name="telefono" required
-               placeholder="+39 333 1234567" value="{{ form.get('telefono','') }}">
-      </div>
-
-      <!-- Indirizzo di residenza -->
-      <div class="form-section-title" style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--c200);">Indirizzo di residenza</div>
-
-      <div class="form-group">
-        <label class="form-label" for="res_indirizzo">Via e numero civico <span class="req">*</span></label>
-        <input class="form-control" type="text" id="res_indirizzo" name="res_indirizzo"
-               placeholder="Via Roma 1" value="{{ form.get('res_indirizzo','') }}">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="res_citta">Città <span class="req">*</span></label>
-          <input class="form-control" type="text" id="res_citta" name="res_citta"
-                 placeholder="Milano" value="{{ form.get('res_citta','') }}">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="res_cap">CAP <span class="req">*</span></label>
-          <input class="form-control" type="text" id="res_cap" name="res_cap"
-                 placeholder="20100" maxlength="5" value="{{ form.get('res_cap','') }}">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="res_provincia">Provincia</label>
-        <input class="form-control" type="text" id="res_provincia" name="res_provincia"
-               placeholder="MI" maxlength="2" value="{{ form.get('res_provincia','') }}">
-      </div>
-
-      <!-- Spedizione diversa -->
-      <label class="spedizione-toggle">
-        <input type="checkbox" id="spedizione_diversa" name="spedizione_diversa" value="1"
-               {% if form.get('spedizione_diversa') %}checked{% endif %}>
-        <span class="spedizione-toggle-box"></span>
-        <span class="spedizione-toggle-label">L'indirizzo di spedizione è diverso da quello di residenza</span>
-      </label>
-
-      <!-- Indirizzo di spedizione (visibile solo se spunta attiva) -->
-      <div id="spedizione-extra" style="display:none; margin-top:20px;">
-        <div class="form-section-title" style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--c200);">Indirizzo di spedizione</div>
-        <div class="form-group">
-          <label class="form-label" for="indirizzo">Via e numero civico <span class="req">*</span></label>
-          <input class="form-control" type="text" id="indirizzo" name="indirizzo"
-                 placeholder="Via Roma 1" value="{{ form.get('indirizzo','') }}">
+          <label class="form-label" for="res_indirizzo">Via e numero civico <span class="req">*</span></label>
+          <input class="form-control" type="text" id="res_indirizzo" name="res_indirizzo"
+                 placeholder="Via Roma 1" value="{{ form.get('res_indirizzo','') }}">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="citta">Città <span class="req">*</span></label>
-            <input class="form-control" type="text" id="citta" name="citta"
-                   placeholder="Milano" value="{{ form.get('citta','') }}">
+            <label class="form-label" for="res_citta">Città <span class="req">*</span></label>
+            <input class="form-control" type="text" id="res_citta" name="res_citta"
+                   placeholder="Milano" value="{{ form.get('res_citta','') }}">
           </div>
           <div class="form-group">
-            <label class="form-label" for="cap">CAP <span class="req">*</span></label>
-            <input class="form-control" type="text" id="cap" name="cap"
-                   placeholder="20100" maxlength="5" value="{{ form.get('cap','') }}">
+            <label class="form-label" for="res_cap">CAP <span class="req">*</span></label>
+            <input class="form-control" type="text" id="res_cap" name="res_cap"
+                   placeholder="20100" maxlength="5" value="{{ form.get('res_cap','') }}">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="provincia">Provincia</label>
-          <input class="form-control" type="text" id="provincia" name="provincia"
-                 placeholder="MI" maxlength="2" value="{{ form.get('provincia','') }}">
+          <label class="form-label" for="res_provincia">Provincia</label>
+          <input class="form-control" type="text" id="res_provincia" name="res_provincia"
+                 placeholder="MI" maxlength="2" value="{{ form.get('res_provincia','') }}">
         </div>
-      </div>
 
-      <div style="margin-top:20px;padding:12px 16px;background:var(--c100);border:1.5px solid var(--c200);border-radius:2px;font-size:0.9rem;color:var(--text2);">
-        <i class="fas fa-truck" style="color:var(--c500);margin-right:8px;"></i>Spedizione standard Italia — <strong style="color:var(--text);">€3,00</strong>
-      </div>
+        <label class="spedizione-toggle">
+          <input type="checkbox" id="spedizione_diversa" name="spedizione_diversa" value="1"
+                 {% if form.get('spedizione_diversa') %}checked{% endif %}>
+          <span class="spedizione-toggle-box"></span>
+          <span class="spedizione-toggle-label">L'indirizzo di spedizione è diverso da quello di residenza</span>
+        </label>
 
-      <div class="wizard-nav">
-        <button type="button" class="btn-back" onclick="goStep(1)">← Indietro</button>
-        <button type="button" class="btn-next" onclick="goStep(3)">
-          Continua → Pagamento
-        </button>
+        <div id="spedizione-extra" style="display:none;margin-top:20px;">
+          <div class="form-section-title">Indirizzo di spedizione</div>
+          <div class="form-group">
+            <label class="form-label" for="indirizzo">Via e numero civico <span class="req">*</span></label>
+            <input class="form-control" type="text" id="indirizzo" name="indirizzo"
+                   placeholder="Via Roma 1" value="{{ form.get('indirizzo','') }}">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="citta">Città <span class="req">*</span></label>
+              <input class="form-control" type="text" id="citta" name="citta"
+                     placeholder="Milano" value="{{ form.get('citta','') }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cap">CAP <span class="req">*</span></label>
+              <input class="form-control" type="text" id="cap" name="cap"
+                     placeholder="20100" maxlength="5" value="{{ form.get('cap','') }}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="provincia">Provincia</label>
+            <input class="form-control" type="text" id="provincia" name="provincia"
+                   placeholder="MI" maxlength="2" value="{{ form.get('provincia','') }}">
+          </div>
+        </div>
+
+        <div class="ship-info">
+          <i class="fas fa-truck" aria-hidden="true"></i>Spedizione standard Italia — <strong>€3,00</strong>
+        </div>
+
+        <div class="wizard-nav">
+          <button type="button" class="btn-back" onclick="goStep(1)">← Indietro</button>
+          <button type="button" class="btn-next" onclick="goStep(3)">Continua → Pagamento</button>
+        </div>
       </div>
     </div>
 
-    <!-- ══ STEP 3: PAGAMENTO ══ -->
+    {# ══ STEP 3 ══ #}
     <div class="wizard-panel" id="panel-3">
-      <h2 class="panel-title">Pagamento</h2>
+      <div class="step-single">
+        <h2 class="panel-title">Pagamento</h2>
 
-      <!-- Riepilogo compatto -->
-      <div class="recap-bar">
-        <div class="recap-col">
-          <span class="recap-lbl">Lettera</span>
-          <span class="recap-val" id="r-lettera">—</span>
+        <div class="recap-bar">
+          <div class="recap-col">
+            <span class="recap-lbl">Lettera</span>
+            <span class="recap-val" id="r-lettera">—</span>
+          </div>
+          <div class="recap-col">
+            <span class="recap-lbl">Dimensione</span>
+            <span class="recap-val" id="r-dim">—</span>
+          </div>
+          <div class="recap-col">
+            <span class="recap-lbl">Colore</span>
+            <span class="recap-val" id="r-colore">—</span>
+          </div>
+          <div class="recap-col">
+            <span class="recap-lbl">Totale</span>
+            <span class="recap-val recap-total" id="r-totale">—</span>
+          </div>
         </div>
-        <div class="recap-col">
-          <span class="recap-lbl">Dimensione</span>
-          <span class="recap-val" id="r-dim">—</span>
+
+        <div class="payment-tabs">
+          <button type="button" class="pay-tab active" data-tab="stripe">
+            <i class="fas fa-credit-card" style="margin-right:6px;" aria-hidden="true"></i>Carta
+          </button>
+          <button type="button" class="pay-tab" data-tab="paypal">
+            <i class="fab fa-paypal" style="margin-right:6px;" aria-hidden="true"></i>PayPal
+          </button>
         </div>
-        <div class="recap-col">
-          <span class="recap-lbl">Colore</span>
-          <span class="recap-val" id="r-colore">—</span>
+
+        <div class="pay-panel active" id="panel-stripe">
+          <div id="card-element"></div>
+          <div id="stripe-error"></div>
+          <input type="hidden" name="payment_method" id="payment_method" value="stripe">
+          <input type="hidden" name="stripe_token" id="stripe_token">
         </div>
-        <div class="recap-col">
-          <span class="recap-lbl">Totale</span>
-          <span class="recap-val recap-total" id="r-totale">—</span>
+
+        <div class="pay-panel" id="panel-paypal">
+          <p class="paypal-note">Verrai reindirizzato su PayPal per completare il pagamento in sicurezza.</p>
+          <div id="paypal-button-container" style="margin-top:16px;"></div>
+          <input type="hidden" name="paypal_order_id" id="paypal_order_id">
         </div>
-      </div>
 
-      <div class="payment-tabs">
-        <button type="button" class="pay-tab active" data-tab="stripe">
-          <i class="fas fa-credit-card" style="margin-right:6px;"></i>Carta
-        </button>
-        <button type="button" class="pay-tab" data-tab="paypal">
-          <i class="fab fa-paypal" style="margin-right:6px;"></i>PayPal
-        </button>
-      </div>
+        <p class="ssl-note"><i class="fas fa-lock" aria-hidden="true"></i>Pagamento sicuro 256-bit SSL</p>
 
-      <div class="pay-panel active" id="panel-stripe">
-        <div id="card-element"></div>
-        <div id="stripe-error"></div>
-        <input type="hidden" name="payment_method" id="payment_method" value="stripe">
-        <input type="hidden" name="stripe_token" id="stripe_token">
-      </div>
-
-      <div class="pay-panel" id="panel-paypal">
-        <p class="paypal-note">Verrai reindirizzato su PayPal per completare il pagamento in sicurezza.</p>
-        <div id="paypal-button-container" style="margin-top:16px;"></div>
-        <input type="hidden" name="paypal_order_id" id="paypal_order_id">
-      </div>
-
-      <p style="font-size:0.75rem;color:var(--text2);margin-top:12px;display:flex;align-items:center;gap:6px;">
-        <i class="fas fa-lock" style="color:var(--c500);"></i>Pagamento sicuro 256-bit SSL
-      </p>
-
-      <div class="wizard-nav">
-        <button type="button" class="btn-back" onclick="goStep(2)">← Indietro</button>
-        <button type="submit" class="btn-next" id="submit-btn">
-          <i class="fas fa-lock" style="margin-right:6px;"></i>Conferma e paga
-        </button>
+        <div class="wizard-nav">
+          <button type="button" class="btn-back" onclick="goStep(2)">← Indietro</button>
+          <button type="submit" class="btn-next" id="submit-btn">
+            <i class="fas fa-lock" style="margin-right:6px;" aria-hidden="true"></i>Conferma e paga
+          </button>
+        </div>
       </div>
     </div>
 
@@ -369,11 +458,16 @@
 </div>
 
 <style>
-/* ── Wizard layout ── */
-.ordina-wrap { max-width: 640px; margin: 0 auto; padding: 48px 32px 80px; }
+/* ── Page header ── */
+.ordina-header { background: var(--c100); border-bottom: 1px solid var(--c200); padding: 40px 32px 0; }
+.ordina-header-inner { max-width: 1040px; margin: 0 auto; }
+.ordina-h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.4rem); color: var(--text); margin: 6px 0; }
+.ordina-sub { font-size: 0.88rem; color: var(--text2); margin-bottom: 28px; font-weight: 300; }
+.ordina-sub strong { font-weight: 500; color: var(--text); }
 
-.wizard-steps { display: flex; align-items: center; gap: 0; margin-bottom: -1px; }
-.wstep { display: flex; align-items: center; gap: 10px; padding: 16px 0; cursor: default; opacity: .45; transition: opacity .2s; }
+/* ── Stepper ── */
+.wizard-steps { display: flex; align-items: center; margin-bottom: -1px; }
+.wstep { display: flex; align-items: center; gap: 10px; padding: 16px 0; opacity: .45; transition: opacity .2s; }
 .wstep.active { opacity: 1; }
 .wstep.done { opacity: .7; }
 .wstep-num { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--c300); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: var(--text2); background: var(--white); transition: all .2s; }
@@ -383,64 +477,97 @@
 .wstep.active .wstep-label { color: var(--text); }
 .wstep-line { flex: 1; height: 1px; background: var(--c200); margin: 0 16px; }
 
+/* ── Wrap & panels ── */
+.ordina-wrap { padding: 0 32px 80px; }
 .wizard-panel { display: none; }
 .wizard-panel.active { display: block; }
 .panel-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--c200); }
 
-.form-group { margin-bottom: 24px; }
+/* ── Step 1: 2-col layout ── */
+.step1-layout { display: grid; grid-template-columns: 320px 1fr; gap: 48px; max-width: 1040px; margin: 0 auto; padding-top: 40px; }
+
+/* ── Preview column ── */
+.preview-sticky { position: sticky; top: 88px; }
+.preview-card { background: var(--c100); border: 1px solid var(--c200); border-radius: 4px; padding: 20px; margin-bottom: 16px; text-align: center; }
+.preview-card-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; }
+#preview-canvas { display: block; margin: 0 auto; border-radius: 2px; max-width: 100%; }
+.preview-hint { font-size: 0.72rem; color: var(--text2); margin-top: 10px; font-style: italic; }
+
+/* ── Live total ── */
+.live-total { background: var(--white); border: 1.5px solid var(--c200); border-radius: 4px; padding: 18px 20px; }
+.lt-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+.lt-row-total { padding-top: 12px; }
+.lt-label { font-size: 0.82rem; color: var(--text2); }
+.lt-price { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+.lt-divider { height: 1px; background: var(--c200); margin: 8px 0; }
+.lt-total-price { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--c500); }
+
+/* ── Config column ── */
+.config-col { min-width: 0; }
+
+/* ── Form basics ── */
+.form-group { margin-bottom: 28px; }
 .form-label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
 .req { color: var(--c500); }
-.form-control { display: block; width: 100%; padding: 12px 16px; border: 1.5px solid var(--c200); border-radius: 2px; font-family: 'Jost', sans-serif; font-size: 0.95rem; color: var(--text); background: var(--white); transition: border-color .2s; outline: none; }
+.form-control { display: block; width: 100%; padding: 12px 16px; border: 1.5px solid var(--c200); border-radius: 2px; font-family: 'Jost', sans-serif; font-size: 0.95rem; color: var(--text); background: var(--white); transition: border-color .2s; outline: none; box-sizing: border-box; }
 .form-control:focus { border-color: var(--c500); }
 select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath fill='%237A6560' d='M6 7L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
 textarea.form-control { resize: vertical; }
 .form-hint { font-size: 0.78rem; color: var(--text2); margin-top: 6px; font-weight: 300; }
 .form-alert { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 4px; padding: 14px 16px; color: #c00; font-size: 0.88rem; margin-bottom: 24px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-section-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--c200); }
 
-/* Color picker */
-.color-picker { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+/* ── Forma ── */
+.forma-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.forma-opt { border: 1.5px solid var(--c200); border-radius: 4px; padding: 20px 16px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; user-select: none; }
+.forma-opt:hover { border-color: var(--c300); background: var(--c100); }
+.forma-opt-active { border-color: var(--c500); background: #fff5f5; }
+.forma-icon { color: var(--c300); margin-bottom: 10px; transition: color .2s; }
+.forma-opt-active .forma-icon { color: var(--c500); }
+.forma-name { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.forma-desc { font-size: 0.75rem; color: var(--text2); }
+
+/* ── Color picker ── */
+.color-picker { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 4px; }
 .color-opt { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
 .color-opt input { display: none; }
-.cswatch { display: block; width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent; outline: 2px solid transparent; transition: outline-color .15s, transform .15s; }
+.cswatch { display: block; width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent; outline: 2.5px solid transparent; transition: outline-color .15s, transform .15s; }
 .color-opt input:checked + .cswatch { outline-color: var(--c500); transform: scale(1.12); }
-.cname { font-size: 0.62rem; color: var(--text2); text-align: center; }
+.cname { font-size: 0.6rem; color: var(--text2); text-align: center; }
 
-/* Dimensione */
-.dim-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+/* ── Dimensione ── */
+.dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .dim-opt input { display: none; }
-.dim-card { padding: 20px 12px; border: 1.5px solid var(--c200); border-radius: 2px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
+.dim-card { padding: 22px 12px; border: 1.5px solid var(--c200); border-radius: 4px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
 .dim-opt input:checked + .dim-card { border-color: var(--c500); background: #fff5f5; }
-.dim-price { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--text); }
-.dim-size { font-size: 0.78rem; color: var(--text2); margin-top: 2px; }
-.dim-popular { }
-.dim-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--c500); color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; }
+.dim-price { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 600; color: var(--text); }
+.dim-size { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-top: 4px; }
+.dim-tag { font-size: 0.7rem; color: var(--text2); margin-top: 4px; }
+.dim-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--c500); color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; }
 
-/* Tema pills */
-.tema-box { background: var(--c100); border: 1px solid var(--c200); border-radius: 4px; padding: 20px; }
-.tema-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.tema-pill { cursor: pointer; }
-.tema-pill input { display: none; }
-.tema-pill span { display: inline-block; padding: 7px 14px; border: 1.5px solid var(--c200); border-radius: 20px; font-size: 0.82rem; color: var(--text2); background: var(--white); transition: all .2s; }
-.tema-pill input:checked + span { border-color: var(--c500); color: var(--c500); background: #fff5f5; font-weight: 500; }
+/* ── Upload zone ── */
+.upload-zone { border: 1.5px dashed var(--c300); border-radius: 4px; padding: 28px 20px; text-align: center; transition: border-color .2s, background .2s; cursor: pointer; background: var(--c100); }
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--c500); background: #fff5f5; }
+#upload-placeholder i { font-size: 1.6rem; color: var(--c300); display: block; margin-bottom: 8px; }
+.upload-text { font-size: 0.85rem; color: var(--text2); }
+#upload-preview { position: relative; display: inline-block; }
+#upload-img { max-height: 120px; max-width: 100%; border-radius: 4px; display: block; margin: 0 auto; }
+.upload-remove { position: absolute; top: -8px; right: -8px; background: var(--text); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-/* Deco pricing strip */
-.deco-pricing { display: grid; grid-template-columns: repeat(5,1fr); gap: 2px; background: rgba(60,30,10,.08); border-radius: 4px; overflow: hidden; }
-.deco-slot { background: var(--white); padding: 14px 10px; text-align: center; cursor: pointer; transition: background .15s; border: 2px solid transparent; border-radius: 0; }
+/* ── Deco box ── */
+.deco-box { background: var(--c100); border: 1px solid var(--c200); border-radius: 4px; padding: 20px; }
+.deco-pricing { display: grid; grid-template-columns: repeat(5,1fr); gap: 2px; background: var(--c200); border-radius: 4px; overflow: hidden; }
+.deco-slot { background: var(--white); padding: 14px 8px; text-align: center; cursor: pointer; transition: background .15s; border: 2px solid transparent; }
 .deco-slot:hover { background: #fff8f8; }
 .deco-slot.selected { background: #fff5f5; border-color: var(--c500); }
-.deco-slot.best { background: rgba(255,107,107,.06); }
-.deco-slot.best.selected { background: #fff5f5; }
-.deco-slot-lbl { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
-.deco-slot-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--text); }
+.deco-slot.best { background: rgba(255,107,107,.04); }
+.deco-slot-lbl { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
+.deco-slot-price { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; color: var(--text); }
 .deco-slot.selected .deco-slot-price { color: var(--c500); }
-.deco-slot-each { font-size: 0.65rem; color: var(--text2); margin-top: 2px; }
-
-/* Deco counter bar */
-.deco-counter-bar { display: flex; justify-content: space-between; align-items: center; background: var(--c150); border-radius: 2px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: var(--text2); }
-.deco-counter-badge { background: var(--c500); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
-
-/* Deco catalogo */
+.deco-slot-each { font-size: 0.6rem; color: var(--text2); margin-top: 3px; }
+.deco-counter-bar { display: flex; justify-content: space-between; align-items: center; background: var(--c150); border-radius: 2px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.82rem; color: var(--text2); }
+.deco-counter-badge { background: var(--c500); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
 .deco-tema-block { margin-bottom: 20px; }
 .deco-tema-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--c200); }
 .deco-items { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -451,21 +578,36 @@ textarea.form-control { resize: vertical; }
 .deco-item.disabled .deco-item-label { opacity: .4; cursor: not-allowed; }
 .deco-item.disabled input:not(:checked) { pointer-events: none; }
 
-/* Wizard nav */
+/* ── Wizard nav ── */
 .wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--c200); }
-.btn-next { display: inline-block; padding: 14px 28px; background: var(--c500); color: var(--white); border: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: background .2s; }
+.btn-next { display: inline-flex; align-items: center; padding: 14px 28px; background: var(--c500); color: var(--white); border: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: background .2s; }
 .btn-next:hover { background: var(--c600); }
 .btn-back { display: inline-block; padding: 13px 20px; border: 1.5px solid var(--c200); background: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--text2); border-radius: 2px; cursor: pointer; transition: border-color .2s, color .2s; }
 .btn-back:hover { border-color: var(--text2); color: var(--text); }
 
-/* Recap bar */
+/* ── Step 2 & 3 single col ── */
+.step-single { max-width: 640px; margin: 0 auto; padding-top: 40px; }
+.ship-info { margin-top: 20px; padding: 12px 16px; background: var(--c100); border: 1.5px solid var(--c200); border-radius: 2px; font-size: 0.88rem; color: var(--text2); display: flex; align-items: center; gap: 8px; }
+.ship-info i { color: var(--c500); }
+.ship-info strong { color: var(--text); }
+
+/* ── Spedizione toggle ── */
+.spedizione-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-top: 8px; padding: 14px 16px; border: 1.5px solid var(--c200); border-radius: 2px; background: var(--c100); transition: border-color .2s; }
+.spedizione-toggle:hover { border-color: var(--c300); }
+.spedizione-toggle input[type="checkbox"] { display: none; }
+.spedizione-toggle-box { width: 20px; height: 20px; border: 1.5px solid var(--c300); border-radius: 2px; background: var(--white); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.spedizione-toggle input:checked + .spedizione-toggle-box { background: var(--c500); border-color: var(--c500); }
+.spedizione-toggle input:checked + .spedizione-toggle-box::after { content: '✓'; color: #fff; font-size: 0.7rem; font-weight: 700; }
+.spedizione-toggle-label { font-size: 0.88rem; color: var(--text2); }
+
+/* ── Recap bar ── */
 .recap-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--c200); border: 1px solid var(--c200); border-radius: 4px; overflow: hidden; margin-bottom: 28px; }
 .recap-col { background: var(--white); padding: 14px 12px; text-align: center; }
-.recap-lbl { display: block; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
+.recap-lbl { display: block; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
 .recap-val { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; color: var(--text); }
 .recap-total { color: var(--c500); font-size: 1.2rem; }
 
-/* Payment */
+/* ── Payment ── */
 .payment-tabs { display: flex; gap: 2px; margin-bottom: 20px; border: 1px solid var(--c200); border-radius: 2px; overflow: hidden; }
 .pay-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); background: var(--c100); border: none; transition: background .2s, color .2s; }
 .pay-tab.active { background: var(--c500); color: var(--white); }
@@ -475,68 +617,186 @@ textarea.form-control { resize: vertical; }
 #card-element.StripeElement--focus { border-color: var(--c500); }
 #stripe-error { color: var(--c500); font-size: 0.85rem; margin-top: 8px; min-height: 18px; }
 .paypal-note { font-size: 0.85rem; color: var(--text2); text-align: center; padding: 14px; background: var(--c100); border-radius: 2px; }
+.ssl-note { font-size: 0.75rem; color: var(--text2); margin-top: 12px; display: flex; align-items: center; gap: 6px; }
 
-/* Spedizione toggle */
-.spedizione-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-top: 8px; padding: 14px 16px; border: 1.5px solid var(--c200); border-radius: 2px; background: var(--c100); transition: border-color .2s; }
-.spedizione-toggle:hover { border-color: var(--c300); }
-.spedizione-toggle input[type="checkbox"] { display: none; }
-.spedizione-toggle-box { width: 20px; height: 20px; border: 1.5px solid var(--c300); border-radius: 2px; background: var(--white); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-.spedizione-toggle input:checked ~ .spedizione-toggle-box,
-.spedizione-toggle-box.checked { background: var(--c500); border-color: var(--c500); }
-.spedizione-toggle-box::after { content: '✓'; color: #fff; font-size: 0.7rem; font-weight: 700; display: none; }
-.spedizione-toggle input:checked ~ * .spedizione-toggle-box::after,
-.spedizione-toggle input:checked + .spedizione-toggle-box::after { display: block; }
-.spedizione-toggle-label { font-size: 0.88rem; color: var(--text2); }
-
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .step1-layout { grid-template-columns: 1fr; gap: 0; }
+  .preview-sticky { position: static; }
+  .preview-card { margin-bottom: 24px; }
+  .live-total { margin-bottom: 32px; }
+  .ordina-wrap { padding: 0 24px 60px; }
+}
 @media (max-width: 600px) {
-  .ordina-wrap { padding: 32px 20px 60px; }
-  .form-row { grid-template-columns: 1fr; }
-  .dim-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }
-  .recap-bar { grid-template-columns: repeat(2,1fr); }
+  .ordina-wrap { padding: 0 16px 60px; }
+  .ordina-header { padding: 28px 16px 0; }
   .wstep-label { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .dim-grid { gap: 8px; }
+  .deco-pricing { grid-template-columns: repeat(5,1fr); }
+  .deco-slot-lbl { font-size: 0.56rem; }
+  .recap-bar { grid-template-columns: repeat(2,1fr); }
+  .forma-grid { gap: 8px; }
+  .color-picker { gap: 8px; }
+  .cswatch { width: 30px; height: 30px; }
 }
 </style>
 
 <script>
+// ── Color map ──
+const COLOR_HEX = {
+  corallo: '#ff6b6b', pesca: '#F0A898', cipria: '#F5C4BC', lilla: '#C8A8D0',
+  azzurro: '#88B4C8', salvia: '#9BB8A0', oro: '#E8C84A', tortora: '#eed7c1',
+  bianco: '#F8F6F3', nero: '#1A1A1A'
+};
+
+// ── Canvas preview ──
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function renderPreview() {
+  const canvas = document.getElementById('preview-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const lettera = document.getElementById('lettera').value || '?';
+  const nome = document.getElementById('nome_bimbo').value || '';
+  const forma = document.getElementById('forma').value;
+  const clInput = document.querySelector('input[name="colore_lettera"]:checked');
+  const csInput = document.querySelector('input[name="colore_scritta"]:checked');
+  const letteraHex = clInput ? (COLOR_HEX[clInput.value] || '#ff6b6b') : '#ff6b6b';
+  const scrittaHex = csInput ? (COLOR_HEX[csInput.value] || '#ffffff') : '#ffffff';
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#F2EDE8';
+  ctx.fillRect(0, 0, W, H);
+
+  // Letter block
+  const pad = 28, nameH = 48;
+  const bx = pad, by = pad;
+  const bw = W - pad * 2, bh = H - pad * 2 - nameH;
+
+  if (forma === 'piena') {
+    ctx.fillStyle = letteraHex;
+    roundRect(ctx, bx, by, bw, bh, 10);
+    ctx.fill();
+    // subtle inner shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+    roundRect(ctx, bx, by, bw, bh, 10);
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = letteraHex;
+    ctx.lineWidth = 12;
+    roundRect(ctx, bx + 6, by + 6, bw - 12, bh - 12, 10);
+    ctx.stroke();
+  }
+
+  // Letter character
+  const fontSize = Math.min(bw, bh) * 0.6;
+  ctx.save();
+  ctx.font = `600 ${fontSize}px 'Cormorant Garamond', Georgia, serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = forma === 'piena' ? scrittaHex : letteraHex;
+  if (forma === 'piena') {
+    ctx.shadowColor = 'rgba(0,0,0,0.18)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 2;
+  }
+  ctx.fillText(lettera, bx + bw / 2, by + bh / 2);
+  ctx.restore();
+
+  // Name below
+  if (nome) {
+    const display = nome.length > 18 ? nome.slice(0, 18) + '…' : nome;
+    ctx.save();
+    ctx.font = `300 13px 'Jost', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#8a7570';
+    ctx.letterSpacing = '0.15em';
+    ctx.fillText(display.toUpperCase(), W / 2, H - nameH / 2);
+    ctx.restore();
+  }
+}
+
+// ── Forma ──
+function setForma(val) {
+  document.getElementById('forma').value = val;
+  document.getElementById('forma-piena-card').classList.toggle('forma-opt-active', val === 'piena');
+  document.getElementById('forma-scatola-card').classList.toggle('forma-opt-active', val === 'scatola');
+  document.getElementById('forma-piena-card').setAttribute('aria-pressed', val === 'piena');
+  document.getElementById('forma-scatola-card').setAttribute('aria-pressed', val === 'scatola');
+  renderPreview();
+}
+document.getElementById('forma-piena-card').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setForma('piena'); } });
+document.getElementById('forma-scatola-card').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setForma('scatola'); } });
+
+// ── Live total ──
 const PREZZI_DIM = { '20': 29.90, '30': 39.90 };
 const PREZZI_DECO = { 0: 0, 1: 8, 2: 15, 3: 20, 4: 25 };
 let numDeco = parseInt(document.getElementById('num_deco').value) || 0;
 
-// ── Deco slot click ──
+function updateTotal() {
+  const dim = document.querySelector('input[name="dimensione"]:checked');
+  const dimVal = dim ? dim.value : '20';
+  const base = PREZZI_DIM[dimVal] || 29.90;
+  const deco = PREZZI_DECO[numDeco] || 0;
+  const total = base + deco + 3;
+
+  document.getElementById('lt-dim-label').textContent = dimVal + ' cm';
+  document.getElementById('lt-base-price').textContent = '€' + base.toFixed(2).replace('.', ',');
+  document.getElementById('lt-total').textContent = '€' + total.toFixed(2).replace('.', ',');
+
+  const decoRow = document.getElementById('lt-deco-row');
+  if (numDeco > 0) {
+    decoRow.style.display = 'flex';
+    document.getElementById('lt-deco-n').textContent = numDeco;
+    document.getElementById('lt-deco-price').textContent = '€' + deco.toFixed(2).replace('.', ',');
+  } else {
+    decoRow.style.display = 'none';
+  }
+}
+
+// ── Deco slots ──
 function aggiornaDecoUI() {
   const catalog = document.getElementById('deco-catalog');
   catalog.style.display = numDeco > 0 ? 'block' : 'none';
   document.getElementById('deco-max').textContent = numDeco;
   document.getElementById('deco-max2').textContent = numDeco;
-
-  // deseleziona le caselle in eccesso
   const checked = [...document.querySelectorAll('.deco-check:checked')];
-  if (checked.length > numDeco) {
-    checked.slice(numDeco).forEach(c => { c.checked = false; });
-  }
+  if (checked.length > numDeco) checked.slice(numDeco).forEach(c => { c.checked = false; });
   aggiornaDecoCount();
+  updateTotal();
 }
 
 function aggiornaDecoCount() {
   const checked = document.querySelectorAll('.deco-check:checked');
   const count = checked.length;
   document.getElementById('deco-count').textContent = count;
-
-  // blocca le non-selezionate se al limite
   document.querySelectorAll('.deco-item').forEach(item => {
     const cb = item.querySelector('.deco-check');
     if (!cb.checked && count >= numDeco) {
-      item.classList.add('disabled');
-      cb.disabled = true;
+      item.classList.add('disabled'); cb.disabled = true;
     } else {
-      item.classList.remove('disabled');
-      cb.disabled = false;
+      item.classList.remove('disabled'); cb.disabled = false;
     }
   });
-
-  // salva la lista scelta
-  const nomi = [...checked].map(c => c.value).join(', ');
-  document.getElementById('decorazioni_scelte').value = nomi;
+  document.getElementById('decorazioni_scelte').value = [...checked].map(c => c.value).join(', ');
 }
 
 document.querySelectorAll('.deco-slot').forEach(slot => {
@@ -548,47 +808,71 @@ document.querySelectorAll('.deco-slot').forEach(slot => {
     aggiornaDecoUI();
   });
 });
+document.querySelectorAll('.deco-check').forEach(cb => cb.addEventListener('change', aggiornaDecoCount));
 
-document.querySelectorAll('.deco-check').forEach(cb => {
-  cb.addEventListener('change', aggiornaDecoCount);
-});
-
-// init
+// init slots
 document.querySelectorAll('.deco-slot').forEach(s => {
   if (parseInt(s.dataset.n) === numDeco) s.classList.add('selected');
 });
 aggiornaDecoUI();
 
-// ── Stepper ──
-function goStep(n) {
-  if (n > 1 && !validateStep(currentStep)) return;
+// ── Photo upload ──
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('foto_personalizzata');
 
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+uploadZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+function handleFile(file) {
+  if (!file.type.match(/image\/(jpeg|png|webp)/)) { alert('Formato non supportato. Usa jpg, png o webp.'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('Il file è troppo grande. Massimo 10 MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('upload-img').src = e.target.result;
+    document.getElementById('upload-placeholder').style.display = 'none';
+    document.getElementById('upload-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeUpload() {
+  fileInput.value = '';
+  document.getElementById('upload-img').src = '';
+  document.getElementById('upload-placeholder').style.display = 'block';
+  document.getElementById('upload-preview').style.display = 'none';
+}
+
+// ── Stepper ──
+let currentStep = 1;
+
+function goStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
   document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.wstep').forEach((s, i) => {
-    s.classList.remove('active','done');
+    s.classList.remove('active', 'done');
     if (i + 1 < n) s.classList.add('done');
     if (i + 1 === n) s.classList.add('active');
   });
   document.getElementById('panel-' + n).classList.add('active');
   currentStep = n;
-
   if (n === 3) updateRecap();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-let currentStep = 1;
-
 function validateStep(step) {
   if (step === 1) {
-    const lettera = document.getElementById('lettera').value;
-    const nome = document.getElementById('nome_bimbo').value.trim();
-    const colore = document.querySelector('input[name="colore_lettera"]:checked');
-    const dim = document.querySelector('input[name="dimensione"]:checked');
-    if (!lettera) { alert('Scegli la lettera iniziale'); return false; }
-    if (!nome) { alert('Inserisci il nome da personalizzare'); return false; }
-    if (!colore) { alert('Scegli il colore della lettera'); return false; }
-    if (!dim) { alert('Scegli la dimensione'); return false; }
-    // verifica decorazioni: se ne ha scelte meno del numero selezionato, avvisa
+    if (!document.getElementById('lettera').value) { alert('Scegli la lettera iniziale'); return false; }
+    if (!document.getElementById('nome_bimbo').value.trim()) { alert('Inserisci il nome da personalizzare'); return false; }
+    if (!document.querySelector('input[name="colore_lettera"]:checked')) { alert('Scegli il colore della lettera'); return false; }
+    if (!document.querySelector('input[name="dimensione"]:checked')) { alert('Scegli la dimensione'); return false; }
     const decoScelte = document.querySelectorAll('.deco-check:checked').length;
     if (numDeco > 0 && decoScelte < numDeco) {
       alert(`Hai selezionato ${numDeco} decorazioni ma ne hai scelte solo ${decoScelte}. Seleziona le decorazioni dal catalogo o scegli "Nessuna".`);
@@ -596,74 +880,38 @@ function validateStep(step) {
     }
   }
   if (step === 2) {
-    const base = ['nome','cognome','codice_fiscale','email','res_indirizzo','res_citta','res_cap'];
-    for (const id of base) {
-      if (!document.getElementById(id).value.trim()) {
-        alert('Compila tutti i campi obbligatori'); return false;
-      }
+    for (const id of ['nome','cognome','codice_fiscale','email','res_indirizzo','res_citta','res_cap']) {
+      if (!document.getElementById(id).value.trim()) { alert('Compila tutti i campi obbligatori'); return false; }
     }
-    // se spedizione diversa, valida anche quei campi
     if (document.getElementById('spedizione_diversa').checked) {
       for (const id of ['indirizzo','citta','cap']) {
-        if (!document.getElementById(id).value.trim()) {
-          alert('Compila l\'indirizzo di spedizione'); return false;
-        }
+        if (!document.getElementById(id).value.trim()) { alert('Compila l\'indirizzo di spedizione'); return false; }
       }
     }
   }
   return true;
 }
 
-// ── Colore label ──
-function initColorPicker(name, hintId) {
-  const update = () => {
-    const checked = document.querySelector(`input[name="${name}"]:checked`);
-    if (checked) {
-      document.getElementById(hintId).textContent =
-        'Colore selezionato: ' + checked.closest('label').querySelector('.cname').textContent;
-    }
-  };
-  document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.addEventListener('change', update));
-  update();
-}
-initColorPicker('colore_lettera', 'color-lettera-selected');
-initColorPicker('colore_scritta', 'color-scritta-selected');
-
 // ── Recap step 3 ──
 function updateRecap() {
   const lettera = document.getElementById('lettera').value || '—';
   const dim = document.querySelector('input[name="dimensione"]:checked');
   const colore = document.querySelector('input[name="colore_lettera"]:checked');
-
   const dimVal = dim ? dim.value : '20';
-  const basePrice = PREZZI_DIM[dimVal] || 29.90;
-  const decoPrice = PREZZI_DECO[numDeco] || 0;
-  const spedizione = 3;
-  const totale = basePrice + decoPrice + spedizione;
-
+  const total = (PREZZI_DIM[dimVal] || 29.90) + (PREZZI_DECO[numDeco] || 0) + 3;
   document.getElementById('r-lettera').textContent = lettera;
   document.getElementById('r-dim').textContent = dim ? dim.value + ' cm' : '—';
   document.getElementById('r-colore').textContent = colore ? colore.closest('label').querySelector('.cname').textContent : '—';
-  document.getElementById('r-totale').textContent = '€' + totale.toFixed(2);
+  document.getElementById('r-totale').textContent = '€' + total.toFixed(2).replace('.', ',');
 }
 
-// ── Toggle spedizione diversa ──
+// ── Spedizione toggle ──
 const chkSpedizione = document.getElementById('spedizione_diversa');
 const extraSpedizione = document.getElementById('spedizione-extra');
-const toggleBox = document.querySelector('.spedizione-toggle-box');
-
-function aggiornaToggleSpedizione() {
+chkSpedizione.addEventListener('change', () => {
   extraSpedizione.style.display = chkSpedizione.checked ? 'block' : 'none';
-  if (chkSpedizione.checked) {
-    toggleBox.classList.add('checked');
-    toggleBox.innerHTML = '<span style="color:#fff;font-size:0.7rem;font-weight:700;">✓</span>';
-  } else {
-    toggleBox.classList.remove('checked');
-    toggleBox.innerHTML = '';
-  }
-}
-chkSpedizione.addEventListener('change', aggiornaToggleSpedizione);
-aggiornaToggleSpedizione();
+});
+extraSpedizione.style.display = chkSpedizione.checked ? 'block' : 'none';
 
 // ── Payment tabs ──
 document.querySelectorAll('.pay-tab').forEach(tab => {
@@ -678,7 +926,6 @@ document.querySelectorAll('.pay-tab').forEach(tab => {
 
 // ── Stripe ──
 const stripeKey = '{{ config.get("stripe_publishable_key", "") }}';
-let stripeReady = false;
 if (stripeKey) {
   const stripe = Stripe(stripeKey);
   const elements = stripe.elements();
@@ -689,8 +936,6 @@ if (stripeKey) {
   cardEl.on('change', e => {
     document.getElementById('stripe-error').textContent = e.error ? e.error.message : '';
   });
-  stripeReady = true;
-
   document.getElementById('order-form').addEventListener('submit', async e => {
     if (document.getElementById('payment_method').value !== 'stripe') return;
     e.preventDefault();
@@ -716,10 +961,8 @@ if (window.paypal) {
     createOrder: (data, actions) => {
       const dim = document.querySelector('input[name="dimensione"]:checked');
       const base = PREZZI_DIM[dim ? dim.value : '20'] || 29.90;
-      const extra = PREZZI_DECO[numDeco] || 0;
-      const total = (base + extra + 3).toFixed(2);
-      const lettera = document.getElementById('lettera').value;
-      return actions.order.create({ purchase_units: [{ amount: { value: total, currency_code: 'EUR' }, description: 'Filamento — Lettera ' + lettera }] });
+      const total = (base + (PREZZI_DECO[numDeco] || 0) + 3).toFixed(2);
+      return actions.order.create({ purchase_units: [{ amount: { value: total, currency_code: 'EUR' }, description: 'Filamento — Lettera ' + document.getElementById('lettera').value }] });
     },
     onApprove: (data, actions) => actions.order.capture().then(() => {
       document.getElementById('payment_method').value = 'paypal';
@@ -729,6 +972,14 @@ if (window.paypal) {
     onError: err => console.error(err)
   }).render('#paypal-button-container');
 }
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', () => {
+  updateTotal();
+  renderPreview();
+  // attach live preview to nome_bimbo input (already inline, belt+suspenders)
+  document.getElementById('nome_bimbo').addEventListener('input', renderPreview);
+});
 </script>
 
 {% endblock %}
