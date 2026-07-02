@@ -31,15 +31,21 @@ nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.96)
 .nav-social a { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--c200); color: var(--text2); font-size: 0.95rem; text-decoration: none; transition: border-color .2s, color .2s; }
 .nav-social a:hover { border-color: var(--c500); color: var(--c500); }
 
+@keyframes heroFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.hero-wrap { background: var(--white); }
+.hero-fade { animation: heroFadeIn 700ms ease-out both; }
+.hero-fade-delay { animation-delay: 150ms; }
+
 .hero { display: grid; grid-template-columns: 1fr 1fr; max-width: 1100px; margin: 0 auto; padding: 0 32px; align-items: center; gap: 80px; }
-.hero-text { padding: 56px 0; }
-.hero-overline { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c500); margin-bottom: 24px; }
-.hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); color: var(--text); margin-bottom: 24px; }
+.hero-text { padding: 120px 0; }
+.hero-overline { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c500); margin-bottom: 32px; }
+.hero h1 { font-size: clamp(2.8rem, 5vw, 4.2rem); color: var(--text); margin-bottom: 32px; }
 .hero h1 em { font-style: italic; color: var(--c500); }
-.hero-desc { font-size: 1.05rem; line-height: 1.7; color: var(--text2); max-width: 420px; margin-bottom: 40px; font-weight: 300; }
-.hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.hero-desc { font-size: 1.05rem; line-height: 1.75; color: var(--text2); max-width: 420px; margin-bottom: 40px; font-weight: 300; }
+.hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .btn-primary { display: inline-block; padding: 14px 36px; background: var(--c500); color: var(--white); text-decoration: none; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; border-radius: 2px; transition: background .2s, transform .15s; }
 .btn-primary:hover { background: var(--c600); transform: translateY(-1px); }
+.btn-primary-lg { padding: 16px 44px; font-size: 0.83rem; }
 .btn-ghost { display: inline-block; padding: 13px 28px; border: 1.5px solid var(--c200); color: var(--text2); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; transition: border-color .2s, color .2s; }
 .btn-ghost:hover { border-color: var(--c500); color: var(--c500); }
 .hero-image { position: relative; aspect-ratio: 1 / 1; height: auto; max-width: 520px; width: 100%; margin: 0 auto; }
@@ -47,12 +53,10 @@ nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.96)
 .hero-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
 .hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 4px; z-index: 1; }
 
-@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-.strip { border-top: 1px solid var(--c200); border-bottom: 1px solid var(--c200); background: var(--c100); overflow: hidden; white-space: nowrap; }
-.strip-track { display: inline-flex; animation: marquee 18s linear infinite; }
-.strip-track:hover { animation-play-state: paused; }
-.strip-item { display: inline-flex; align-items: center; gap: 10px; padding: 18px 40px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); flex-shrink: 0; }
-.strip-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--c300); flex-shrink: 0; }
+.benefits-row { display: flex; justify-content: center; border-top: 1px solid var(--c200); border-bottom: 1px solid var(--c200); background: var(--c100); }
+.benefit-item { display: flex; align-items: center; gap: 10px; padding: 26px 48px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); border-right: 1px solid var(--c200); }
+.benefit-item:last-child { border-right: none; }
+.benefit-check { color: var(--c500); font-weight: 700; }
 
 section { padding: 96px 32px; }
 .section-inner { max-width: 1100px; margin: 0 auto; }
@@ -203,9 +207,12 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .conferma-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; gap: 24px; padding: 24px 24px 0; min-height: auto; }
+  .hero { grid-template-columns: 1fr; gap: 32px; padding: 48px 24px 0; min-height: auto; }
   .hero-text { padding: 0; margin: 0; }
-  .hero-image { max-width: 380px; }
+  .hero-image { max-width: 420px; }
+  .benefits-row { flex-wrap: wrap; }
+  .benefit-item { flex: 1 1 40%; justify-content: center; border-right: none; border-bottom: 1px solid var(--c200); padding: 20px 24px; }
+  .benefit-item:nth-child(3), .benefit-item:nth-child(4) { border-bottom: none; }
   .steps-grid { grid-template-columns: 1fr 1fr; }
   .step-card { border-bottom: 1px solid var(--c200); }
   .prices-grid { grid-template-columns: 1fr; }
@@ -217,7 +224,13 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 }
 @media (max-width: 600px) {
   section { padding: 64px 20px; }
-  .hero { margin-bottom: 24px; }
+  .hero { padding: 40px 20px 0; gap: 24px; margin-bottom: 0; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .hero-actions .btn-primary, .hero-actions .btn-primary-lg { text-align: center; }
+  .hero-actions .btn-ghost { text-align: center; }
+  .benefits-row { flex-direction: column; }
+  .benefit-item { flex: none; border-right: none; border-bottom: 1px solid var(--c200); padding: 18px 24px; justify-content: flex-start; }
+  .benefit-item:last-child { border-bottom: none; }
   .steps-grid { grid-template-columns: 1fr 1fr; }
   .step-card { padding: 24px 16px; border-bottom: 1px solid var(--c200); }
   .step-card:nth-child(2n) { border-right: none; }
