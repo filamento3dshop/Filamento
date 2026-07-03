@@ -1208,7 +1208,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
   // Scene — sfondo studio fotografico, nessuna scenografia
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#f4efe8');
+  scene.background = new THREE.Color('#eee8e0'); // 5: leggermente più caldo/scuro per far risaltare i colori
 
   // Camera
   const camera = new THREE.PerspectiveCamera(38, sz.w / sz.h, 0.01, 50);
@@ -1246,12 +1246,12 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     _arTimer = setTimeout(() => { controls.autoRotate = true; }, 3000);
   });
 
-  // ── Studio 3-point lighting ──
-  const ambient = new THREE.AmbientLight(0xfff8f0, 0.70);
+  // ── Studio 3-point lighting — più contrasto, meno "latteo" ──
+  const ambient = new THREE.AmbientLight(0xfff8f0, 0.42); // 3: ridotto per più contrasto
   scene.add(ambient);
 
-  // Key light — morbida, da sinistra-alto-fronte
-  const keyLight = new THREE.DirectionalLight(0xfff8ee, 2.8);
+  // Key light — più forte per più volume sul PLA
+  const keyLight = new THREE.DirectionalLight(0xfff6e8, 3.4); // 3: intensità su
   keyLight.position.set(-3, 6, 5);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(1024, 1024);
@@ -1262,8 +1262,8 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   keyLight.shadow.bias = -0.0003;
   scene.add(keyLight);
 
-  // Fill light — destra, leggera, neutra
-  const fillLight = new THREE.DirectionalLight(0xeef2ff, 0.65);
+  // Fill light — destra, ridotta per più contrasto
+  const fillLight = new THREE.DirectionalLight(0xeef2ff, 0.45); // 3: giù
   fillLight.position.set(4, 3, 3);
   scene.add(fillLight);
 
@@ -1272,20 +1272,22 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   rimLight.position.set(0, 4, -5);
   scene.add(rimLight);
 
-  // ── Contact shadow (gradiente radiale, non shadow map) ──
+  // ── Contact shadow — più definita al centro, sfuma verso bordi (4) ──
   const _sc = document.createElement('canvas');
   _sc.width = 256; _sc.height = 256;
   const _sctx = _sc.getContext('2d');
-  const _sgrad = _sctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-  _sgrad.addColorStop(0,   'rgba(50,30,10,0.28)');
-  _sgrad.addColorStop(0.45,'rgba(50,30,10,0.10)');
-  _sgrad.addColorStop(1,   'rgba(50,30,10,0)');
+  // Nucleo più scuro e compatto, poi sfuma rapidamente
+  const _sgrad = _sctx.createRadialGradient(128, 128, 4, 128, 128, 128);
+  _sgrad.addColorStop(0,    'rgba(40,22,8,0.52)');
+  _sgrad.addColorStop(0.22, 'rgba(40,22,8,0.30)');
+  _sgrad.addColorStop(0.55, 'rgba(40,22,8,0.08)');
+  _sgrad.addColorStop(1,    'rgba(40,22,8,0)');
   _sctx.fillStyle = _sgrad;
-  _sctx.beginPath(); _sctx.ellipse(128,128,128,80,0,0,Math.PI*2); _sctx.fill();
+  _sctx.beginPath(); _sctx.ellipse(128,128,128,72,0,0,Math.PI*2); _sctx.fill();
   const shadowTex = new THREE.CanvasTexture(_sc);
   const shadowPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.85 })
+    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.90 })
   );
   shadowPlane.rotation.x = -Math.PI / 2;
   shadowPlane.position.y = 0.001;
@@ -1310,12 +1312,13 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     const size   = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
 
-    // Distanza per riempire ~72% del frustum
+    // Distanza per riempire ~65% del frustum (2: un po' più lontana)
     const fovRad = camera.fov * (Math.PI / 180);
-    const dist = (maxDim / 2) / Math.tan(fovRad / 2) * 1.55;
+    const dist = (maxDim / 2) / Math.tan(fovRad / 2) * 1.72;
 
-    controls.target.set(center.x, center.y, center.z);
-    camera.position.set(center.x, center.y + size.y * 0.08, dist);
+    // Target leggermente sotto il centro: la lettera sale nel frame (1)
+    controls.target.set(center.x, center.y - size.y * 0.10, center.z);
+    camera.position.set(center.x, center.y + size.y * 0.18, dist);
     controls.minDistance = dist * 0.45;
     controls.maxDistance = dist * 3.2;
     controls.update();
