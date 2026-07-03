@@ -1206,81 +1206,90 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   const sz = getSize();
   renderer.setSize(sz.w, sz.h);
 
-  // Scene
+  // Scene — sfondo studio fotografico, nessuna scenografia
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#f0ebe4');
-  scene.fog = new THREE.FogExp2('#f0ebe4', 0.055);
+  scene.background = new THREE.Color('#f4efe8');
 
   // Camera
-  const camera = new THREE.PerspectiveCamera(42, sz.w / sz.h, 0.1, 50);
-  camera.position.set(0, 1.5, 5.8);
+  const camera = new THREE.PerspectiveCamera(38, sz.w / sz.h, 0.01, 50);
+  camera.position.set(0, 0.8, 4.5);
 
-  // Environment (ambient reflections only — scene lighting is handcrafted)
+  // Environment map per riflessi PBR (non visibile come sfondo)
   const pmremGen = new THREE.PMREMGenerator(renderer);
   scene.environment = pmremGen.fromScene(new RoomEnvironment(), 0.04).texture;
   pmremGen.dispose();
 
-  // OrbitControls
+  // OrbitControls — studio, nessun pan, auto-rotate lento
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0.5, 0);
+  controls.target.set(0, 0.7, 0);
   controls.enableDamping = true;
-  controls.dampingFactor = 0.05;
+  controls.dampingFactor = 0.06;
   controls.autoRotate = true;
-  controls.autoRotateSpeed = 0.9;
-  controls.maxPolarAngle = Math.PI * 0.52;
-  controls.minPolarAngle = Math.PI * 0.18;
+  controls.autoRotateSpeed = 0.5;
+  controls.maxPolarAngle = Math.PI * 0.60;
+  controls.minPolarAngle = Math.PI * 0.12;
   controls.enablePan = false;
-  controls.minDistance = 2.5;
-  controls.maxDistance = 9;
+  controls.minDistance = 1.5;
+  controls.maxDistance = 8;
   controls.update();
 
-  // Hide hint on first touch
+  // Ferma autoRotate sull'interazione, riprende dopo 3s
+  let _arTimer = null;
   renderer.domElement.addEventListener('pointerdown', () => {
+    controls.autoRotate = false;
+    clearTimeout(_arTimer);
     const h = document.getElementById('three-hint-rotate');
     if (h) h.classList.add('hidden');
-  }, { once: true });
+  });
+  renderer.domElement.addEventListener('pointerup', () => {
+    clearTimeout(_arTimer);
+    _arTimer = setTimeout(() => { controls.autoRotate = true; }, 3000);
+  });
 
-  // ── Mensola in rovere ──
-  const shelfMat = new THREE.MeshStandardMaterial({ color: 0xb8935a, roughness: 0.82, metalness: 0.0, envMapIntensity: 0.25 });
-  const shelf = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.075, 2.2), shelfMat);
-  shelf.position.set(0, -0.038, 0);
-  shelf.receiveShadow = true;
-  scene.add(shelf);
-
-  // ── Bordo frontale mensola ──
-  const shelfEdge = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, 0.04), shelfMat);
-  shelfEdge.position.set(0, 0.0, 1.12);
-  scene.add(shelfEdge);
-
-  // ── Parete panna ──
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5ede5, roughness: 1.0, metalness: 0, envMapIntensity: 0.05 });
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(8, 6), wallMat);
-  wall.position.set(0, 2.5, -1.5);
-  wall.receiveShadow = true;
-  scene.add(wall);
-
-  // ── Illuminazione fotografica ──
-  const ambient = new THREE.AmbientLight(0xfff4e8, 0.55);
+  // ── Studio 3-point lighting ──
+  const ambient = new THREE.AmbientLight(0xfff8f0, 0.70);
   scene.add(ambient);
 
-  const keyLight = new THREE.DirectionalLight(0xfff5e0, 2.6);
-  keyLight.position.set(-2.5, 5.5, 4.5);
+  // Key light — morbida, da sinistra-alto-fronte
+  const keyLight = new THREE.DirectionalLight(0xfff8ee, 2.8);
+  keyLight.position.set(-3, 6, 5);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(1024, 1024);
-  keyLight.shadow.camera.left = -3.5; keyLight.shadow.camera.right = 3.5;
-  keyLight.shadow.camera.top = 4.5; keyLight.shadow.camera.bottom = -1.5;
-  keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 20;
-  keyLight.shadow.radius = 5;
-  keyLight.shadow.bias = -0.0004;
+  keyLight.shadow.camera.left = -3; keyLight.shadow.camera.right = 3;
+  keyLight.shadow.camera.top = 4; keyLight.shadow.camera.bottom = -2;
+  keyLight.shadow.camera.near = 0.5; keyLight.shadow.camera.far = 20;
+  keyLight.shadow.radius = 12;
+  keyLight.shadow.bias = -0.0003;
   scene.add(keyLight);
 
-  const fillLight = new THREE.DirectionalLight(0xe8eeff, 0.55);
-  fillLight.position.set(3.5, 2, 2.5);
+  // Fill light — destra, leggera, neutra
+  const fillLight = new THREE.DirectionalLight(0xeef2ff, 0.65);
+  fillLight.position.set(4, 3, 3);
   scene.add(fillLight);
 
-  const rimLight = new THREE.DirectionalLight(0xffd8a0, 0.30);
-  rimLight.position.set(0.5, 3.5, -3.5);
+  // Rim light — controluce delicata
+  const rimLight = new THREE.DirectionalLight(0xffe8cc, 0.22);
+  rimLight.position.set(0, 4, -5);
   scene.add(rimLight);
+
+  // ── Contact shadow (gradiente radiale, non shadow map) ──
+  const _sc = document.createElement('canvas');
+  _sc.width = 256; _sc.height = 256;
+  const _sctx = _sc.getContext('2d');
+  const _sgrad = _sctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  _sgrad.addColorStop(0,   'rgba(50,30,10,0.28)');
+  _sgrad.addColorStop(0.45,'rgba(50,30,10,0.10)');
+  _sgrad.addColorStop(1,   'rgba(50,30,10,0)');
+  _sctx.fillStyle = _sgrad;
+  _sctx.beginPath(); _sctx.ellipse(128,128,128,80,0,0,Math.PI*2); _sctx.fill();
+  const shadowTex = new THREE.CanvasTexture(_sc);
+  const shadowPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.85 })
+  );
+  shadowPlane.rotation.x = -Math.PI / 2;
+  shadowPlane.position.y = 0.001;
+  scene.add(shadowPlane);
 
   // Target light colors (animated with lerp)
   let tKeyColor = new THREE.Color(0xfff5e0);
@@ -1288,9 +1297,38 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   let tExposure = 1.06;
   let tRoughness = 0.58, tMetalness = 0.0, tEnvIntensity = 0.70;
 
+  // ── Camera auto-fit sul bounding box del modello ──
+  function fitCamera() {
+    if (!letterMesh) return;
+    // Calcola bounds a scala=1 (non durante lo spring)
+    const prevScale = letterGroup.scale.x;
+    letterGroup.scale.set(1, 1, 1);
+    const box = new THREE.Box3().setFromObject(letterGroup);
+    letterGroup.scale.setScalar(prevScale);
+
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+
+    // Distanza per riempire ~72% del frustum
+    const fovRad = camera.fov * (Math.PI / 180);
+    const dist = (maxDim / 2) / Math.tan(fovRad / 2) * 1.55;
+
+    controls.target.set(center.x, center.y, center.z);
+    camera.position.set(center.x, center.y + size.y * 0.08, dist);
+    controls.minDistance = dist * 0.45;
+    controls.maxDistance = dist * 3.2;
+    controls.update();
+
+    // Adatta contact shadow alla dimensione della lettera
+    const shadowSize = Math.max(size.x, size.z) * 2.4;
+    shadowPlane.scale.set(shadowSize, shadowSize, 1);
+    shadowPlane.position.y = box.min.y * prevScale + 0.001;
+  }
+
   // ── Lettera group ──
   const letterGroup = new THREE.Group();
-  letterGroup.position.set(0, 0.08, 0);
+  letterGroup.position.set(0, 0, 0);
   scene.add(letterGroup);
 
   const letterMat = new THREE.MeshStandardMaterial({
@@ -1368,6 +1406,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
           letterGroup.add(letterMesh);
           hidePlaceholder();
           animateIn();
+          fitCamera();
           refreshDecos();
         }, undefined, () => { loading.style.display = 'none'; /* placeholder stays */ });
       })
