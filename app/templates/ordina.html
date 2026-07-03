@@ -2,10 +2,14 @@
 {% block title %}Ordina — Filamento{% endblock %}
 
 {% block head %}
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/environments/RoomEnvironment.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "/static/js/three.module.min.js",
+    "three/addons/": "/static/js/jsm/"
+  }
+}
+</script>
 <script src="https://js.stripe.com/v3/"></script>
 {% endblock %}
 
@@ -1148,8 +1152,14 @@ if (window.paypal) {
 document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventListener('change', updateTotal));
 
 // ══ Three.js 3D Viewer ══
-(function initThreeViewer() {
-  if (typeof THREE === 'undefined') { console.warn('Three.js non caricato'); return; }
+(async function initThreeViewer() {
+  let THREE, OrbitControls, GLTFLoader, RoomEnvironment;
+  try {
+    THREE = await import('three');
+    ({ OrbitControls } = await import('/static/js/jsm/controls/OrbitControls.js'));
+    ({ GLTFLoader } = await import('/static/js/jsm/loaders/GLTFLoader.js'));
+    ({ RoomEnvironment } = await import('/static/js/jsm/environments/RoomEnvironment.js'));
+  } catch(e) { console.warn('Three.js load error:', e); return; }
 
   const wrap = document.getElementById('three-wrap');
   const canvas = document.getElementById('three-canvas');
@@ -1207,11 +1217,11 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
   // Environment (ambient reflections only — scene lighting is handcrafted)
   const pmremGen = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmremGen.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  scene.environment = pmremGen.fromScene(new RoomEnvironment(), 0.04).texture;
   pmremGen.dispose();
 
   // OrbitControls
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0.5, 0);
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
@@ -1334,7 +1344,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
         loading.style.display = 'none';
         if (!r.ok) return; // placeholder stays visible — no fake geometry
 
-        const gltfLoader = new THREE.GLTFLoader();
+        const gltfLoader = new GLTFLoader();
         gltfLoader.load(glbUrl, gltf => {
           const model = gltf.scene;
           model.traverse(child => {
@@ -1392,7 +1402,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       fetch(glbUrl, { method: 'HEAD' })
         .then(r => {
           if (r.ok) {
-            new THREE.GLTFLoader().load(glbUrl, gltf => {
+            new GLTFLoader().load(glbUrl, gltf => {
               const model = gltf.scene;
               model.traverse(c => { if (c.isMesh) c.castShadow = true; });
               const b = new THREE.Box3().setFromObject(model);
