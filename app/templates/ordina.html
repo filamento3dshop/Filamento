@@ -1354,10 +1354,16 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
             child.castShadow = true;
             child.receiveShadow = true;
           });
+          // Normalizza altezza a 1.4 unità scene (indipendente dalla scala Blender)
+          const box0 = new THREE.Box3().setFromObject(model);
+          const size0 = box0.getSize(new THREE.Vector3());
+          const targetH = 1.4;
+          model.scale.setScalar(targetH / Math.max(size0.x, size0.y, size0.z));
+
           const box = new THREE.Box3().setFromObject(model);
           const c = box.getCenter(new THREE.Vector3());
           model.position.sub(c);
-          model.position.y = -box.min.y + c.y;
+          model.position.y = -box.min.y;
           letterMesh = model;
           letterGroup.add(letterMesh);
           hidePlaceholder();
