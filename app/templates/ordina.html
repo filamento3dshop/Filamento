@@ -5,8 +5,6 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/FontLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/geometries/TextGeometry.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/environments/RoomEnvironment.js"></script>
 <script src="https://js.stripe.com/v3/"></script>
 {% endblock %}
@@ -55,13 +53,20 @@
                   <div id="three-loading">
                     <div class="pl-spinner"></div>
                   </div>
+                  {# Placeholder: shown when no GLB available #}
+                  <div id="three-placeholder">
+                    <div class="tph-inner">
+                      <div class="tph-letter" id="tph-letter">?</div>
+                      <p class="tph-note">Scegli lettera e colore<br>per vedere la tua composizione</p>
+                    </div>
+                  </div>
                   <div id="three-hint-rotate">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
                     Ruota
                   </div>
                 </div>
               </div>
-              <p class="preview-hint">L'anteprima è indicativa · trascina per ruotare</p>
+              <p class="preview-hint">Anteprima tipografica — il modello 3D fotorealistico è in lavorazione</p>
             </div>
 
             <div class="live-total">
@@ -146,6 +151,7 @@
                 <div class="forma-desc">Struttura aperta</div>
               </div>
             </div>
+            <p class="forma-desc-live" id="forma-desc-live">Superficie solida, look moderno e minimale. Ideale per ambienti luminosi.</p>
           </div>
 
           {# Colori #}
@@ -174,6 +180,7 @@
               </label>
               {% endfor %}
             </div>
+            <p class="color-desc-live" id="color-desc-live">La tonalità più amata per le camerette — vivace ma mai eccessiva.</p>
           </div>
 
           <div class="form-group">
@@ -239,6 +246,27 @@
             </div>
             <input type="file" id="foto_personalizzata" name="foto_personalizzata"
                    accept="image/jpeg,image/png,image/webp" style="display:none;">
+            {# Photo editor — shown after upload #}
+            <div id="photo-editor" style="display:none; margin-top:16px;">
+              <div class="pe-header">
+                <span class="pe-title">Posiziona la foto</span>
+                <div class="pe-actions">
+                  <button type="button" class="pe-btn" onclick="peRotate()">↺ Ruota</button>
+                  <button type="button" class="pe-btn" onclick="peReset()">Reimposta</button>
+                </div>
+              </div>
+              <div class="pe-stage">
+                <canvas id="pe-canvas"></canvas>
+                <div class="pe-crosshair"></div>
+              </div>
+              <div class="pe-zoom-row">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="range" id="pe-zoom" min="0.3" max="3.5" step="0.01" value="1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+              </div>
+              <p class="pe-hint">Trascina per spostare · scorri per ingrandire</p>
+              <button type="button" class="pe-apply" onclick="peApply()">✓ Applica alla lettera</button>
+            </div>
           </div>
 
           {# Decorazioni #}
@@ -735,6 +763,115 @@ textarea.form-control { resize: vertical; }
 @media (prefers-reduced-motion: reduce) {
   .pl-spinner { animation: none; }
 }
+
+/* ══ Placeholder overlay ══ */
+#three-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity .5s ease;
+  z-index: 2;
+}
+#three-placeholder.hidden { opacity: 0; }
+.tph-inner { text-align: center; }
+.tph-letter {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(5rem, 16cqw, 8rem);
+  font-weight: 300;
+  line-height: 1;
+  color: #ff6b6b;
+  opacity: 0.9;
+  transition: color .4s ease;
+  text-shadow: 0 8px 32px rgba(0,0,0,.12);
+  letter-spacing: -0.02em;
+}
+.tph-note {
+  font-size: 0.68rem;
+  color: var(--text2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 12px;
+  line-height: 1.6;
+  opacity: 0.75;
+}
+
+/* ══ Micro-copy ══ */
+.forma-desc-live, .color-desc-live {
+  font-size: 0.78rem;
+  color: var(--text2);
+  font-style: italic;
+  margin-top: 10px;
+  min-height: 1.2em;
+  transition: opacity .2s ease;
+  font-weight: 300;
+  line-height: 1.5;
+}
+.forma-desc-live.fading, .color-desc-live.fading { opacity: 0; }
+
+/* ══ Photo editor ══ */
+.pe-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.pe-title { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); }
+.pe-actions { display: flex; gap: 6px; }
+.pe-btn {
+  padding: 5px 10px;
+  border: 1.5px solid var(--c200);
+  border-radius: 2px;
+  background: none;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  color: var(--text2);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.pe-btn:hover { border-color: var(--c500); color: var(--c500); }
+.pe-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #1a1a1a;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+#pe-canvas { display: block; width: 100%; height: 100%; }
+.pe-crosshair {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 2px dashed rgba(255,255,255,.3);
+  box-shadow: inset 0 0 0 20px rgba(0,0,0,.25);
+}
+.pe-zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 0 2px;
+}
+.pe-zoom-row svg { color: var(--text2); flex-shrink: 0; }
+#pe-zoom { flex: 1; accent-color: var(--c500); }
+.pe-hint { font-size: 0.7rem; color: var(--text2); text-align: center; margin-top: 6px; font-style: italic; }
+.pe-apply {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 11px;
+  background: var(--c500);
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s;
+}
+.pe-apply:hover { background: var(--c600); }
 </style>
 
 <script>
@@ -858,7 +995,6 @@ document.querySelectorAll('.nome-slot-btn').forEach(btn => {
     document.querySelectorAll('.nome-slot-btn').forEach(b => b.classList.remove('nome-slot-active'));
     btn.classList.add('nome-slot-active');
     document.getElementById('nome_posizione').value = btn.dataset.slot;
-    if (window._threeRefreshName) window._threeRefreshName();
   });
 });
 
@@ -875,28 +1011,7 @@ uploadZone.addEventListener('drop', e => {
 });
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
 
-function handleFile(file) {
-  if (!file.type.match(/image\/(jpeg|png|webp)/)) { alert('Formato non supportato. Usa jpg, png o webp.'); return; }
-  if (file.size > 10 * 1024 * 1024) { alert('Il file è troppo grande. Massimo 10 MB.'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    uploadedPhotoDataUrl = e.target.result;
-    document.getElementById('upload-thumb').src = e.target.result;
-    document.getElementById('upload-placeholder').style.display = 'none';
-    document.getElementById('upload-preview').style.display = 'inline-block';
-    if (window._threeApplyPhoto) window._threeApplyPhoto(e.target.result);
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeUpload() {
-  fileInput.value = '';
-  uploadedPhotoDataUrl = null;
-  document.getElementById('upload-thumb').src = '';
-  document.getElementById('upload-placeholder').style.display = 'block';
-  document.getElementById('upload-preview').style.display = 'none';
-  if (window._threeApplyPhoto) window._threeApplyPhoto(null);
-}
+// handleFile and removeUpload defined below (photo editor section)
 
 // ══ Stepper ══
 let currentStep = 1;
@@ -1040,6 +1155,34 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   const canvas = document.getElementById('three-canvas');
   if (!wrap || !canvas) return;
 
+  // ── PBR props per colore (PLA filament reale ha queste caratteristiche) ──
+  const MAT_PROPS = {
+    corallo: { roughness: 0.58, metalness: 0.0, envMapIntensity: 0.70 },
+    pesca:   { roughness: 0.62, metalness: 0.0, envMapIntensity: 0.65 },
+    cipria:  { roughness: 0.63, metalness: 0.0, envMapIntensity: 0.60 },
+    lilla:   { roughness: 0.56, metalness: 0.0, envMapIntensity: 0.72 },
+    azzurro: { roughness: 0.57, metalness: 0.0, envMapIntensity: 0.70 },
+    salvia:  { roughness: 0.61, metalness: 0.0, envMapIntensity: 0.65 },
+    oro:     { roughness: 0.38, metalness: 0.06, envMapIntensity: 1.10 },
+    tortora: { roughness: 0.66, metalness: 0.0, envMapIntensity: 0.55 },
+    bianco:  { roughness: 0.50, metalness: 0.0, envMapIntensity: 0.88 },
+    nero:    { roughness: 0.44, metalness: 0.04, envMapIntensity: 1.05 },
+  };
+
+  // ── Luce ambiente per colore (scene lighting shifts slightly) ──
+  const LIGHT_TINT = {
+    corallo: { key: 0xfff0e0, ambient: 0xfff2e6, exposure: 1.08 },
+    pesca:   { key: 0xffece0, ambient: 0xfff0e8, exposure: 1.06 },
+    cipria:  { key: 0xffece0, ambient: 0xfff0e8, exposure: 1.05 },
+    lilla:   { key: 0xf0eeff, ambient: 0xf8f0ff, exposure: 1.04 },
+    azzurro: { key: 0xe8f2ff, ambient: 0xf0f4ff, exposure: 1.04 },
+    salvia:  { key: 0xeef8ee, ambient: 0xf0f8f0, exposure: 1.05 },
+    oro:     { key: 0xfff8d8, ambient: 0xfffae8, exposure: 1.10 },
+    tortora: { key: 0xfff5e8, ambient: 0xfff4e0, exposure: 1.04 },
+    bianco:  { key: 0xfff8f4, ambient: 0xfff8f8, exposure: 1.03 },
+    nero:    { key: 0xffe8d8, ambient: 0xffeedd, exposure: 1.12 },
+  };
+
   // Renderer
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1047,36 +1190,33 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.06;
 
-  function getSize() {
-    return { w: wrap.clientWidth || 300, h: wrap.clientHeight || 360 };
-  }
+  function getSize() { return { w: wrap.clientWidth || 300, h: wrap.clientHeight || 360 }; }
   const sz = getSize();
   renderer.setSize(sz.w, sz.h);
 
   // Scene
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#f0ebe4');
-  scene.fog = new THREE.Fog('#f0ebe4', 12, 28);
+  scene.fog = new THREE.FogExp2('#f0ebe4', 0.055);
 
   // Camera
   const camera = new THREE.PerspectiveCamera(42, sz.w / sz.h, 0.1, 50);
-  camera.position.set(0, 1.6, 5.5);
+  camera.position.set(0, 1.5, 5.8);
 
-  // Environment (RoomEnvironment)
+  // Environment (ambient reflections only — scene lighting is handcrafted)
   const pmremGen = new THREE.PMREMGenerator(renderer);
-  const roomEnv = new THREE.RoomEnvironment();
-  scene.environment = pmremGen.fromScene(roomEnv, 0.04).texture;
+  scene.environment = pmremGen.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
   pmremGen.dispose();
 
   // OrbitControls
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0.6, 0);
+  controls.target.set(0, 0.5, 0);
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
   controls.autoRotate = true;
-  controls.autoRotateSpeed = 1.0;
+  controls.autoRotateSpeed = 0.9;
   controls.maxPolarAngle = Math.PI * 0.52;
   controls.minPolarAngle = Math.PI * 0.18;
   controls.enablePan = false;
@@ -1084,164 +1224,138 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   controls.maxDistance = 9;
   controls.update();
 
-  // Hide rotate hint after first interaction
-  const hintEl = document.getElementById('three-hint-rotate');
+  // Hide hint on first touch
   renderer.domElement.addEventListener('pointerdown', () => {
-    if (hintEl) hintEl.classList.add('hidden');
+    const h = document.getElementById('three-hint-rotate');
+    if (h) h.classList.add('hidden');
   }, { once: true });
 
-  // ── Scene geometry ──
-
-  // Shelf
-  const shelfMat = new THREE.MeshStandardMaterial({ color: 0xcbb99a, roughness: 0.9, metalness: 0.0, envMapIntensity: 0.3 });
-  const shelf = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.07, 2.0), shelfMat);
-  shelf.position.set(0, -0.035, 0);
+  // ── Mensola in rovere ──
+  const shelfMat = new THREE.MeshStandardMaterial({ color: 0xb8935a, roughness: 0.82, metalness: 0.0, envMapIntensity: 0.25 });
+  const shelf = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.075, 2.2), shelfMat);
+  shelf.position.set(0, -0.038, 0);
   shelf.receiveShadow = true;
   scene.add(shelf);
 
-  // Wall
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5ede5, roughness: 1.0, metalness: 0, envMapIntensity: 0.1 });
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(7, 5), wallMat);
-  wall.position.set(0, 2.2, -1.4);
+  // ── Bordo frontale mensola ──
+  const shelfEdge = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, 0.04), shelfMat);
+  shelfEdge.position.set(0, 0.0, 1.12);
+  scene.add(shelfEdge);
+
+  // ── Parete panna ──
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5ede5, roughness: 1.0, metalness: 0, envMapIntensity: 0.05 });
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(8, 6), wallMat);
+  wall.position.set(0, 2.5, -1.5);
   wall.receiveShadow = true;
   scene.add(wall);
 
-  // Lights
-  scene.add(new THREE.AmbientLight(0xfff4e8, 0.6));
+  // ── Illuminazione fotografica ──
+  const ambient = new THREE.AmbientLight(0xfff4e8, 0.55);
+  scene.add(ambient);
 
-  const key = new THREE.DirectionalLight(0xfff5e0, 2.5);
-  key.position.set(-2.5, 5, 4);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.camera.left = -3; key.shadow.camera.right = 3;
-  key.shadow.camera.top = 4; key.shadow.camera.bottom = -1.5;
-  key.shadow.camera.near = 0.5; key.shadow.camera.far = 18;
-  key.shadow.radius = 4;
-  key.shadow.bias = -0.0005;
-  scene.add(key);
+  const keyLight = new THREE.DirectionalLight(0xfff5e0, 2.6);
+  keyLight.position.set(-2.5, 5.5, 4.5);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(1024, 1024);
+  keyLight.shadow.camera.left = -3.5; keyLight.shadow.camera.right = 3.5;
+  keyLight.shadow.camera.top = 4.5; keyLight.shadow.camera.bottom = -1.5;
+  keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 20;
+  keyLight.shadow.radius = 5;
+  keyLight.shadow.bias = -0.0004;
+  scene.add(keyLight);
 
-  const fill = new THREE.DirectionalLight(0xe8eeff, 0.6);
-  fill.position.set(3.5, 2, 2);
-  scene.add(fill);
+  const fillLight = new THREE.DirectionalLight(0xe8eeff, 0.55);
+  fillLight.position.set(3.5, 2, 2.5);
+  scene.add(fillLight);
 
-  const rim = new THREE.DirectionalLight(0xffd8a0, 0.35);
-  rim.position.set(0, 3, -3);
-  scene.add(rim);
+  const rimLight = new THREE.DirectionalLight(0xffd8a0, 0.30);
+  rimLight.position.set(0.5, 3.5, -3.5);
+  scene.add(rimLight);
 
-  // ── Letter group (letter + name + decos all children → rotate together) ──
+  // Target light colors (animated with lerp)
+  let tKeyColor = new THREE.Color(0xfff5e0);
+  let tAmbColor = new THREE.Color(0xfff4e8);
+  let tExposure = 1.06;
+  let tRoughness = 0.58, tMetalness = 0.0, tEnvIntensity = 0.70;
+
+  // ── Lettera group ──
   const letterGroup = new THREE.Group();
-  letterGroup.position.set(0, 0.1, 0);
+  letterGroup.position.set(0, 0.08, 0);
   scene.add(letterGroup);
 
-  // Materials
   const letterMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color('#ff6b6b'),
-    roughness: 0.55,
+    roughness: 0.58,
     metalness: 0.0,
-    envMapIntensity: 0.9
-  });
-  const nameMat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color('#F8F6F3'),
-    roughness: 0.65,
-    metalness: 0.0,
-    envMapIntensity: 0.5
+    envMapIntensity: 0.70
   });
 
-  // ── State ──
-  let font = null;
+  // ── Stato ──
   let letterMesh = null;
-  let nameMesh = null;
   let decoObjects = [];
   let photoTex = null;
-
   let currentLetterVal = '';
   let currentFormaVal = 'piena';
-  let currentNomeVal = '';
-  let currentNomePosVal = 'sotto';
-
   let targetLetterColor = new THREE.Color('#ff6b6b');
-  let targetNameColor = new THREE.Color('#F8F6F3');
+  let scaleTarget = 1.0, scaleCurrent = 0.01;
 
-  // Scale spring
-  let scaleTarget = 1.0;
-  let scaleCurrent = 0.01;
+  const placeholder = document.getElementById('three-placeholder');
+  const tphLetter = document.getElementById('tph-letter');
+
+  function showPlaceholder(letter) {
+    if (!placeholder) return;
+    placeholder.classList.remove('hidden');
+    if (tphLetter) {
+      tphLetter.textContent = letter || '?';
+      // Sync placeholder letter color with selected color
+      const cl = document.querySelector('input[name="colore_lettera"]:checked');
+      tphLetter.style.color = cl ? (COLOR_HEX[cl.value] || '#ff6b6b') : '#ff6b6b';
+    }
+  }
+  function hidePlaceholder() {
+    if (placeholder) placeholder.classList.add('hidden');
+  }
 
   function animateIn() { scaleCurrent = 0.01; scaleTarget = 1.0; }
 
-  // ── Font ──
-  const fontLoader = new THREE.FontLoader();
-  fontLoader.load(
-    'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/fonts/helvetiker_bold.typeface.json',
-    loaded => { font = loaded; refreshScene(); },
-    undefined,
-    () => console.warn('Font non caricato — testo 3D non disponibile')
-  );
-
-  // ── Load letter ──
+  // ── Carica GLB (nessun fallback con TextGeometry) ──
   function loadLetter(letter, forma) {
     clearLetter();
-    if (!letter) return;
+    if (!letter) { showPlaceholder(letter); return; }
 
     const loading = document.getElementById('three-loading');
     loading.style.display = 'flex';
+    showPlaceholder(letter);
 
     const glbUrl = `/static/models/${forma}/${encodeURIComponent(letter)}.glb`;
 
     fetch(glbUrl, { method: 'HEAD' })
       .then(r => {
-        if (r.ok) {
-          const loader = new THREE.GLTFLoader();
-          loader.load(glbUrl, gltf => {
-            loading.style.display = 'none';
-            const model = gltf.scene;
-            model.traverse(child => {
-              if (!child.isMesh) return;
-              child.material = photoTex ? letterMat.clone() : letterMat;
-              if (photoTex) child.material.map = photoTex;
-              child.castShadow = true;
-              child.receiveShadow = true;
-            });
-            const box = new THREE.Box3().setFromObject(model);
-            const c = box.getCenter(new THREE.Vector3());
-            model.position.sub(c);
-            model.position.y = -box.min.y + c.y;
-            letterMesh = model;
-            letterGroup.add(letterMesh);
-            animateIn();
-            refreshName();
-            refreshDecos();
-          }, undefined, () => { loading.style.display = 'none'; buildFallbackLetter(letter, forma); });
-        } else {
-          loading.style.display = 'none';
-          buildFallbackLetter(letter, forma);
-        }
-      })
-      .catch(() => { document.getElementById('three-loading').style.display = 'none'; buildFallbackLetter(letter, forma); });
-  }
+        loading.style.display = 'none';
+        if (!r.ok) return; // placeholder stays visible — no fake geometry
 
-  function buildFallbackLetter(letter, forma) {
-    if (!font) return;
-    const geo = new THREE.TextGeometry(String(letter), {
-      font,
-      size: 0.95,
-      height: forma === 'scatola' ? 0.14 : 0.32,
-      curveSegments: 8,
-      bevelEnabled: true,
-      bevelThickness: forma === 'scatola' ? 0.03 : 0.055,
-      bevelSize: forma === 'scatola' ? 0.018 : 0.028,
-      bevelSegments: 4
-    });
-    geo.center();
-    const useMat = photoTex ? letterMat.clone() : letterMat;
-    if (photoTex) useMat.map = photoTex;
-    const mesh = new THREE.Mesh(geo, useMat);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    letterMesh = mesh;
-    letterGroup.add(letterMesh);
-    animateIn();
-    refreshName();
-    refreshDecos();
+        const gltfLoader = new THREE.GLTFLoader();
+        gltfLoader.load(glbUrl, gltf => {
+          const model = gltf.scene;
+          model.traverse(child => {
+            if (!child.isMesh) return;
+            child.material = letterMat;
+            if (photoTex) child.material.map = photoTex;
+            child.castShadow = true;
+            child.receiveShadow = true;
+          });
+          const box = new THREE.Box3().setFromObject(model);
+          const c = box.getCenter(new THREE.Vector3());
+          model.position.sub(c);
+          model.position.y = -box.min.y + c.y;
+          letterMesh = model;
+          letterGroup.add(letterMesh);
+          hidePlaceholder();
+          animateIn();
+          refreshDecos();
+        }, undefined, () => { loading.style.display = 'none'; /* placeholder stays */ });
+      })
+      .catch(() => { loading.style.display = 'none'; });
   }
 
   function clearLetter() {
@@ -1250,63 +1364,11 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       letterMesh.traverse && letterMesh.traverse(c => { if (c.geometry) c.geometry.dispose(); });
       letterMesh = null;
     }
-    clearName();
     clearDecos();
-    scaleCurrent = 0.01;
-    scaleTarget = 1.0;
+    scaleCurrent = 0.01; scaleTarget = 1.0;
   }
 
-  // ── Name mesh ──
-  function refreshName() {
-    clearName();
-    const nome = document.getElementById('nome_bimbo').value.trim().toUpperCase();
-    const pos = document.getElementById('nome_posizione').value;
-    if (!font || !nome) return;
-
-    const geo = new THREE.TextGeometry(nome, {
-      font,
-      size: 0.13,
-      height: 0.04,
-      curveSegments: 4,
-      bevelEnabled: false
-    });
-    geo.computeBoundingBox();
-    geo.center();
-
-    nameMesh = new THREE.Mesh(geo, nameMat);
-
-    // Bounding box of letter for anchoring
-    const lb = letterMesh
-      ? new THREE.Box3().setFromObject(letterMesh)
-      : new THREE.Box3(new THREE.Vector3(-0.55,-0.6,-0.25), new THREE.Vector3(0.55,0.6,0.25));
-
-    const nb = new THREE.Box3().setFromObject(nameMesh);
-    const nH = nb.max.y - nb.min.y;
-
-    switch (pos) {
-      case 'sotto':
-        nameMesh.position.set(0, lb.min.y - nH * 0.5 - 0.1, lb.max.z + 0.01);
-        break;
-      case 'sopra':
-        nameMesh.position.set(0, lb.max.y + nH * 0.5 + 0.1, lb.max.z + 0.01);
-        break;
-      case 'dx':
-        nameMesh.rotation.z = -Math.PI / 2;
-        nameMesh.position.set(lb.max.x + nH * 0.5 + 0.12, (lb.min.y + lb.max.y) * 0.5, lb.max.z + 0.01);
-        break;
-      case 'sx':
-        nameMesh.rotation.z = Math.PI / 2;
-        nameMesh.position.set(lb.min.x - nH * 0.5 - 0.12, (lb.min.y + lb.max.y) * 0.5, lb.max.z + 0.01);
-        break;
-    }
-    letterGroup.add(nameMesh);
-  }
-
-  function clearName() {
-    if (nameMesh) { letterGroup.remove(nameMesh); nameMesh.geometry.dispose(); nameMesh = null; }
-  }
-
-  // ── Decorations ──
+  // ── Decorazioni con animazione pop ──
   function refreshDecos() {
     clearDecos();
     const names = [...document.querySelectorAll('.deco-check:checked')].map(c => c.value).slice(0, 4);
@@ -1316,29 +1378,30 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       ? new THREE.Box3().setFromObject(letterMesh)
       : new THREE.Box3(new THREE.Vector3(-0.55,-0.6,-0.25), new THREE.Vector3(0.55,0.6,0.25));
 
-    const spread = 0.5;
-    const anchorPositions = [
-      { x: lb.max.x + spread, y: lb.max.y + 0.2 },
-      { x: lb.min.x - spread, y: lb.max.y + 0.2 },
-      { x: lb.max.x + spread, y: lb.min.y + 0.2 },
-      { x: lb.min.x - spread, y: lb.min.y + 0.2 }
+    const positions = [
+      { x: lb.max.x + 0.55, y: lb.max.y + 0.15 },
+      { x: lb.min.x - 0.55, y: lb.max.y + 0.15 },
+      { x: lb.max.x + 0.55, y: lb.min.y + 0.25 },
+      { x: lb.min.x - 0.55, y: lb.min.y + 0.25 }
     ];
 
     names.forEach((name, i) => {
-      const ap = anchorPositions[i] || anchorPositions[0];
+      const ap = positions[i] || positions[0];
       const glbUrl = `/static/models/decorazioni/${decoFilename(name)}.glb`;
 
       fetch(glbUrl, { method: 'HEAD' })
         .then(r => {
           if (r.ok) {
-            const loader = new THREE.GLTFLoader();
-            loader.load(glbUrl, gltf => {
+            new THREE.GLTFLoader().load(glbUrl, gltf => {
               const model = gltf.scene;
               model.traverse(c => { if (c.isMesh) c.castShadow = true; });
               const b = new THREE.Box3().setFromObject(model);
-              const sz = b.getSize(new THREE.Vector3());
-              const s = 0.32 / Math.max(sz.x, sz.y, sz.z, 0.01);
-              model.scale.setScalar(s);
+              const sv = b.getSize(new THREE.Vector3());
+              const baseScale = 0.32 / Math.max(sv.x, sv.y, sv.z, 0.01);
+              model.userData.baseScale = baseScale;
+              model.userData.scaleCurrent = 0.01;
+              model.userData.scaleTarget = 1.0;
+              model.scale.setScalar(0.01);
               model.position.set(ap.x, ap.y, 0.3);
               letterGroup.add(model);
               decoObjects.push(model);
@@ -1356,14 +1419,16 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     c.width = 128; c.height = 128;
     const ctx = c.getContext('2d');
     ctx.font = '88px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(emoji, 64, 68);
     const tex = new THREE.CanvasTexture(c);
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(0.5, 0.5, 1);
-    sprite.position.set(x, y, 0.35);
+    sprite.userData.baseScale = 0.5;
+    sprite.userData.scaleCurrent = 0.01;
+    sprite.userData.scaleTarget = 1.0;
+    sprite.scale.set(0.01, 0.01, 1);
+    sprite.position.set(x, y, 0.38);
     letterGroup.add(sprite);
     decoObjects.push(sprite);
   }
@@ -1377,11 +1442,10 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     decoObjects = [];
   }
 
-  // ── Photo texture ──
+  // ── Foto come texture ──
   function applyPhoto(dataUrl) {
     if (photoTex) { photoTex.dispose(); photoTex = null; }
     if (!dataUrl) {
-      if (letterMesh) letterMesh.traverse(c => { if (c.isMesh) { c.material.map = null; c.material.needsUpdate = true; } });
       letterMat.map = null; letterMat.needsUpdate = true;
       return;
     }
@@ -1389,35 +1453,39 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     img.onload = () => {
       photoTex = new THREE.CanvasTexture(img);
       photoTex.colorSpace = THREE.SRGBColorSpace;
-      if (letterMesh) {
-        letterMesh.traverse(c => { if (c.isMesh) { c.material.map = photoTex; c.material.needsUpdate = true; } });
-      } else {
-        letterMat.map = photoTex; letterMat.needsUpdate = true;
-      }
+      letterMat.map = photoTex; letterMat.needsUpdate = true;
     };
     img.src = dataUrl;
   }
 
-  // ── Full scene refresh (letter or forma changed) ──
+  // ── Cambio colore con aggiornamento PBR + luce ──
+  function setLetterColor(colorName, hex) {
+    targetLetterColor = new THREE.Color(hex || '#ff6b6b');
+    const props = MAT_PROPS[colorName] || MAT_PROPS.corallo;
+    tRoughness = props.roughness;
+    tMetalness = props.metalness;
+    tEnvIntensity = props.envMapIntensity;
+    const tint = LIGHT_TINT[colorName] || LIGHT_TINT.corallo;
+    tKeyColor = new THREE.Color(tint.key);
+    tAmbColor = new THREE.Color(tint.ambient);
+    tExposure = tint.exposure;
+    // Sync placeholder color
+    if (tphLetter) tphLetter.style.color = hex || '#ff6b6b';
+  }
+
+  // ── Refresh completo scena ──
   function refreshScene() {
     const letter = document.getElementById('lettera').value;
     const forma = document.getElementById('forma').value;
-    const clInput = document.querySelector('input[name="colore_lettera"]:checked');
-    const csInput = document.querySelector('input[name="colore_scritta"]:checked');
-    if (clInput) targetLetterColor = new THREE.Color(COLOR_HEX[clInput.value] || '#ff6b6b');
-    if (csInput) targetNameColor = new THREE.Color(COLOR_HEX[csInput.value] || '#F8F6F3');
+    const cl = document.querySelector('input[name="colore_lettera"]:checked');
+    if (cl) setLetterColor(cl.value, COLOR_HEX[cl.value]);
 
     if (letter !== currentLetterVal || forma !== currentFormaVal) {
       currentLetterVal = letter;
       currentFormaVal = forma;
       if (letter) loadLetter(letter, forma);
-      else clearLetter();
+      else { clearLetter(); showPlaceholder(''); }
     }
-
-    const nome = document.getElementById('nome_bimbo').value.trim();
-    if (nome !== currentNomeVal) { currentNomeVal = nome; refreshName(); }
-    const pos = document.getElementById('nome_posizione').value;
-    if (pos !== currentNomePosVal) { currentNomePosVal = pos; refreshName(); }
   }
 
   // ── Render loop ──
@@ -1425,42 +1493,53 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     requestAnimationFrame(animate);
     controls.update();
 
-    // Smooth color lerp
-    letterMat.color.lerp(targetLetterColor, 0.08);
-    nameMat.color.lerp(targetNameColor, 0.08);
+    // Color lerp
+    letterMat.color.lerp(targetLetterColor, 0.07);
+    letterMat.roughness += (tRoughness - letterMat.roughness) * 0.05;
+    letterMat.metalness += (tMetalness - letterMat.metalness) * 0.05;
+    letterMat.envMapIntensity += (tEnvIntensity - letterMat.envMapIntensity) * 0.05;
 
-    // Scale spring
-    if (Math.abs(scaleCurrent - scaleTarget) > 0.001) {
-      scaleCurrent += (scaleTarget - scaleCurrent) * 0.10;
+    // Light tint lerp
+    keyLight.color.lerp(tKeyColor, 0.04);
+    ambient.color.lerp(tAmbColor, 0.04);
+    renderer.toneMappingExposure += (tExposure - renderer.toneMappingExposure) * 0.04;
+
+    // Scale spring on letter load
+    if (scaleCurrent < scaleTarget - 0.001) {
+      scaleCurrent += (scaleTarget - scaleCurrent) * 0.11;
       letterGroup.scale.setScalar(Math.max(0.001, scaleCurrent));
     }
+
+    // Deco pop animation
+    decoObjects.forEach(obj => {
+      if (obj.userData.scaleCurrent < obj.userData.scaleTarget - 0.01) {
+        obj.userData.scaleCurrent += (obj.userData.scaleTarget - obj.userData.scaleCurrent) * 0.13;
+        const s = obj.userData.scaleCurrent * obj.userData.baseScale;
+        if (obj.isSprite) obj.scale.set(s, s, 1);
+        else obj.scale.setScalar(s);
+      }
+    });
 
     renderer.render(scene, camera);
   }
   animate();
 
   // ── Resize ──
-  const ro = new ResizeObserver(() => {
+  new ResizeObserver(() => {
     const s = getSize();
     camera.aspect = s.w / s.h;
     camera.updateProjectionMatrix();
     renderer.setSize(s.w, s.h);
-  });
-  ro.observe(wrap);
+  }).observe(wrap);
 
-  // ── Expose to outer scope ──
+  // ── Init: show placeholder ──
+  showPlaceholder('');
+
+  // ── Expose ──
   window._threeRefreshScene = refreshScene;
-  window._threeRefreshName = () => {
-    const nome = document.getElementById('nome_bimbo').value.trim();
-    const pos = document.getElementById('nome_posizione').value;
-    currentNomeVal = nome;
-    currentNomePosVal = pos;
-    refreshName();
-  };
   window._threeRefreshDecos = refreshDecos;
   window._threeApplyPhoto = applyPhoto;
-  window._threeSetLetterColor = hex => { targetLetterColor = new THREE.Color(hex); };
-  window._threeSetNameColor = hex => { targetNameColor = new THREE.Color(hex); };
+  window._threeSetLetterColor = (name, hex) => setLetterColor(name, hex);
 
 })();
 
@@ -1468,17 +1547,148 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 document.getElementById('lettera').addEventListener('change', () => {
   if (window._threeRefreshScene) window._threeRefreshScene();
 });
-document.getElementById('nome_bimbo').addEventListener('input', () => {
-  if (window._threeRefreshName) window._threeRefreshName();
-});
 document.querySelectorAll('input[name="colore_lettera"]').forEach(r => r.addEventListener('change', () => {
-  const v = r.value;
-  if (window._threeSetLetterColor) window._threeSetLetterColor(COLOR_HEX[v] || '#ff6b6b');
+  if (window._threeSetLetterColor) window._threeSetLetterColor(r.value, COLOR_HEX[r.value] || '#ff6b6b');
+  updateColorDesc(r.value);
 }));
-document.querySelectorAll('input[name="colore_scritta"]').forEach(r => r.addEventListener('change', () => {
-  const v = r.value;
-  if (window._threeSetNameColor) window._threeSetNameColor(COLOR_HEX[v] || '#F8F6F3');
-}));
+
+// ══ Micro-copy ══
+const FORMA_DESC = {
+  piena:   'Superficie solida, look moderno e minimale. Ideale per ambienti luminosi.',
+  scatola: 'Struttura aperta, perfetta per inserire luci LED dall\'interno. Effetto più scenografico.'
+};
+const COLOR_DESC = {
+  corallo: 'La tonalità più amata per le camerette — vivace ma mai eccessiva.',
+  pesca:   'Delicato e caldo. Perfetto per un\'atmosfera serena e romantica.',
+  cipria:  'Raffinato e senza tempo. Funziona in ogni tipo di ambiente.',
+  lilla:   'Un tocco di fantasia leggero e sognante. Universalmente amato.',
+  azzurro: 'Calmo e fresco — richiama il cielo e il mare. Mai banale.',
+  salvia:  'Naturale e contemporaneo. Un verde che non stanca mai.',
+  oro:     'Un dettaglio prezioso che cattura la luce in modo unico.',
+  tortora: 'Neutro e caldo. Si abbina perfettamente a qualsiasi palette.',
+  bianco:  'Essenziale e puro. Il bianco che non è mai freddo.',
+  nero:    'Elegante e deciso. Per un effetto grafico e sofisticato.'
+};
+
+function fadeText(el, newText) {
+  if (!el) return;
+  el.classList.add('fading');
+  setTimeout(() => { el.textContent = newText; el.classList.remove('fading'); }, 200);
+}
+function updateColorDesc(val) {
+  fadeText(document.getElementById('color-desc-live'), COLOR_DESC[val] || '');
+}
+function updateFormaDesc(val) {
+  fadeText(document.getElementById('forma-desc-live'), FORMA_DESC[val] || '');
+}
+
+document.getElementById('forma-piena-card').addEventListener('click', () => updateFormaDesc('piena'));
+document.getElementById('forma-scatola-card').addEventListener('click', () => updateFormaDesc('scatola'));
+
+// ══ Photo editor ══
+let peImg = null, peZoom = 1, pePanX = 0, pePanY = 0, peAngle = 0;
+let peDrag = false, peDragSX = 0, peDragSY = 0, pePanSX = 0, pePanSY = 0;
+
+function peInit(dataUrl) {
+  peImg = new Image();
+  peImg.onload = () => {
+    peZoom = 1; pePanX = 0; pePanY = 0; peAngle = 0;
+    document.getElementById('pe-zoom').value = '1';
+    document.getElementById('photo-editor').style.display = 'block';
+    peDraw();
+  };
+  peImg.src = dataUrl;
+}
+
+function peDraw() {
+  const cvs = document.getElementById('pe-canvas');
+  const size = cvs.clientWidth || 220;
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  cvs.width = size * dpr; cvs.height = size * dpr;
+  const ctx = cvs.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, size, size);
+  if (!peImg) return;
+  ctx.save();
+  ctx.translate(size / 2 + pePanX, size / 2 + pePanY);
+  ctx.rotate(peAngle * Math.PI / 180);
+  ctx.scale(peZoom, peZoom);
+  const iw = peImg.naturalWidth, ih = peImg.naturalHeight;
+  const cover = Math.max(size / iw, size / ih);
+  const dw = iw * cover, dh = ih * cover;
+  ctx.drawImage(peImg, -dw / 2, -dh / 2, dw, dh);
+  ctx.restore();
+}
+
+function peRotate() { peAngle = (peAngle + 90) % 360; peDraw(); }
+function peReset() { peZoom = 1; pePanX = 0; pePanY = 0; peAngle = 0; document.getElementById('pe-zoom').value = '1'; peDraw(); }
+
+document.getElementById('pe-zoom').addEventListener('input', e => { peZoom = parseFloat(e.target.value); peDraw(); });
+
+(function peBindDrag() {
+  const cvs = document.getElementById('pe-canvas');
+  cvs.addEventListener('pointerdown', e => {
+    peDrag = true; peDragSX = e.clientX; peDragSY = e.clientY;
+    pePanSX = pePanX; pePanSY = pePanY;
+    cvs.setPointerCapture(e.pointerId);
+  });
+  cvs.addEventListener('pointermove', e => {
+    if (!peDrag) return;
+    pePanX = pePanSX + (e.clientX - peDragSX);
+    pePanY = pePanSY + (e.clientY - peDragSY);
+    peDraw();
+  });
+  cvs.addEventListener('pointerup', () => { peDrag = false; });
+  cvs.addEventListener('wheel', e => {
+    e.preventDefault();
+    const step = e.deltaY > 0 ? -0.07 : 0.07;
+    peZoom = Math.max(0.3, Math.min(3.5, peZoom + step));
+    document.getElementById('pe-zoom').value = peZoom;
+    peDraw();
+  }, { passive: false });
+})();
+
+function peApply() {
+  if (!peImg) return;
+  const out = document.createElement('canvas');
+  out.width = 512; out.height = 512;
+  const ctx = out.getContext('2d');
+  const size = document.getElementById('pe-canvas').clientWidth || 220;
+  const ratio = 512 / size;
+  ctx.translate(256 + pePanX * ratio, 256 + pePanY * ratio);
+  ctx.rotate(peAngle * Math.PI / 180);
+  ctx.scale(peZoom * ratio, peZoom * ratio);
+  const iw = peImg.naturalWidth, ih = peImg.naturalHeight;
+  const cover = Math.max(size / iw, size / ih);
+  const dw = iw * cover, dh = ih * cover;
+  ctx.drawImage(peImg, -dw / 2, -dh / 2, dw, dh);
+  const dataUrl = out.toDataURL('image/jpeg', 0.92);
+  if (window._threeApplyPhoto) window._threeApplyPhoto(dataUrl);
+}
+
+function handleFile(file) {
+  if (!file.type.match(/image\/(jpeg|png|webp)/)) { alert('Formato non supportato. Usa jpg, png o webp.'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('Il file è troppo grande. Massimo 10 MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedPhotoDataUrl = e.target.result;
+    document.getElementById('upload-thumb').src = e.target.result;
+    document.getElementById('upload-placeholder').style.display = 'none';
+    document.getElementById('upload-preview').style.display = 'inline-block';
+    peInit(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeUpload() {
+  fileInput.value = '';
+  uploadedPhotoDataUrl = null;
+  document.getElementById('upload-thumb').src = '';
+  document.getElementById('upload-placeholder').style.display = 'block';
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('photo-editor').style.display = 'none';
+  if (window._threeApplyPhoto) window._threeApplyPhoto(null);
+}
 
 // ══ Init ══
 updateTotal();
