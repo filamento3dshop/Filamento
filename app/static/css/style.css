@@ -308,6 +308,8 @@ section { padding: 96px 32px; }
 }
 
 /* Benefits strip — tono editoriale, discreta */
+.hero-section { padding-bottom: 24px; }
+
 .benefits-strip {
   display: flex;
   justify-content: center;
