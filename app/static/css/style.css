@@ -1144,8 +1144,14 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Manifesto */
   .manifesto-section { padding: 80px 20px; }
 
-  /* Process — 1 colonna su mobile */
-  .process-steps { grid-template-columns: 1fr; }
+  /* Process — 3 colonne affiancate su mobile */
+  .process-steps { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .process-media { display: none; }
+  .process-step { gap: 8px; }
+  .process-body { padding: 0; }
+  .process-num { font-size: 1.4rem; }
+  .process-title { font-size: 0.9rem; }
+  .process-desc { font-size: 0.75rem; }
 
   /* Reviews */
   .reviews-grid { grid-template-columns: 1fr; }
@@ -1156,6 +1162,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Footer */
   .footer-top { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+  .footer-brand { display: flex; justify-content: center; }
 
   /* Ordina */
   .form-row { grid-template-columns: 1fr; }
