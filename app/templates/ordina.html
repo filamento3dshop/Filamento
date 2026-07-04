@@ -11,7 +11,8 @@
     "troika-three-utils": "/static/js/troika-three-utils.esm.js",
     "troika-worker-utils": "/static/js/troika-worker-utils.esm.js",
     "webgl-sdf-generator": "/static/js/webgl-sdf-generator.mjs",
-    "bidi-js": "/static/js/bidi.mjs"
+    "bidi-js": "/static/js/bidi.mjs",
+    "opentype.js": "/static/js/opentype.min.mjs"
   }
 }
 </script>
@@ -128,10 +129,8 @@
                    value="{{ form.get('nome_bimbo','') }}">
             <p class="form-hint">Verrà inciso sulla composizione</p>
             <div class="nome-slot-row">
-              <button type="button" class="nome-slot-btn nome-slot-active" data-slot="sotto">Sotto</button>
-              <button type="button" class="nome-slot-btn" data-slot="sopra">Sopra</button>
-              <button type="button" class="nome-slot-btn" data-slot="dx">Destra</button>
-              <button type="button" class="nome-slot-btn" data-slot="sx">Sinistra</button>
+              <button type="button" class="nome-slot-btn nome-slot-active" data-slot="centro">Al centro</button>
+              <button type="button" class="nome-slot-btn" data-slot="base">Alla base</button>
             </div>
           </div>
 
@@ -1158,13 +1157,13 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
 // ══ Three.js 3D Viewer ══
 (async function initThreeViewer() {
-  let THREE, OrbitControls, GLTFLoader, RoomEnvironment, TroikaText;
+  let THREE, OrbitControls, GLTFLoader, RoomEnvironment, opentype;
   try {
     THREE = await import('three');
     ({ OrbitControls } = await import('/static/js/jsm/controls/OrbitControls.js'));
     ({ GLTFLoader } = await import('/static/js/jsm/loaders/GLTFLoader.js'));
     ({ RoomEnvironment } = await import('/static/js/jsm/environments/RoomEnvironment.js'));
-    ({ Text: TroikaText } = await import('troika-three-text'));
+    opentype = await import('opentype.js');
   } catch(e) { console.warn('Three.js load error:', e); return; }
 
   const wrap = document.getElementById('three-wrap');
@@ -1554,10 +1553,8 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
   // ── Nome 3D — state vars (devono stare prima di animate()) ──
   let nameMesh = null;
-  let nameColorTarget = new THREE.Color('#ffffff');
   let nameScaleCurrent = 0.01;
-  let nameScaleTarget  = 1.0;
-  let nameOpacityCurrent = 0;
+  let nameScaleTarget  = 0.01;
 
   // ── Render loop ──
   function animate() {
@@ -1581,17 +1578,10 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       letterGroup.scale.setScalar(Math.max(0.001, scaleCurrent));
     }
 
-    // Nome 3D — spring scale + fade-in
-    if (nameMesh) {
-      if (nameScaleCurrent < nameScaleTarget - 0.001) {
-        nameScaleCurrent += (nameScaleTarget - nameScaleCurrent) * 0.11;
-        nameMesh.scale.setScalar(Math.max(0.001, nameScaleCurrent));
-      }
-      if (nameOpacityCurrent < 1 - 0.01) {
-        nameOpacityCurrent += (1 - nameOpacityCurrent) * 0.09;
-        nameMesh.fillOpacity = Math.min(1, nameOpacityCurrent);
-        nameMesh.needsUpdate = true;
-      }
+    // Nome 3D — spring scale in
+    if (nameMesh && nameScaleCurrent < nameScaleTarget - 0.0001) {
+      nameScaleCurrent += (nameScaleTarget - nameScaleCurrent) * 0.11;
+      nameMesh.scale.setScalar(Math.max(0.0001, nameScaleCurrent));
     }
 
     // Deco pop animation
@@ -1619,80 +1609,164 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   // ── Init: show placeholder ──
   showPlaceholder('');
 
-  // ══ Nome 3D (troika-three-text) ══════════════════════════════════════════
+  // ══ Nome 3D (opentype.js + ExtrudeGeometry) ═════════════════════════════
 
   const FONT_URL = '/static/fonts/Allura-Regular.ttf';
+  let _otFont = null; // font opentype caricato una volta sola
 
-  // Offset per ogni posizione (in unità scena — da rifinire dopo)
-  const NAME_OFFSETS = {
-    sotto: { x: 0,     y: -0.09 },
-    sopra: { x: 0,     y: +0.09 },
-    dx:    { x: +0.09, y: 0     },
-    sx:    { x: -0.09, y: 0     },
-  };
+  // Carica il font TTF una volta, poi riusa
+  async function _loadOTFont() {
+    if (_otFont) return _otFont;
+    const buf = await fetch(FONT_URL).then(r => r.arrayBuffer());
+    _otFont = opentype.parse(buf);
+    return _otFont;
+  }
+
+  // Converte path opentype → array di THREE.Shape
+  function _otPathToShapes(path) {
+    const shapes = [];
+    let currentShape = null;
+    for (const cmd of path.commands) {
+      if (cmd.type === 'M') {
+        currentShape = new THREE.Shape();
+        currentShape.moveTo(cmd.x, cmd.y);
+        shapes.push(currentShape);
+      } else if (cmd.type === 'L') {
+        currentShape && currentShape.lineTo(cmd.x, cmd.y);
+      } else if (cmd.type === 'C') {
+        currentShape && currentShape.bezierCurveTo(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
+      } else if (cmd.type === 'Q') {
+        currentShape && currentShape.quadraticCurveTo(cmd.x1, cmd.y1, cmd.x, cmd.y);
+      } else if (cmd.type === 'Z') {
+        currentShape && currentShape.closePath();
+      }
+    }
+    return shapes;
+  }
 
   function _getCurrentNomePos() {
     const btn = document.querySelector('.nome-slot-btn.nome-slot-active');
-    return (btn ? btn.dataset.slot : 'sotto') || 'sotto';
+    return (btn ? btn.dataset.slot : 'centro') || 'centro';
   }
 
-  function _placeNameMesh() {
-    if (!nameMesh) return;
-    const pos = NAME_OFFSETS[_getCurrentNomePos()] || NAME_OFFSETS.sotto;
-    nameMesh.position.set(pos.x, pos.y, 0.06); // z leggermente avanti rispetto alla lettera
+  // Forza Title Case: "sofia" → "Sofia", "SOFIA" → "Sofia"
+  function _toTitleCase(s) {
+    return s.trim().toLowerCase().replace(/^\w/, c => c.toUpperCase());
   }
 
-  function setName3D(text, colorHex, posSlot) {
-    if (!TroikaText) return;
+  // Calcola y in base alla posizione (centro o base) usando letterMesh bbox
+  function _calcNameY(slot) {
+    if (!letterMesh) return 0;
+    const box = new THREE.Box3().setFromObject(letterMesh);
+    const minY = box.min.y;
+    const maxY = box.max.y;
+    if (slot === 'base') return minY + (maxY - minY) * 0.18;
+    return (minY + maxY) / 2; // centro
+  }
 
-    const trimmed = (text || '').trim();
+  // Spessore testo: ~1cm su lettera 20cm → 1/20 = 5% dell'altezza lettera
+  function _calcDepth() {
+    if (!letterMesh) return 0.05;
+    const box = new THREE.Box3().setFromObject(letterMesh);
+    return (box.max.y - box.min.y) * 0.05;
+  }
 
-    // Rimuovi vecchio mesh
+  // Calcola z frontale della lettera
+  function _calcFrontZ() {
+    if (!letterMesh) return 0.08;
+    const box = new THREE.Box3().setFromObject(letterMesh);
+    return box.max.z;
+  }
+
+  function _removeName() {
     if (nameMesh) {
       letterGroup.remove(nameMesh);
-      nameMesh.dispose && nameMesh.dispose();
+      nameMesh.geometry && nameMesh.geometry.dispose();
+      nameMesh.material && nameMesh.material.dispose();
       nameMesh = null;
     }
+  }
 
-    if (!trimmed) return;
+  async function setName3D(text, colorHex, posSlot) {
+    _removeName();
+    const raw = (text || '').trim();
+    if (!raw) return;
 
-    nameMesh = new TroikaText();
-    nameMesh.text          = trimmed;
-    nameMesh.font          = FONT_URL;
-    nameMesh.fontSize      = 0.22;
-    nameMesh.color         = colorHex || '#ffffff';
-    nameMesh.anchorX       = 'center';
-    nameMesh.anchorY       = 'middle';
-    nameMesh.textAlign     = 'center';
-    nameMesh.castShadow    = true;
-    nameMesh.depthOffset   = -0.01; // evita z-fighting
-    nameMesh.outlineWidth  = 0;     // nessun outline, look clean
-    nameMesh.sdfGlyphSize  = 64;    // qualità antialiasing
+    const label = _toTitleCase(raw);
+    let font;
+    try { font = await _loadOTFont(); } catch(e) { console.warn('Font load error', e); return; }
+
+    // Genera path opentype a fontSize 1 (scaliamo dopo)
+    const fontSize = 1;
+    const path = font.getPath(label, 0, 0, fontSize);
+    const shapes = _otPathToShapes(path);
+    if (!shapes.length) return;
+
+    // Altezza glyph (dalla font metrics)
+    const glyphH = (font.ascender - font.descender) / font.unitsPerEm * fontSize;
+
+    // Larghezza testo
+    const advance = font.getAdvanceWidth(label, fontSize);
+
+    // Vogliamo che il testo sia largo al massimo il 70% della lettera
+    let targetW = 0.7;
+    if (letterMesh) {
+      const box = new THREE.Box3().setFromObject(letterMesh);
+      targetW = (box.max.x - box.min.x) * 0.75;
+    }
+    const textScale = targetW / advance;
+
+    const depth = _calcDepth();
+    const geo = new THREE.ExtrudeGeometry(shapes, {
+      depth: depth / textScale, // depth in spazio glyph (poi scalato)
+      bevelEnabled: false,
+      curveSegments: 8,
+    });
+
+    // Specchia Y (opentype ha Y invertito rispetto a Three.js)
+    geo.applyMatrix4(new THREE.Matrix4().makeScale(1, -1, 1));
+
+    // Centra orizzontalmente e verticalmente (in spazio glyph)
+    geo.computeBoundingBox();
+    const bx = geo.boundingBox;
+    const geoW = bx.max.x - bx.min.x;
+    const geoH = bx.max.y - bx.min.y;
+    geo.translate(-bx.min.x - geoW / 2, -bx.min.y - geoH / 2, 0);
+
+    const mat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(colorHex || '#ffffff'),
+      roughness: 0.35,
+      metalness: 0.05,
+    });
+
+    nameMesh = new THREE.Mesh(geo, mat);
+    nameMesh.castShadow = true;
+    nameMesh.scale.setScalar(textScale);
+
+    // Posiziona sulla superficie frontale della lettera
+    const slot = posSlot || _getCurrentNomePos();
+    const yPos = _calcNameY(slot);
+    const zFront = _calcFrontZ();
+    nameMesh.position.set(0, yPos, zFront);
 
     // Spring di ingresso
     nameScaleCurrent = 0.01;
-    nameScaleTarget  = 1.0;
-    nameOpacityCurrent = 0;
-    nameMesh.scale.setScalar(0.01);
-    nameMesh.fillOpacity = 0;
+    nameScaleTarget  = textScale;
 
-    _placeNameMesh();
     letterGroup.add(nameMesh);
-    nameMesh.sync();
-
-    nameColorTarget = new THREE.Color(colorHex || '#ffffff');
   }
 
   function updateNameColor(colorHex) {
-    nameColorTarget = new THREE.Color(colorHex || '#ffffff');
     if (nameMesh) {
-      nameMesh.color = colorHex;
-      nameMesh.needsUpdate = true;
+      nameMesh.material.color.set(colorHex || '#ffffff');
     }
   }
 
   function updateNamePosition(slot) {
-    _placeNameMesh(); // riposiziona senza ricreare il mesh
+    if (!nameMesh || !letterMesh) return;
+    const yPos = _calcNameY(slot);
+    const zFront = _calcFrontZ();
+    nameMesh.position.set(0, yPos, zFront);
   }
 
   // ── Expose ──
@@ -1700,7 +1774,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   window._threeRefreshDecos = refreshDecos;
   window._threeApplyPhoto = applyPhoto;
   window._threeSetLetterColor = (name, hex) => setLetterColor(name, hex);
-  window._threeSetName    = (text, colorHex, slot) => setName3D(text, colorHex, slot);
+  window._threeSetName    = (text, colorHex, slot) => setName3D(text, colorHex, slot).catch(console.warn);
   window._threeUpdateNameColor = (hex) => updateNameColor(hex);
   window._threeUpdateNamePos   = (slot) => updateNamePosition(slot);
 
@@ -1722,7 +1796,7 @@ function _getScritta() {
 }
 function _getSlot() {
   const btn = document.querySelector('.nome-slot-btn.nome-slot-active');
-  return btn ? btn.dataset.slot : 'sotto';
+  return btn ? btn.dataset.slot : 'centro';
 }
 function _triggerName() {
   if (!window._threeSetName) return;
