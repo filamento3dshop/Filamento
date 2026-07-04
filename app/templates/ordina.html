@@ -1710,8 +1710,9 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       curveSegments: 12,
     });
 
-    // Specchia Y (opentype ha Y invertito rispetto a Three.js)
+    // Specchia Y (opentype ha Y invertito rispetto a Three.js) e ricalcola normali
     geo.applyMatrix4(new THREE.Matrix4().makeScale(1, -1, 1));
+    geo.computeVertexNormals();
 
     // Centra orizzontalmente e verticalmente (in spazio glyph)
     geo.computeBoundingBox();
