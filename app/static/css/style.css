@@ -308,8 +308,6 @@ section { padding: 96px 32px; }
 }
 
 /* Benefits strip — tono editoriale, discreta */
-.hero-section { padding-bottom: 24px; }
-
 .benefits-strip {
   display: flex;
   justify-content: center;
@@ -1126,6 +1124,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   .nav-social a { width: 32px; height: 32px; font-size: 0.85rem; }
 
   /* Hero */
+  .hero-section { padding-bottom: 24px; }
   .hero-inner { padding: 40px 20px 0; gap: 20px; }
   .hero-actions { flex-direction: column; align-items: stretch; }
   .hero-actions .btn-primary { text-align: center; }
@@ -1138,20 +1137,22 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Temi — 2 colonne su mobile */
   .themes-grid { grid-template-columns: repeat(2, 1fr); }
 
-  /* Formati — 2 colonne anche su mobile */
-  .formats-grid { grid-template-columns: 1fr 1fr; }
+  /* Formati — 2 colonne su mobile con font ridotti */
+  .formats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .format-card { padding: 0; }
+  .format-body { padding: 12px; }
+  .format-size { font-size: 1rem; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .format-badge { font-size: 0.55rem; padding: 2px 5px; margin-left: 0; }
+  .format-desc { font-size: 0.72rem; }
+  .format-price { margin-top: 8px; }
+  .price-amount { font-size: 1.4rem; }
+  .price-unit { font-size: 0.65rem; }
 
   /* Manifesto */
   .manifesto-section { padding: 80px 20px; }
 
-  /* Process — 3 colonne affiancate su mobile */
-  .process-steps { grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .process-media { display: none; }
-  .process-step { gap: 8px; }
-  .process-body { padding: 0; }
-  .process-num { font-size: 1.4rem; }
-  .process-title { font-size: 0.9rem; }
-  .process-desc { font-size: 0.75rem; }
+  /* Process — 1 colonna su mobile (come prima) */
+  .process-steps { grid-template-columns: 1fr; }
 
   /* Reviews */
   .reviews-grid { grid-template-columns: 1fr; }
