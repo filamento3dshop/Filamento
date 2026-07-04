@@ -1119,6 +1119,9 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
   /* Nav */
   .nav-links { display: none; }
+  .nav-social { flex-direction: column; gap: 6px; }
+  .nav-inner { height: auto; padding: 12px 20px; }
+  .nav-social a { width: 32px; height: 32px; font-size: 0.85rem; }
 
   /* Hero */
   .hero-inner { padding: 40px 20px 0; gap: 20px; }
