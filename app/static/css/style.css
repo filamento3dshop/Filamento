@@ -308,6 +308,8 @@ section { padding: 96px 32px; }
 }
 
 /* Benefits strip — tono editoriale, discreta */
+.hero-section { padding-bottom: 24px; }
+
 .benefits-strip {
   display: flex;
   justify-content: center;
@@ -536,9 +538,9 @@ section { padding: 96px 32px; }
   content: '·';
   position: absolute;
   left: 0;
-  color: var(--c300);
-  font-size: 1rem;
-  line-height: 1.55;
+  color: var(--c400);
+  font-size: 1.5rem;
+  line-height: 1.2;
 }
 
 .formats-note-extra {
@@ -1136,14 +1138,20 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Temi — 2 colonne su mobile */
   .themes-grid { grid-template-columns: repeat(2, 1fr); }
 
-  /* Formati — 1 colonna su mobile */
-  .formats-grid { grid-template-columns: 1fr; }
+  /* Formati — 2 colonne anche su mobile */
+  .formats-grid { grid-template-columns: 1fr 1fr; }
 
   /* Manifesto */
   .manifesto-section { padding: 80px 20px; }
 
-  /* Process — 1 colonna su mobile */
-  .process-steps { grid-template-columns: 1fr; }
+  /* Process — 3 colonne affiancate su mobile */
+  .process-steps { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .process-media { display: none; }
+  .process-step { gap: 8px; }
+  .process-body { padding: 0; }
+  .process-num { font-size: 1.4rem; }
+  .process-title { font-size: 0.9rem; }
+  .process-desc { font-size: 0.75rem; }
 
   /* Reviews */
   .reviews-grid { grid-template-columns: 1fr; }
@@ -1154,6 +1162,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Footer */
   .footer-top { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+  .footer-brand { display: flex; justify-content: center; }
 
   /* Ordina */
   .form-row { grid-template-columns: 1fr; }
