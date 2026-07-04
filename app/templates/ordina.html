@@ -1094,6 +1094,13 @@ function updateRecap() {
   document.getElementById('r-totale').textContent = '€' + total.toFixed(2).replace('.', ',');
 }
 
+// ══ Spedizione toggle ══
+const chkSpedizione = document.getElementById('spedizione_diversa');
+const extraSpedizione = document.getElementById('spedizione-extra');
+chkSpedizione.addEventListener('change', () => {
+  extraSpedizione.style.display = chkSpedizione.checked ? 'block' : 'none';
+});
+
 // ══ Tipo consegna ══
 function updateConsegnaUI() {
   const isRitiro = document.getElementById('tipo_ritiro').checked;
@@ -1111,12 +1118,6 @@ function updateConsegnaUI() {
 document.querySelectorAll('input[name="tipo_consegna"]').forEach(r => r.addEventListener('change', updateConsegnaUI));
 updateConsegnaUI();
 
-// ══ Spedizione toggle ══
-const chkSpedizione = document.getElementById('spedizione_diversa');
-const extraSpedizione = document.getElementById('spedizione-extra');
-chkSpedizione.addEventListener('change', () => {
-  extraSpedizione.style.display = chkSpedizione.checked ? 'block' : 'none';
-});
 extraSpedizione.style.display = chkSpedizione.checked ? 'block' : 'none';
 
 // ══ Payment tabs ══
@@ -1356,9 +1357,11 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     controls.update();
 
     // Adatta contact shadow alla dimensione della lettera
-    const shadowSize = Math.max(size.x, size.z) * 2.4;
-    shadowPlane.scale.set(shadowSize, shadowSize, 1);
-    shadowPlane.position.y = box.min.y * prevScale + 0.001;
+    if (typeof shadowPlane !== 'undefined' && shadowPlane) {
+      const shadowSize = Math.max(size.x, size.z) * 2.4;
+      shadowPlane.scale.set(shadowSize, shadowSize, 1);
+      shadowPlane.position.y = box.min.y * prevScale + 0.001;
+    }
   }
 
   // ── Lettera group ──
