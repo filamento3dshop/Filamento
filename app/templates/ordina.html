@@ -1205,7 +1205,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.06;
+  renderer.toneMappingExposure = 0.82;
 
   function getSize() { return { w: wrap.clientWidth || 300, h: wrap.clientHeight || 360 }; }
   const sz = getSize();
@@ -1213,7 +1213,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
   // Scene — sfondo studio fotografico, nessuna scenografia
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#eee8e0'); // 5: leggermente più caldo/scuro per far risaltare i colori
+  scene.background = new THREE.Color('#f8f6f2');
 
   // Camera
   const camera = new THREE.PerspectiveCamera(38, sz.w / sz.h, 0.01, 50);
@@ -1256,7 +1256,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   scene.add(ambient);
 
   // Key light — più forte per più volume sul PLA
-  const keyLight = new THREE.DirectionalLight(0xfff6e8, 3.4); // 3: intensità su
+  const keyLight = new THREE.DirectionalLight(0xfff6e8, 2.0);
   keyLight.position.set(-3, 6, 5);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(1024, 1024);
@@ -1277,31 +1277,11 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   rimLight.position.set(0, 4, -5);
   scene.add(rimLight);
 
-  // ── Contact shadow — più definita al centro, sfuma verso bordi (4) ──
-  const _sc = document.createElement('canvas');
-  _sc.width = 256; _sc.height = 256;
-  const _sctx = _sc.getContext('2d');
-  // Nucleo più scuro e compatto, poi sfuma rapidamente
-  const _sgrad = _sctx.createRadialGradient(128, 128, 4, 128, 128, 128);
-  _sgrad.addColorStop(0,    'rgba(40,22,8,0.52)');
-  _sgrad.addColorStop(0.22, 'rgba(40,22,8,0.30)');
-  _sgrad.addColorStop(0.55, 'rgba(40,22,8,0.08)');
-  _sgrad.addColorStop(1,    'rgba(40,22,8,0)');
-  _sctx.fillStyle = _sgrad;
-  _sctx.beginPath(); _sctx.ellipse(128,128,128,72,0,0,Math.PI*2); _sctx.fill();
-  const shadowTex = new THREE.CanvasTexture(_sc);
-  const shadowPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.90 })
-  );
-  shadowPlane.rotation.x = -Math.PI / 2;
-  shadowPlane.position.y = 0.001;
-  scene.add(shadowPlane);
 
   // Target light colors (animated with lerp)
   let tKeyColor = new THREE.Color(0xfff5e0);
   let tAmbColor = new THREE.Color(0xfff4e8);
-  let tExposure = 1.06;
+  let tExposure = 0.82;
   let tRoughness = 0.58, tMetalness = 0.0, tEnvIntensity = 0.70;
 
   // ── Camera auto-fit sul bounding box del modello ──
@@ -1710,8 +1690,9 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       curveSegments: 12,
     });
 
-    // Specchia Y (opentype ha Y invertito rispetto a Three.js)
+    // Specchia Y (opentype ha Y invertito rispetto a Three.js) e ricalcola normali
     geo.applyMatrix4(new THREE.Matrix4().makeScale(1, -1, 1));
+    geo.computeVertexNormals();
 
     // Centra orizzontalmente e verticalmente (in spazio glyph)
     geo.computeBoundingBox();
