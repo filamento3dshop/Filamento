@@ -1141,6 +1141,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Benefits */
   .benefits-strip { flex-direction: column; }
   .benefit { flex: none; border-right: none; border-bottom: 1px solid var(--c200); padding: 14px 20px; justify-content: flex-start; }
+  .benefit:nth-child(3), .benefit:nth-child(4) { border-bottom: 1px solid var(--c200); }
   .benefit:last-child { border-bottom: none; }
 
   /* Temi — 2 colonne su mobile */
