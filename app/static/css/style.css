@@ -1156,7 +1156,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   .format-media { position: relative; }
   .format-badge-corner { display: inline-block; }
   .format-badge-inline { display: none; }
-  .format-body { padding: 10px 10px 14px; align-items: center; text-align: center; }
+  .format-body { padding: 10px 10px 14px; align-items: center; text-align: center; justify-content: space-between; min-height: 110px; }
+  .format-price { margin-top: auto; }
   .format-size { font-size: 0.95rem; justify-content: center; }
   .format-desc { font-size: 0.7rem; }
   .format-price { margin-top: 6px; justify-content: center; }
