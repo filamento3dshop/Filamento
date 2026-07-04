@@ -1631,9 +1631,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       else if (cmd.type === 'C') sp.bezierCurveTo(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
       else if (cmd.type === 'Q') sp.quadraticCurveTo(cmd.x1, cmd.y1, cmd.x, cmd.y);
     }
-    // false = TrueType convention (outer = CW), true = PostScript/SVG (outer = CCW)
-    const shapes = sp.toShapes(false);
-    return shapes.length ? shapes : sp.toShapes(true);
+    return sp.toShapes(true);
   }
 
   function _getCurrentNomePos() {
@@ -1726,6 +1724,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       color: new THREE.Color(colorHex || '#ffffff'),
       roughness: 0.35,
       metalness: 0.05,
+      side: THREE.DoubleSide,
     });
 
     nameMesh = new THREE.Mesh(geo, mat);
