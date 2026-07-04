@@ -1032,21 +1032,6 @@ document.querySelectorAll('.nome-slot-btn').forEach(btn => {
   });
 });
 
-// ══ Photo upload ══
-const uploadZone = document.getElementById('upload-zone');
-const fileInput = document.getElementById('foto_personalizzata');
-
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('dragover');
-  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
-
-// handleFile and removeUpload defined below (photo editor section)
-
 // ══ Stepper ══
 let currentStep = 1;
 
