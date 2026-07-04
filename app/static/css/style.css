@@ -486,6 +486,16 @@ section { padding: 96px 32px; }
   top: -1px;
 }
 
+/* Badge angolo — visibile solo su mobile */
+.format-badge-corner {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  margin-left: 0;
+}
+
 .format-desc {
   font-size: 0.82rem;
   color: var(--text2);
@@ -1131,21 +1141,26 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Benefits */
   .benefits-strip { flex-direction: column; }
   .benefit { flex: none; border-right: none; border-bottom: 1px solid var(--c200); padding: 14px 20px; justify-content: flex-start; }
-  .benefit:last-child { border-bottom: none; }
+  .benefit:last-child { border-bottom: 1px solid var(--c200); }
 
   /* Temi — 2 colonne su mobile */
   .themes-grid { grid-template-columns: repeat(2, 1fr); }
 
-  /* Formati — 2 colonne su mobile con font ridotti */
+  /* Formati — 2 colonne su mobile */
   .formats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .format-card { padding: 0; }
-  .format-body { padding: 12px; }
-  .format-size { font-size: 1rem; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-  .format-badge { font-size: 0.55rem; padding: 2px 5px; margin-left: 0; }
-  .format-desc { font-size: 0.72rem; }
-  .format-price { margin-top: 8px; }
-  .price-amount { font-size: 1.4rem; }
-  .price-unit { font-size: 0.65rem; }
+  /* Rettangolo foto: numero centrato, badge in alto a destra */
+  .format-media { position: relative; }
+  .format-photo-placeholder { font-size: 1.6rem; min-height: 120px; }
+  .format-media { position: relative; }
+  .format-badge-corner { display: inline-block; }
+  .format-badge-inline { display: none; }
+  .format-body { padding: 10px 10px 14px; align-items: center; text-align: center; }
+  .format-size { font-size: 0.95rem; justify-content: center; }
+  .format-desc { font-size: 0.7rem; }
+  .format-price { margin-top: 6px; justify-content: center; }
+  .price-amount { font-size: 1.3rem; }
+  .price-unit { font-size: 0.62rem; }
 
   /* Manifesto */
   .manifesto-section { padding: 80px 20px; }
