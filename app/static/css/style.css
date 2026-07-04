@@ -1138,8 +1138,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Temi — 2 colonne su mobile */
   .themes-grid { grid-template-columns: repeat(2, 1fr); }
 
-  /* Formati — 1 colonna su mobile */
-  .formats-grid { grid-template-columns: 1fr; }
+  /* Formati — 2 colonne anche su mobile */
+  .formats-grid { grid-template-columns: 1fr 1fr; }
 
   /* Manifesto */
   .manifesto-section { padding: 80px 20px; }
