@@ -12,7 +12,8 @@
     "troika-worker-utils": "/static/js/troika-worker-utils.esm.js",
     "webgl-sdf-generator": "/static/js/webgl-sdf-generator.mjs",
     "bidi-js": "/static/js/bidi.mjs",
-    "opentype.js": "/static/js/opentype.min.mjs"
+    "opentype.js": "/static/js/opentype.min.mjs",
+    "clipper-lib": "/static/js/clipper.esm.js"
   }
 }
 </script>
@@ -1157,13 +1158,14 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
 // ══ Three.js 3D Viewer ══
 (async function initThreeViewer() {
-  let THREE, OrbitControls, GLTFLoader, RoomEnvironment, opentype;
+  let THREE, OrbitControls, GLTFLoader, RoomEnvironment, opentype, ClipperLib;
   try {
     THREE = await import('three');
     ({ OrbitControls } = await import('/static/js/jsm/controls/OrbitControls.js'));
     ({ GLTFLoader } = await import('/static/js/jsm/loaders/GLTFLoader.js'));
     ({ RoomEnvironment } = await import('/static/js/jsm/environments/RoomEnvironment.js'));
     opentype = await import('opentype.js');
+    ({ ClipperLib } = await import('clipper-lib'));
   } catch(e) { console.warn('Three.js load error:', e); return; }
 
   const wrap = document.getElementById('three-wrap');
@@ -1623,59 +1625,71 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   }
 
   // ── Spessore tratto (mm reali su lettera 20cm) ───────────────────────────
-  const NAME_THICKNESS_MM = 1.5; // 0.8 elegante | 1.2 ideale | 1.5 bold | 2.0 insegna
+  const NAME_THICKNESS_MM = 3.5; // 1.5 sottile | 2.5 medio | 3.5 bold | 5.0 insegna
 
-  // Area con segno per capire il verso di avvolgimento (CCW = positivo)
-  function _signedArea2D(pts) {
+  const CLIPPER_SCALE = 1e6; // ClipperLib usa interi: scala float → int
+
+  // Converti array THREE.Vector2 → Clipper path (array di {X,Y} interi)
+  function _toClipperPath(pts) {
+    return pts.map(p => ({ X: Math.round(p.x * CLIPPER_SCALE), Y: Math.round(p.y * CLIPPER_SCALE) }));
+  }
+
+  // Converti Clipper path → array THREE.Vector2
+  function _fromClipperPath(cpath) {
+    return cpath.map(p => new THREE.Vector2(p.X / CLIPPER_SCALE, p.Y / CLIPPER_SCALE));
+  }
+
+  // Area con segno per riconoscere outer (CCW→positivo) da hole (CW→negativo)
+  function _clipperArea(path) {
     let s = 0;
-    for (let i = 0, n = pts.length; i < n; i++) {
+    for (let i = 0, n = path.length; i < n; i++) {
       const j = (i + 1) % n;
-      s += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+      s += path[i].X * path[j].Y - path[j].X * path[i].Y;
     }
     return s * 0.5;
   }
 
-  // Offset del contorno: sposta ogni vertice lungo la normale mediata tra i due spigoli.
-  // Per CCW (contorno esterno) la normale punta fuori → espande.
-  // Per CW (fori) la stessa formula punta verso il centro → restringe il foro → più materiale.
-  function _offsetPoints2D(pts, dist) {
-    const n = pts.length;
-    if (n < 3) return pts;
-    const result = [];
-    for (let i = 0; i < n; i++) {
-      const p0 = pts[(i - 1 + n) % n];
-      const p1 = pts[i];
-      const p2 = pts[(i + 1) % n];
-      const e1x = p1.x - p0.x, e1y = p1.y - p0.y;
-      const e2x = p2.x - p1.x, e2y = p2.y - p1.y;
-      const l1 = Math.hypot(e1x, e1y) || 1;
-      const l2 = Math.hypot(e2x, e2y) || 1;
-      // Normali sinistra di ogni spigolo
-      const nx1 = -e1y / l1, ny1 = e1x / l1;
-      const nx2 = -e2y / l2, ny2 = e2x / l2;
-      // Media normalizzata
-      let nx = nx1 + nx2, ny = ny1 + ny2;
-      const nl = Math.hypot(nx, ny) || 1;
-      nx /= nl; ny /= nl;
-      // Miter limit: evita spike a angoli acuti (cap a 3×)
-      const cosA = nx1 * nx2 + ny1 * ny2;
-      const sinH = Math.sqrt(Math.max(0, (1 - cosA) * 0.5));
-      const miter = sinH > 0.2 ? Math.min(2.0, 1.0 / sinH) : 2.0;
-      result.push(new THREE.Vector2(p1.x + nx * dist * miter, p1.y + ny * dist * miter));
-    }
-    return result;
-  }
-
-  // Applica l'offset a tutte le shape prima dell'estrusione
-  function _thickenShapes(shapes, offsetDist, resolution = 72) {
-    return shapes.map(shape => {
-      const pts = shape.getPoints(resolution);
-      const newShape = new THREE.Shape(_offsetPoints2D(pts, offsetDist));
+  // Offset robusto con ClipperLib: Round join → nessuno spike, union automatica
+  function _thickenShapes(shapes, offsetDist, resolution = 48) {
+    const co = new ClipperLib.ClipperOffset(2, 0.25);
+    for (const shape of shapes) {
+      co.AddPath(_toClipperPath(shape.getPoints(resolution)),
+        ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon);
       for (const hole of shape.holes) {
-        newShape.holes.push(new THREE.Path(_offsetPoints2D(hole.getPoints(resolution), offsetDist)));
+        co.AddPath(_toClipperPath(hole.getPoints(resolution)),
+          ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon);
       }
-      return newShape;
-    });
+    }
+
+    const solution = new ClipperLib.Paths();
+    co.Execute(solution, offsetDist * CLIPPER_SCALE);
+    if (!solution || !solution.length) return shapes;
+
+    // Separa outer (area>0) e holes (area<0), poi associa ogni hole all'outer che la contiene
+    const outers = solution.filter(p => _clipperArea(p) > 0);
+    const holes  = solution.filter(p => _clipperArea(p) < 0);
+
+    // Ogni outer diventa una THREE.Shape; gli holes vengono assegnati al primo outer
+    // che li contiene (approx: usiamo il centroide del hole per la hit-test)
+    function ptInPoly(pt, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i].X, yi = poly[i].Y, xj = poly[j].X, yj = poly[j].Y;
+        if ((yi > pt.Y) !== (yj > pt.Y) && pt.X < (xj - xi) * (pt.Y - yi) / (yj - yi) + xi)
+          inside = !inside;
+      }
+      return inside;
+    }
+
+    const result = outers.map(o => new THREE.Shape(_fromClipperPath(o)));
+    for (const hole of holes) {
+      const cx = Math.round(hole.reduce((s, p) => s + p.X, 0) / hole.length);
+      const cy = Math.round(hole.reduce((s, p) => s + p.Y, 0) / hole.length);
+      const idx = outers.findIndex(o => ptInPoly({ X: cx, Y: cy }, o));
+      if (idx >= 0) result[idx].holes.push(new THREE.Path(_fromClipperPath(hole)));
+    }
+
+    return result.length > 0 ? result : shapes;
   }
 
   // Converte path opentype → array di THREE.Shape
