@@ -211,7 +211,7 @@
             <div class="dim-grid">
               <label class="dim-opt">
                 <input type="radio" name="dimensione" value="20"
-                       {% if form.get('dimensione','20')=='20' or not form.get('dimensione') %}checked{% endif %}>
+                       {% if form.get('dimensione')=='20' %}checked{% endif %}>
                 <div class="dim-card">
                   <div class="dim-price">€29,90</div>
                   <div class="dim-size">20 cm</div>
@@ -220,7 +220,7 @@
               </label>
               <label class="dim-opt">
                 <input type="radio" name="dimensione" value="30"
-                       {% if form.get('dimensione')=='30' %}checked{% endif %}>
+                       {% if form.get('dimensione','30')=='30' or not form.get('dimensione') %}checked{% endif %}>
                 <div class="dim-card dim-popular">
                   <div class="dim-badge">Grande impatto</div>
                   <div class="dim-price">€39,90</div>
