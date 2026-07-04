@@ -6,7 +6,12 @@
 {
   "imports": {
     "three": "/static/js/three.module.min.js",
-    "three/addons/": "/static/js/jsm/"
+    "three/addons/": "/static/js/jsm/",
+    "troika-three-text": "/static/js/troika-three-text.esm.js",
+    "troika-three-utils": "/static/js/troika-three-utils.esm.js",
+    "troika-worker-utils": "/static/js/troika-worker-utils.esm.js",
+    "webgl-sdf-generator": "/static/js/webgl-sdf-generator.mjs",
+    "bidi-js": "/static/js/bidi.mjs"
   }
 }
 </script>
@@ -1153,12 +1158,13 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
 // ══ Three.js 3D Viewer ══
 (async function initThreeViewer() {
-  let THREE, OrbitControls, GLTFLoader, RoomEnvironment;
+  let THREE, OrbitControls, GLTFLoader, RoomEnvironment, TroikaText;
   try {
     THREE = await import('three');
     ({ OrbitControls } = await import('/static/js/jsm/controls/OrbitControls.js'));
     ({ GLTFLoader } = await import('/static/js/jsm/loaders/GLTFLoader.js'));
     ({ RoomEnvironment } = await import('/static/js/jsm/environments/RoomEnvironment.js'));
+    ({ Text: TroikaText } = await import('troika-three-text'));
   } catch(e) { console.warn('Three.js load error:', e); return; }
 
   const wrap = document.getElementById('three-wrap');
@@ -1546,6 +1552,13 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     }
   }
 
+  // ── Nome 3D — state vars (devono stare prima di animate()) ──
+  let nameMesh = null;
+  let nameColorTarget = new THREE.Color('#ffffff');
+  let nameScaleCurrent = 0.01;
+  let nameScaleTarget  = 1.0;
+  let nameOpacityCurrent = 0;
+
   // ── Render loop ──
   function animate() {
     requestAnimationFrame(animate);
@@ -1566,6 +1579,19 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     if (scaleCurrent < scaleTarget - 0.001) {
       scaleCurrent += (scaleTarget - scaleCurrent) * 0.11;
       letterGroup.scale.setScalar(Math.max(0.001, scaleCurrent));
+    }
+
+    // Nome 3D — spring scale + fade-in
+    if (nameMesh) {
+      if (nameScaleCurrent < nameScaleTarget - 0.001) {
+        nameScaleCurrent += (nameScaleTarget - nameScaleCurrent) * 0.11;
+        nameMesh.scale.setScalar(Math.max(0.001, nameScaleCurrent));
+      }
+      if (nameOpacityCurrent < 1 - 0.01) {
+        nameOpacityCurrent += (1 - nameOpacityCurrent) * 0.09;
+        nameMesh.fillOpacity = Math.min(1, nameOpacityCurrent);
+        nameMesh.needsUpdate = true;
+      }
     }
 
     // Deco pop animation
@@ -1593,11 +1619,90 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   // ── Init: show placeholder ──
   showPlaceholder('');
 
+  // ══ Nome 3D (troika-three-text) ══════════════════════════════════════════
+
+  const FONT_URL = '/static/fonts/Allura-Regular.ttf';
+
+  // Offset per ogni posizione (in unità scena — da rifinire dopo)
+  const NAME_OFFSETS = {
+    sotto: { x: 0,     y: -0.09 },
+    sopra: { x: 0,     y: +0.09 },
+    dx:    { x: +0.09, y: 0     },
+    sx:    { x: -0.09, y: 0     },
+  };
+
+  function _getCurrentNomePos() {
+    const btn = document.querySelector('.nome-slot-btn.nome-slot-active');
+    return (btn ? btn.dataset.slot : 'sotto') || 'sotto';
+  }
+
+  function _placeNameMesh() {
+    if (!nameMesh) return;
+    const pos = NAME_OFFSETS[_getCurrentNomePos()] || NAME_OFFSETS.sotto;
+    nameMesh.position.set(pos.x, pos.y, 0.06); // z leggermente avanti rispetto alla lettera
+  }
+
+  function setName3D(text, colorHex, posSlot) {
+    if (!TroikaText) return;
+
+    const trimmed = (text || '').trim();
+
+    // Rimuovi vecchio mesh
+    if (nameMesh) {
+      letterGroup.remove(nameMesh);
+      nameMesh.dispose && nameMesh.dispose();
+      nameMesh = null;
+    }
+
+    if (!trimmed) return;
+
+    nameMesh = new TroikaText();
+    nameMesh.text          = trimmed;
+    nameMesh.font          = FONT_URL;
+    nameMesh.fontSize      = 0.22;
+    nameMesh.color         = colorHex || '#ffffff';
+    nameMesh.anchorX       = 'center';
+    nameMesh.anchorY       = 'middle';
+    nameMesh.textAlign     = 'center';
+    nameMesh.castShadow    = true;
+    nameMesh.depthOffset   = -0.01; // evita z-fighting
+    nameMesh.outlineWidth  = 0;     // nessun outline, look clean
+    nameMesh.sdfGlyphSize  = 64;    // qualità antialiasing
+
+    // Spring di ingresso
+    nameScaleCurrent = 0.01;
+    nameScaleTarget  = 1.0;
+    nameOpacityCurrent = 0;
+    nameMesh.scale.setScalar(0.01);
+    nameMesh.fillOpacity = 0;
+
+    _placeNameMesh();
+    letterGroup.add(nameMesh);
+    nameMesh.sync();
+
+    nameColorTarget = new THREE.Color(colorHex || '#ffffff');
+  }
+
+  function updateNameColor(colorHex) {
+    nameColorTarget = new THREE.Color(colorHex || '#ffffff');
+    if (nameMesh) {
+      nameMesh.color = colorHex;
+      nameMesh.needsUpdate = true;
+    }
+  }
+
+  function updateNamePosition(slot) {
+    _placeNameMesh(); // riposiziona senza ricreare il mesh
+  }
+
   // ── Expose ──
   window._threeRefreshScene = refreshScene;
   window._threeRefreshDecos = refreshDecos;
   window._threeApplyPhoto = applyPhoto;
   window._threeSetLetterColor = (name, hex) => setLetterColor(name, hex);
+  window._threeSetName    = (text, colorHex, slot) => setName3D(text, colorHex, slot);
+  window._threeUpdateNameColor = (hex) => updateNameColor(hex);
+  window._threeUpdateNamePos   = (slot) => updateNamePosition(slot);
 
 })();
 
@@ -1608,6 +1713,39 @@ document.getElementById('lettera').addEventListener('change', () => {
 document.querySelectorAll('input[name="colore_lettera"]').forEach(r => r.addEventListener('change', () => {
   if (window._threeSetLetterColor) window._threeSetLetterColor(r.value, COLOR_HEX[r.value] || '#ff6b6b');
   updateColorDesc(r.value);
+}));
+
+// ══ Nome 3D — listener form ══
+function _getScritta() {
+  const r = document.querySelector('input[name="colore_scritta"]:checked');
+  return r ? (COLOR_HEX[r.value] || '#ffffff') : '#ffffff';
+}
+function _getSlot() {
+  const btn = document.querySelector('.nome-slot-btn.nome-slot-active');
+  return btn ? btn.dataset.slot : 'sotto';
+}
+function _triggerName() {
+  if (!window._threeSetName) return;
+  const nome = document.getElementById('nome_bimbo').value;
+  window._threeSetName(nome, _getScritta(), _getSlot());
+}
+
+// Aggiorna nome al typing (debounced 300ms)
+let _nameTimer = null;
+document.getElementById('nome_bimbo').addEventListener('input', () => {
+  clearTimeout(_nameTimer);
+  _nameTimer = setTimeout(_triggerName, 300);
+});
+
+// Aggiorna colore scritta
+document.querySelectorAll('input[name="colore_scritta"]').forEach(r => r.addEventListener('change', () => {
+  if (window._threeUpdateNameColor) window._threeUpdateNameColor(COLOR_HEX[r.value] || '#ffffff');
+}));
+
+// Aggiorna posizione slot (i click esistenti in setForma già chiamano i btn, qui intercettiamo il risultato)
+document.querySelectorAll('.nome-slot-btn').forEach(btn => btn.addEventListener('click', () => {
+  // Aspetta un tick che il btn diventi active, poi aggiorna
+  setTimeout(() => { if (window._threeUpdateNamePos) window._threeUpdateNamePos(_getSlot()); }, 10);
 }));
 
 // ══ Micro-copy ══
