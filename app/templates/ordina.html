@@ -377,7 +377,28 @@
                  placeholder="MI" maxlength="2" value="{{ form.get('res_provincia','') }}">
         </div>
 
-        <label class="spedizione-toggle">
+        <div class="consegna-options">
+          <label class="consegna-opt">
+            <input type="radio" name="tipo_consegna" value="spedizione" id="tipo_spedizione"
+                   {% if form.get('tipo_consegna','spedizione') == 'spedizione' %}checked{% endif %}>
+            <span class="consegna-opt-box"></span>
+            <span class="consegna-opt-inner">
+              <span class="consegna-opt-label"><i class="fas fa-truck"></i> Spedizione in Italia — <strong>€3,00</strong></span>
+              <span class="consegna-opt-sub">Consegna tracciata in 7–10 giorni</span>
+            </span>
+          </label>
+          <label class="consegna-opt">
+            <input type="radio" name="tipo_consegna" value="ritiro" id="tipo_ritiro"
+                   {% if form.get('tipo_consegna') == 'ritiro' %}checked{% endif %}>
+            <span class="consegna-opt-box"></span>
+            <span class="consegna-opt-inner">
+              <span class="consegna-opt-label"><i class="fas fa-hand-holding-box"></i> Ritiro a mano — <strong>gratuito</strong></span>
+              <span class="consegna-opt-sub">Zona Scandiano (RE) — ti contatteremo per concordare il punto di ritiro</span>
+            </span>
+          </label>
+        </div>
+
+        <label class="spedizione-toggle" id="toggle-spedizione-diversa">
           <input type="checkbox" id="spedizione_diversa" name="spedizione_diversa" value="1"
                  {% if form.get('spedizione_diversa') %}checked{% endif %}>
           <span class="spedizione-toggle-box"></span>
@@ -410,9 +431,6 @@
           </div>
         </div>
 
-        <div class="ship-info">
-          <i class="fas fa-truck" aria-hidden="true"></i>Spedizione standard Italia — <strong>€3,00</strong>
-        </div>
 
         <div class="wizard-nav">
           <button type="button" class="btn-back" onclick="goStep(1)">← Indietro</button>
@@ -452,6 +470,9 @@
           <button type="button" class="pay-tab" data-tab="paypal">
             <i class="fab fa-paypal" style="margin-right:6px;" aria-hidden="true"></i>PayPal
           </button>
+          <button type="button" class="pay-tab" data-tab="bonifico">
+            <i class="fas fa-university" style="margin-right:6px;" aria-hidden="true"></i>Bonifico
+          </button>
         </div>
 
         <div class="pay-panel active" id="panel-stripe">
@@ -465,6 +486,25 @@
           <p class="paypal-note">Verrai reindirizzato su PayPal per completare il pagamento in sicurezza.</p>
           <div id="paypal-button-container" style="margin-top:16px;"></div>
           <input type="hidden" name="paypal_order_id" id="paypal_order_id">
+        </div>
+
+        <div class="pay-panel" id="panel-bonifico">
+          <div class="bonifico-box">
+            <p class="bonifico-intro">Effettua un bonifico bancario istantaneo con i dati seguenti. Il tuo ordine verrà messo in lavorazione alla ricezione del pagamento.</p>
+            <div class="bonifico-row">
+              <span class="bonifico-lbl">Intestato a</span>
+              <span class="bonifico-val">Camilla Campani</span>
+            </div>
+            <div class="bonifico-row">
+              <span class="bonifico-lbl">IBAN</span>
+              <span class="bonifico-val bonifico-iban">IT42G03268223000EMH02590789</span>
+            </div>
+            <div class="bonifico-row">
+              <span class="bonifico-lbl">Causale</span>
+              <span class="bonifico-val bonifico-causale" id="bonifico-causale">Ordine Filamento — <em>il tuo nome verrà inserito automaticamente</em></span>
+            </div>
+            <p class="bonifico-nota"><i class="fas fa-info-circle"></i> Riceverai una email di conferma con la causale esatta da usare.</p>
+          </div>
         </div>
 
         <p class="ssl-note"><i class="fas fa-lock" aria-hidden="true"></i>Pagamento sicuro 256-bit SSL</p>
@@ -712,6 +752,30 @@ textarea.form-control { resize: vertical; }
 #stripe-error { color: var(--c500); font-size: 0.85rem; margin-top: 8px; min-height: 18px; }
 .paypal-note { font-size: 0.85rem; color: var(--text2); text-align: center; padding: 14px; background: var(--c100); border-radius: 2px; }
 .ssl-note { font-size: 0.75rem; color: var(--text2); margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+
+/* ══ Consegna options ══ */
+.consegna-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.consegna-opt { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; padding: 14px 16px; border: 1.5px solid var(--c200); border-radius: 2px; background: var(--c100); transition: border-color .2s; }
+.consegna-opt:has(input:checked) { border-color: var(--c500); background: #fff5f5; }
+.consegna-opt input[type="radio"] { display: none; }
+.consegna-opt-box { width: 18px; height: 18px; border: 1.5px solid var(--c300); border-radius: 50%; background: var(--white); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.consegna-opt:has(input:checked) .consegna-opt-box { background: var(--c500); border-color: var(--c500); }
+.consegna-opt:has(input:checked) .consegna-opt-box::after { content: ''; width: 6px; height: 6px; background: #fff; border-radius: 50%; display: block; }
+.consegna-opt-inner { display: flex; flex-direction: column; gap: 3px; }
+.consegna-opt-label { font-size: 0.88rem; color: var(--text); font-weight: 500; }
+.consegna-opt-label i { color: var(--c500); margin-right: 4px; }
+.consegna-opt-sub { font-size: 0.78rem; color: var(--text2); }
+
+/* ══ Bonifico ══ */
+.bonifico-box { background: var(--c100); border: 1.5px solid var(--c200); border-radius: 2px; padding: 20px; }
+.bonifico-intro { font-size: 0.84rem; color: var(--text2); margin-bottom: 16px; line-height: 1.6; }
+.bonifico-row { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--c200); }
+.bonifico-row:last-of-type { border-bottom: none; }
+.bonifico-lbl { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); min-width: 90px; flex-shrink: 0; }
+.bonifico-val { font-size: 0.9rem; color: var(--text); }
+.bonifico-iban { font-family: monospace; font-size: 0.95rem; letter-spacing: 0.05em; color: var(--c600); font-weight: 600; }
+.bonifico-nota { font-size: 0.78rem; color: var(--text2); margin-top: 14px; display: flex; gap: 6px; align-items: flex-start; }
+.bonifico-nota i { color: var(--c500); margin-top: 2px; flex-shrink: 0; }
 
 /* ══ Responsive ══ */
 @media (max-width: 960px) {
@@ -1013,12 +1077,18 @@ function validateStep(step) {
     }
   }
   if (step === 2) {
-    for (const id of ['nome','cognome','codice_fiscale','email','res_indirizzo','res_citta','res_cap']) {
+    for (const id of ['nome','cognome','email']) {
       if (!document.getElementById(id).value.trim()) { alert('Compila tutti i campi obbligatori'); return false; }
     }
-    if (document.getElementById('spedizione_diversa').checked) {
-      for (const id of ['indirizzo','citta','cap']) {
+    const isRitiro = document.getElementById('tipo_ritiro').checked;
+    if (!isRitiro) {
+      for (const id of ['res_indirizzo','res_citta','res_cap']) {
         if (!document.getElementById(id).value.trim()) { alert('Compila l\'indirizzo di spedizione'); return false; }
+      }
+      if (document.getElementById('spedizione_diversa').checked) {
+        for (const id of ['indirizzo','citta','cap']) {
+          if (!document.getElementById(id).value.trim()) { alert('Compila l\'indirizzo di spedizione alternativo'); return false; }
+        }
       }
     }
   }
@@ -1030,12 +1100,31 @@ function updateRecap() {
   const dim = document.querySelector('input[name="dimensione"]:checked');
   const colore = document.querySelector('input[name="colore_lettera"]:checked');
   const dimVal = dim ? dim.value : '20';
-  const total = (PREZZI_DIM[dimVal] || 29.90) + (PREZZI_DECO[numDeco] || 0) + 3;
+  const isRitiro = document.getElementById('tipo_ritiro') && document.getElementById('tipo_ritiro').checked;
+  const spedCost = isRitiro ? 0 : 3;
+  const total = (PREZZI_DIM[dimVal] || 29.90) + (PREZZI_DECO[numDeco] || 0) + spedCost;
   document.getElementById('r-lettera').textContent = lettera;
   document.getElementById('r-dim').textContent = dim ? dim.value + ' cm' : '—';
   document.getElementById('r-colore').textContent = colore ? colore.closest('label').querySelector('.cname').textContent : '—';
   document.getElementById('r-totale').textContent = '€' + total.toFixed(2).replace('.', ',');
 }
+
+// ══ Tipo consegna ══
+function updateConsegnaUI() {
+  const isRitiro = document.getElementById('tipo_ritiro').checked;
+  const addressBlock = document.getElementById('toggle-spedizione-diversa');
+  const extraBlock = document.getElementById('spedizione-extra');
+  if (isRitiro) {
+    addressBlock.style.display = 'none';
+    extraBlock.style.display = 'none';
+  } else {
+    addressBlock.style.display = '';
+    extraBlock.style.display = chkSpedizione.checked ? 'block' : 'none';
+  }
+  updateRecap();
+}
+document.querySelectorAll('input[name="tipo_consegna"]').forEach(r => r.addEventListener('change', updateConsegnaUI));
+updateConsegnaUI();
 
 // ══ Spedizione toggle ══
 const chkSpedizione = document.getElementById('spedizione_diversa');
@@ -1054,6 +1143,18 @@ document.querySelectorAll('.pay-tab').forEach(tab => {
     document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
     document.getElementById('payment_method').value = tab.dataset.tab;
   });
+});
+
+// ══ Bonifico causale ══
+function updateCausale() {
+  const nome = (document.getElementById('nome').value || '').trim();
+  const cognome = (document.getElementById('cognome').value || '').trim();
+  const el = document.getElementById('bonifico-causale');
+  if (el) el.textContent = 'Ordine Filamento' + (nome || cognome ? ' — ' + [nome, cognome].filter(Boolean).join(' ') : '');
+}
+['nome','cognome'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateCausale);
 });
 
 // ══ Stripe ══
