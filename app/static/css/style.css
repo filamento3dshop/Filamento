@@ -469,6 +469,23 @@ section { padding: 96px 32px; }
   color: var(--text);
 }
 
+.format-badge {
+  display: inline-block;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c500);
+  border: 1px solid var(--c500);
+  border-radius: 2px;
+  padding: 2px 7px;
+  vertical-align: middle;
+  margin-left: 6px;
+  position: relative;
+  top: -1px;
+}
+
 .format-desc {
   font-size: 0.82rem;
   color: var(--text2);

@@ -211,7 +211,7 @@
             <div class="dim-grid">
               <label class="dim-opt">
                 <input type="radio" name="dimensione" value="20"
-                       {% if form.get('dimensione','20')=='20' or not form.get('dimensione') %}checked{% endif %}>
+                       {% if form.get('dimensione')=='20' %}checked{% endif %}>
                 <div class="dim-card">
                   <div class="dim-price">€29,90</div>
                   <div class="dim-size">20 cm</div>
@@ -220,7 +220,7 @@
               </label>
               <label class="dim-opt">
                 <input type="radio" name="dimensione" value="30"
-                       {% if form.get('dimensione')=='30' %}checked{% endif %}>
+                       {% if form.get('dimensione','30')=='30' or not form.get('dimensione') %}checked{% endif %}>
                 <div class="dim-card dim-popular">
                   <div class="dim-badge">Grande impatto</div>
                   <div class="dim-price">€39,90</div>
@@ -236,45 +236,6 @@
             <label class="form-label" for="note">Note <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
             <textarea class="form-control" id="note" name="note"
                       placeholder="Richieste particolari, combinazioni di colori…" rows="3">{{ form.get('note','') }}</textarea>
-          </div>
-
-          {# Foto di ispirazione #}
-          <div class="form-group">
-            <label class="form-label">Foto personalizzata <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
-            <p class="form-hint" style="margin-bottom:12px;">Carica una foto: verrà mostrata applicata alla lettera. jpg, png, webp — max 10 MB.</p>
-            <div class="upload-zone" id="upload-zone">
-              <div id="upload-placeholder">
-                <i class="fas fa-image" aria-hidden="true"></i>
-                <span>Trascina qui o <u tabindex="0" onclick="document.getElementById('foto_personalizzata').click()" onkeydown="if(event.key==='Enter')this.click()">sfoglia</u></span>
-              </div>
-              <div id="upload-preview" style="display:none;">
-                <img id="upload-thumb" src="" alt="Anteprima foto caricata">
-                <button type="button" class="upload-remove" onclick="removeUpload()" aria-label="Rimuovi foto">✕</button>
-              </div>
-            </div>
-            <input type="file" id="foto_personalizzata" name="foto_personalizzata"
-                   accept="image/jpeg,image/png,image/webp" style="display:none;">
-            {# Photo editor — shown after upload #}
-            <div id="photo-editor" style="display:none; margin-top:16px;">
-              <div class="pe-header">
-                <span class="pe-title">Posiziona la foto</span>
-                <div class="pe-actions">
-                  <button type="button" class="pe-btn" onclick="peRotate()">↺ Ruota</button>
-                  <button type="button" class="pe-btn" onclick="peReset()">Reimposta</button>
-                </div>
-              </div>
-              <div class="pe-stage">
-                <canvas id="pe-canvas"></canvas>
-                <div class="pe-crosshair"></div>
-              </div>
-              <div class="pe-zoom-row">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="range" id="pe-zoom" min="0.3" max="3.5" step="0.01" value="1">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-              </div>
-              <p class="pe-hint">Trascina per spostare · scorri per ingrandire</p>
-              <button type="button" class="pe-apply" onclick="peApply()">✓ Applica alla lettera</button>
-            </div>
           </div>
 
           {# Decorazioni #}
@@ -316,17 +277,17 @@
               </div>
 
               {% set catalogo = [
-                ('🐾', 'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
-                ('🚀', 'Spazio',      ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
-                ('🐟', 'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
-                ('☁️', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Aeroplano','Aquilone','Palloncino']),
-                ('👑', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
-                ('⚽', 'Sport',       ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
+                ('<i class="fas fa-paw"></i>',    'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
+                ('<i class="fas fa-rocket"></i>', 'Spazio',      ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
+                ('<i class="fas fa-fish"></i>',   'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
+                ('<i class="fas fa-cloud-sun"></i>', 'Cielo',    ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Aeroplano','Aquilone','Palloncino']),
+                ('<i class="fas fa-wand-magic-sparkles"></i>', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
+                ('<i class="fas fa-futbol"></i>', 'Sport',       ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
               ] %}
 
               {% for ico, nome_tema, items in catalogo %}
               <div class="deco-tema-block" data-tema="{{ nome_tema.lower() }}">
-                <div class="deco-tema-title">{{ ico }} {{ nome_tema }}</div>
+                <div class="deco-tema-title">{{ ico | safe }} {{ nome_tema }}</div>
                 <div class="deco-items">
                   {% for item in items %}
                   <label class="deco-item">
@@ -701,7 +662,8 @@ textarea.form-control { resize: vertical; }
 .deco-counter-badge { background: var(--c500); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
 .deco-tema-block { margin-bottom: 20px; }
 .deco-tema-block.tema-highlight .deco-tema-title { color: var(--c500); }
-.deco-tema-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--c200); transition: color .2s; }
+.deco-tema-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--c200); transition: color .2s; display: flex; align-items: center; gap: 8px; }
+.deco-tema-title i { font-size: 0.85rem; color: var(--c500); width: 16px; text-align: center; }
 .deco-items { display: flex; flex-wrap: wrap; gap: 8px; }
 .deco-item { cursor: pointer; }
 .deco-item input[type="checkbox"] { display: none; }
