@@ -1622,62 +1622,18 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     return _otFont;
   }
 
-  // Converte path opentype → array di THREE.Shape con holes corretti
+  // Converte path opentype → array di THREE.Shape usando ShapePath (stesso approccio di FontLoader/SVGLoader)
   function _otPathToShapes(path) {
-    // Raccoglie tutti i subpath (M…Z) come Path objects
-    const subpaths = [];
-    let cur = null;
+    const sp = new THREE.ShapePath();
     for (const cmd of path.commands) {
-      if (cmd.type === 'M') {
-        cur = new THREE.Path();
-        cur.moveTo(cmd.x, cmd.y);
-        subpaths.push(cur);
-      } else if (cmd.type === 'L') {
-        cur && cur.lineTo(cmd.x, cmd.y);
-      } else if (cmd.type === 'C') {
-        cur && cur.bezierCurveTo(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
-      } else if (cmd.type === 'Q') {
-        cur && cur.quadraticCurveTo(cmd.x1, cmd.y1, cmd.x, cmd.y);
-      } else if (cmd.type === 'Z') {
-        cur && cur.closePath();
-      }
+      if      (cmd.type === 'M') sp.moveTo(cmd.x, cmd.y);
+      else if (cmd.type === 'L') sp.lineTo(cmd.x, cmd.y);
+      else if (cmd.type === 'C') sp.bezierCurveTo(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
+      else if (cmd.type === 'Q') sp.quadraticCurveTo(cmd.x1, cmd.y1, cmd.x, cmd.y);
     }
-
-    // Area con segno: positiva = outer (CCW), negativa = hole (CW)
-    function signedArea(pts) {
-      let s = 0;
-      for (let i = 0, n = pts.length; i < n; i++) {
-        const j = (i + 1) % n;
-        s += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
-      }
-      return s * 0.5;
-    }
-
-    function ptInShape(pt, pts) {
-      let inside = false;
-      for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-        const xi = pts[i].x, yi = pts[i].y, xj = pts[j].x, yj = pts[j].y;
-        if ((yi > pt.y) !== (yj > pt.y) && pt.x < (xj - xi) * (pt.y - yi) / (yj - yi) + xi)
-          inside = !inside;
-      }
-      return inside;
-    }
-
-    const outers = [];
-    const holes  = [];
-    for (const sp of subpaths) {
-      const pts = sp.getPoints(12);
-      if (signedArea(pts) >= 0) outers.push({ path: sp, pts });
-      else                      holes.push({ path: sp, pts });
-    }
-
-    const shapes = outers.map(o => new THREE.Shape(o.pts));
-    for (const hole of holes) {
-      const mid = hole.pts[Math.floor(hole.pts.length / 2)];
-      const idx = outers.findIndex(o => ptInShape(mid, o.pts));
-      if (idx >= 0) shapes[idx].holes.push(hole.path);
-    }
-    return shapes;
+    // false = TrueType convention (outer = CW), true = PostScript/SVG (outer = CCW)
+    const shapes = sp.toShapes(false);
+    return shapes.length ? shapes : sp.toShapes(true);
   }
 
   function _getCurrentNomePos() {
