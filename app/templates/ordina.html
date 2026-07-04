@@ -1622,6 +1622,62 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     return _otFont;
   }
 
+  // ── Spessore tratto (mm reali su lettera 20cm) ───────────────────────────
+  const NAME_THICKNESS_MM = 1.5; // 0.8 elegante | 1.2 ideale | 1.5 bold | 2.0 insegna
+
+  // Area con segno per capire il verso di avvolgimento (CCW = positivo)
+  function _signedArea2D(pts) {
+    let s = 0;
+    for (let i = 0, n = pts.length; i < n; i++) {
+      const j = (i + 1) % n;
+      s += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+    }
+    return s * 0.5;
+  }
+
+  // Offset del contorno: sposta ogni vertice lungo la normale mediata tra i due spigoli.
+  // Per CCW (contorno esterno) la normale punta fuori → espande.
+  // Per CW (fori) la stessa formula punta verso il centro → restringe il foro → più materiale.
+  function _offsetPoints2D(pts, dist) {
+    const n = pts.length;
+    if (n < 3) return pts;
+    const result = [];
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[(i - 1 + n) % n];
+      const p1 = pts[i];
+      const p2 = pts[(i + 1) % n];
+      const e1x = p1.x - p0.x, e1y = p1.y - p0.y;
+      const e2x = p2.x - p1.x, e2y = p2.y - p1.y;
+      const l1 = Math.hypot(e1x, e1y) || 1;
+      const l2 = Math.hypot(e2x, e2y) || 1;
+      // Normali sinistra di ogni spigolo
+      const nx1 = -e1y / l1, ny1 = e1x / l1;
+      const nx2 = -e2y / l2, ny2 = e2x / l2;
+      // Media normalizzata
+      let nx = nx1 + nx2, ny = ny1 + ny2;
+      const nl = Math.hypot(nx, ny) || 1;
+      nx /= nl; ny /= nl;
+      // Miter limit: evita spike a angoli acuti (cap a 3×)
+      const cosA = nx1 * nx2 + ny1 * ny2;
+      const sinH = Math.sqrt(Math.max(0, (1 - cosA) * 0.5));
+      const miter = sinH > 0.2 ? Math.min(2.0, 1.0 / sinH) : 2.0;
+      result.push(new THREE.Vector2(p1.x + nx * dist * miter, p1.y + ny * dist * miter));
+    }
+    return result;
+  }
+
+  // Applica l'offset a tutte le shape prima dell'estrusione
+  function _thickenShapes(shapes, offsetDist, resolution = 72) {
+    return shapes.map(shape => {
+      const pts = shape.getPoints(resolution);
+      const newShape = new THREE.Shape(_offsetPoints2D(pts, offsetDist));
+      for (const hole of shape.holes) {
+        newShape.holes.push(new THREE.Path(_offsetPoints2D(hole.getPoints(resolution), offsetDist)));
+      }
+      return newShape;
+    });
+  }
+
   // Converte path opentype → array di THREE.Shape
   function _otPathToShapes(path) {
     const shapes = [];
@@ -1702,13 +1758,10 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     const shapes = _otPathToShapes(path);
     if (!shapes.length) return;
 
-    // Altezza glyph (dalla font metrics)
-    const glyphH = (font.ascender - font.descender) / font.unitsPerEm * fontSize;
-
     // Larghezza testo
     const advance = font.getAdvanceWidth(label, fontSize);
 
-    // Vogliamo che il testo sia largo al massimo il 70% della lettera
+    // Testo largo max 75% della lettera
     let targetW = 0.7;
     if (letterMesh) {
       const box = new THREE.Box3().setFromObject(letterMesh);
@@ -1716,11 +1769,19 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     }
     const textScale = targetW / advance;
 
+    // Offset contorno in unità opentype.
+    // Usa l'altezza EM del font come riferimento (stessa base di fontSize=1),
+    // così l'offset è proporzionale al font stesso indipendentemente dalla scala scena.
+    const glyphH = (font.ascender - font.descender) / font.unitsPerEm; // altezza EM a fontSize=1
+    const offsetOT = NAME_THICKNESS_MM * (glyphH / 200); // 200mm = dimensione di riferimento
+
+    const thickShapes = _thickenShapes(shapes, offsetOT);
+
     const depth = _calcDepth();
-    const geo = new THREE.ExtrudeGeometry(shapes, {
-      depth: depth / textScale, // depth in spazio glyph (poi scalato)
+    const geo = new THREE.ExtrudeGeometry(thickShapes, {
+      depth: depth / textScale,
       bevelEnabled: false,
-      curveSegments: 8,
+      curveSegments: 12,
     });
 
     // Specchia Y (opentype ha Y invertito rispetto a Three.js)
