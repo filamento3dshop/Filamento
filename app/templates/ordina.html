@@ -277,17 +277,17 @@
               </div>
 
               {% set catalogo = [
-                ('🐾', 'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
-                ('🚀', 'Spazio',      ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
-                ('🐟', 'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
-                ('☁️', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Aeroplano','Aquilone','Palloncino']),
-                ('👑', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
-                ('⚽', 'Sport',       ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
+                ('<i class="fas fa-paw"></i>',    'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
+                ('<i class="fas fa-rocket"></i>', 'Spazio',      ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
+                ('<i class="fas fa-fish"></i>',   'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
+                ('<i class="fas fa-cloud-sun"></i>', 'Cielo',    ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Aeroplano','Aquilone','Palloncino']),
+                ('<i class="fas fa-wand-magic-sparkles"></i>', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
+                ('<i class="fas fa-futbol"></i>', 'Sport',       ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
               ] %}
 
               {% for ico, nome_tema, items in catalogo %}
               <div class="deco-tema-block" data-tema="{{ nome_tema.lower() }}">
-                <div class="deco-tema-title">{{ ico }} {{ nome_tema }}</div>
+                <div class="deco-tema-title">{{ ico | safe }} {{ nome_tema }}</div>
                 <div class="deco-items">
                   {% for item in items %}
                   <label class="deco-item">
@@ -662,7 +662,8 @@ textarea.form-control { resize: vertical; }
 .deco-counter-badge { background: var(--c500); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
 .deco-tema-block { margin-bottom: 20px; }
 .deco-tema-block.tema-highlight .deco-tema-title { color: var(--c500); }
-.deco-tema-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--c200); transition: color .2s; }
+.deco-tema-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--c200); transition: color .2s; display: flex; align-items: center; gap: 8px; }
+.deco-tema-title i { font-size: 0.85rem; color: var(--c500); width: 16px; text-align: center; }
 .deco-items { display: flex; flex-wrap: wrap; gap: 8px; }
 .deco-item { cursor: pointer; }
 .deco-item input[type="checkbox"] { display: none; }
