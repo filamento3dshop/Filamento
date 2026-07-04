@@ -1124,8 +1124,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   .nav-social a { width: 32px; height: 32px; font-size: 0.85rem; }
 
   /* Hero */
-  .hero-section { padding-bottom: 24px; }
-  .hero-inner { padding: 40px 20px 0; gap: 20px; }
+  .hero-inner { padding: 40px 20px 24px; gap: 20px; }
   .hero-actions { flex-direction: column; align-items: stretch; }
   .hero-actions .btn-primary { text-align: center; }
 
