@@ -392,7 +392,15 @@ section { padding: 96px 32px; }
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--text);
-  padding: 16px 20px;
+  padding: 14px 20px 2px;
+}
+
+.theme-sub {
+  font-size: 0.78rem;
+  color: var(--text2);
+  font-weight: 300;
+  padding: 0 20px 14px;
+  font-style: italic;
 }
 
 /* ════════════════════════════════════════════════
@@ -486,23 +494,23 @@ section { padding: 96px 32px; }
 }
 
 .formats-note-title {
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--text);
-  letter-spacing: 0.04em;
-  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
 }
 
 .formats-note-list {
   list-style: none;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .formats-note-list li {
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   color: var(--text2);
   font-weight: 300;
-  line-height: 1.7;
+  line-height: 1.8;
   padding-left: 16px;
   position: relative;
 }
@@ -517,7 +525,7 @@ section { padding: 96px 32px; }
 }
 
 .formats-note-extra {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--text2);
   font-weight: 300;
   font-style: italic;
@@ -525,10 +533,10 @@ section { padding: 96px 32px; }
 
 .formats-shipping {
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   color: var(--text2);
   font-weight: 400;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   margin-bottom: 0;
 }
 
