@@ -1282,7 +1282,6 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   let tKeyColor = new THREE.Color(0xfff5e0);
   let tAmbColor = new THREE.Color(0xfff4e8);
   let tExposure = 0.82;
-  let tRoughness = 0.58, tMetalness = 0.0, tEnvIntensity = 0.70;
 
   // ── Camera auto-fit sul bounding box del modello ──
   function fitCamera() {
@@ -1319,11 +1318,8 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   letterGroup.position.set(0, 0, 0);
   scene.add(letterGroup);
 
-  const letterMat = new THREE.MeshStandardMaterial({
+  const letterMat = new THREE.MeshBasicMaterial({
     color: new THREE.Color('#ff6b6b'),
-    roughness: 0.58,
-    metalness: 0.0,
-    envMapIntensity: 0.70
   });
 
   // ── Stato ──
@@ -1505,9 +1501,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   function setLetterColor(colorName, hex) {
     targetLetterColor = new THREE.Color(hex || '#ff6b6b');
     const props = MAT_PROPS[colorName] || MAT_PROPS.corallo;
-    tRoughness = props.roughness;
-    tMetalness = props.metalness;
-    tEnvIntensity = props.envMapIntensity;
+
     const tint = LIGHT_TINT[colorName] || LIGHT_TINT.corallo;
     tKeyColor = new THREE.Color(tint.key);
     tAmbColor = new THREE.Color(tint.ambient);
@@ -1543,9 +1537,6 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
     // Color lerp
     letterMat.color.lerp(targetLetterColor, 0.07);
-    letterMat.roughness += (tRoughness - letterMat.roughness) * 0.05;
-    letterMat.metalness += (tMetalness - letterMat.metalness) * 0.05;
-    letterMat.envMapIntensity += (tEnvIntensity - letterMat.envMapIntensity) * 0.05;
 
     // Light tint lerp
     keyLight.color.lerp(tKeyColor, 0.04);
@@ -1701,10 +1692,8 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     const geoH = bx.max.y - bx.min.y;
     geo.translate(-bx.min.x - geoW / 2, -bx.min.y - geoH / 2, 0);
 
-    const mat = new THREE.MeshStandardMaterial({
+    const mat = new THREE.MeshBasicMaterial({
       color: new THREE.Color(colorHex || '#ffffff'),
-      roughness: 0.35,
-      metalness: 0.05,
       side: THREE.DoubleSide,
     });
 
