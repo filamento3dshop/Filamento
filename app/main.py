@@ -2,6 +2,7 @@ import os
 import secrets
 import uuid
 import smtplib
+import threading
 import stripe
 import psycopg
 from email.mime.text import MIMEText
@@ -125,20 +126,24 @@ def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
 METODO_LABEL = {"stripe": "Carta di credito", "paypal": "PayPal", "bonifico": "Bonifico bancario"}
 
 
-def invia_email(to: str, subject: str, html: str):
-    if not SMTP_USER or not SMTP_PASS:
-        return
+def _send_email_bg(to: str, subject: str, html: str):
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = f"Filamento <{SMTP_USER}>"
         msg["To"] = to
         msg.attach(MIMEText(html, "html"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as s:
             s.login(SMTP_USER, SMTP_PASS)
             s.sendmail(SMTP_USER, to, msg.as_string())
     except Exception as e:
         print(f"[EMAIL ERROR] {e}")
+
+
+def invia_email(to: str, subject: str, html: str):
+    if not SMTP_USER or not SMTP_PASS:
+        return
+    threading.Thread(target=_send_email_bg, args=(to, subject, html), daemon=True).start()
 
 
 def email_cliente(order: dict, payment_method: str) -> str:
