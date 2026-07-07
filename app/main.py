@@ -52,7 +52,7 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 NEGOZIO_EMAIL = os.getenv("NEGOZIO_EMAIL", "filamento3d.shop@gmail.com")
-EMAIL_FROM = os.getenv("EMAIL_FROM", "Filamento <noreply@filamentoshop.it>")
+EMAIL_FROM = os.getenv("EMAIL_FROM", "Filamento <onboarding@resend.dev>")
 
 security = HTTPBasic()
 
