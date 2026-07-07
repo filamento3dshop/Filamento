@@ -6,7 +6,7 @@ import psycopg
 from psycopg.rows import dict_row
 from datetime import datetime
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -73,9 +73,27 @@ def init_db():
             dimensione TEXT, tema TEXT, decorazioni_scelte TEXT, note TEXT,
             codice_fiscale TEXT,
             indirizzo_spedizione TEXT,
-            totale TEXT
+            totale TEXT,
+            codice_sconto TEXT,
+            sconto_applicato TEXT
         )
     """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS codici_sconto (
+            codice TEXT PRIMARY KEY,
+            percentuale INTEGER NOT NULL,
+            usato BOOLEAN NOT NULL DEFAULT FALSE,
+            usato_da TEXT,
+            usato_in TEXT,
+            creato_at TEXT NOT NULL
+        )
+    """)
+    # migrazione colonne per DB esistenti
+    for col, typedef in [("codice_sconto", "TEXT"), ("sconto_applicato", "TEXT")]:
+        try:
+            cur.execute(f"ALTER TABLE orders ADD COLUMN {col} {typedef}")
+        except Exception:
+            pass
     conn.commit()
     cur.close()
     conn.close()
@@ -98,10 +116,13 @@ def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
     return credentials.username
 
 
-def calcola_totale(dimensione: str, num_deco: int) -> float:
+def calcola_totale(dimensione: str, num_deco: int, sconto_perc: int = 0) -> float:
     base = PREZZI_DIM.get(dimensione, 29.90)
     extra = PREZZI_DECO.get(min(num_deco, 4), 0.0)
-    return round(base + extra + SPEDIZIONE, 2)
+    subtotal = base + extra + SPEDIZIONE
+    if sconto_perc > 0:
+        subtotal = round(subtotal * (1 - sconto_perc / 100), 2)
+    return round(subtotal, 2)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -117,6 +138,23 @@ async def ordina_get(request: Request, tema: str = None):
         "form": {"tema": tema or ""},
         "error": None,
     })
+
+
+@app.get("/api/codice-sconto/{codice}")
+async def verifica_codice(codice: str):
+    if not DATABASE_URL:
+        return JSONResponse({"valido": False, "errore": "DB non disponibile"})
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT percentuale, usato FROM codici_sconto WHERE codice = %s", (codice.upper().strip(),))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if row is None:
+        return JSONResponse({"valido": False, "errore": "Codice non valido"})
+    if row["usato"]:
+        return JSONResponse({"valido": False, "errore": "Codice già utilizzato"})
+    return JSONResponse({"valido": True, "percentuale": row["percentuale"]})
 
 
 @app.post("/ordina", response_class=HTMLResponse)
@@ -151,6 +189,7 @@ async def ordina_post(
     payment_method: str = Form("stripe"),
     stripe_token: Optional[str] = Form(None),
     paypal_order_id: Optional[str] = Form(None),
+    codice_sconto: Optional[str] = Form(None),
 ):
     form_data = {
         "lettera": lettera, "nome_bimbo": nome_bimbo,
@@ -165,7 +204,21 @@ async def ordina_post(
         "indirizzo": indirizzo, "citta": citta, "cap": cap, "provincia": provincia,
     }
 
-    totale = calcola_totale(dimensione, num_deco)
+    # verifica codice sconto
+    sconto_perc = 0
+    codice_sconto_valido = None
+    if codice_sconto and DATABASE_URL:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT percentuale, usato FROM codici_sconto WHERE codice = %s", (codice_sconto.upper().strip(),))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        if row and not row["usato"]:
+            sconto_perc = row["percentuale"]
+            codice_sconto_valido = codice_sconto.upper().strip()
+
+    totale = calcola_totale(dimensione, num_deco, sconto_perc)
     totale_centesimi = int(totale * 100)
     order_id = str(uuid.uuid4())[:8].upper()
 
@@ -226,14 +279,21 @@ async def ordina_post(
             """INSERT INTO orders (
                 id, created_at, payment_method, email, nome, cognome, telefono,
                 lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
-                tema, decorazioni_scelte, note, codice_fiscale, indirizzo_spedizione, totale
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                tema, decorazioni_scelte, note, codice_fiscale, indirizzo_spedizione, totale,
+                codice_sconto, sconto_applicato
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
             (
                 order["id"], datetime.utcnow().isoformat(), payment_method, email, nome, cognome, telefono,
                 lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
                 tema, decorazioni_scelte, note, codice_fiscale, order["indirizzo_spedizione"], order["totale"],
+                codice_sconto_valido, f"{sconto_perc}%" if sconto_perc else None,
             ),
         )
+        if codice_sconto_valido:
+            cur.execute(
+                "UPDATE codici_sconto SET usato = TRUE, usato_da = %s, usato_in = %s WHERE codice = %s",
+                (email, order["id"], codice_sconto_valido),
+            )
         conn.commit()
         cur.close()
         conn.close()
@@ -285,6 +345,59 @@ async def admin_orders(request: Request, username: str = Depends(verify_admin)):
     return templates.TemplateResponse("admin.html", {
         "request": request, "config": CONFIG, "orders": orders,
     })
+
+
+@app.get("/admin/sconti", response_class=HTMLResponse)
+async def admin_sconti(request: Request, username: str = Depends(verify_admin)):
+    codici = []
+    if DATABASE_URL:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM codici_sconto ORDER BY creato_at DESC")
+        codici = [dict(row) for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+    return templates.TemplateResponse("admin_sconti.html", {
+        "request": request, "config": CONFIG, "codici": codici,
+    })
+
+
+@app.post("/admin/sconti/crea", response_class=HTMLResponse)
+async def admin_crea_codice(
+    request: Request,
+    codice: str = Form(...),
+    percentuale: int = Form(...),
+    username: str = Depends(verify_admin),
+):
+    if not DATABASE_URL:
+        raise HTTPException(status_code=503)
+    codice = codice.upper().strip()
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO codici_sconto (codice, percentuale, usato, creato_at) VALUES (%s, %s, FALSE, %s)",
+            (codice, percentuale, datetime.utcnow().isoformat()),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+    cur.close()
+    conn.close()
+    return RedirectResponse("/admin/sconti", status_code=303)
+
+
+@app.post("/admin/sconti/elimina/{codice}", response_class=HTMLResponse)
+async def admin_elimina_codice(codice: str, username: str = Depends(verify_admin)):
+    if not DATABASE_URL:
+        raise HTTPException(status_code=503)
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM codici_sconto WHERE codice = %s", (codice,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return RedirectResponse("/admin/sconti", status_code=303)
 
 
 @app.get("/admin/ordine/{order_id}", response_class=HTMLResponse)

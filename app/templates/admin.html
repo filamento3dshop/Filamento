@@ -8,7 +8,10 @@
       <span class="section-label">Admin</span>
       <h1>Ordini ricevuti</h1>
       <div class="divider"></div>
-      <p class="legal-meta">{{ orders|length }} ordini totali</p>
+      <p class="legal-meta" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+        <span>{{ orders|length }} ordini totali</span>
+        <a href="/admin/sconti" style="color:var(--c600,#e55252);font-weight:600;font-size:.9rem;">🎟 Gestisci codici sconto →</a>
+      </p>
     </div>
 
     <div class="legal-body">
