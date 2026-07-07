@@ -127,17 +127,20 @@ METODO_LABEL = {"stripe": "Carta di credito", "paypal": "PayPal", "bonifico": "B
 
 
 def _send_email_bg(to: str, subject: str, html: str):
+    import traceback
+    print(f"[EMAIL] Invio a {to} | SMTP_USER={SMTP_USER!r} | PASS_len={len(SMTP_PASS) if SMTP_PASS else 0}")
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = f"Filamento <{SMTP_USER}>"
         msg["To"] = to
         msg.attach(MIMEText(html, "html"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as s:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as s:
             s.login(SMTP_USER, SMTP_PASS)
             s.sendmail(SMTP_USER, to, msg.as_string())
+        print(f"[EMAIL] OK — inviata a {to}")
     except Exception as e:
-        print(f"[EMAIL ERROR] {e}")
+        print(f"[EMAIL ERROR] {e}\n{traceback.format_exc()}")
 
 
 def invia_email(to: str, subject: str, html: str):
