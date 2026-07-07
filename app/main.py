@@ -1,8 +1,11 @@
 import os
 import secrets
 import uuid
+import smtplib
 import stripe
 import psycopg
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from psycopg.rows import dict_row
 from datetime import datetime
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
@@ -48,6 +51,9 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
+NEGOZIO_EMAIL = os.getenv("NEGOZIO_EMAIL", "filamento3d.shop@gmail.com")
 
 security = HTTPBasic()
 
@@ -114,6 +120,78 @@ def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
             headers={"WWW-Authenticate": "Basic"},
         )
     return credentials.username
+
+
+METODO_LABEL = {"stripe": "Carta di credito", "paypal": "PayPal", "bonifico": "Bonifico bancario"}
+
+
+def invia_email(to: str, subject: str, html: str):
+    if not SMTP_USER or not SMTP_PASS:
+        return
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = f"Filamento <{SMTP_USER}>"
+        msg["To"] = to
+        msg.attach(MIMEText(html, "html"))
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+            s.login(SMTP_USER, SMTP_PASS)
+            s.sendmail(SMTP_USER, to, msg.as_string())
+    except Exception as e:
+        print(f"[EMAIL ERROR] {e}")
+
+
+def email_cliente(order: dict, payment_method: str) -> str:
+    metodo = METODO_LABEL.get(payment_method, payment_method)
+    bonifico_note = ""
+    if payment_method == "bonifico":
+        bonifico_note = f"""
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:16px;margin:16px 0;">
+          <strong>Istruzioni bonifico:</strong><br>
+          Intestato a: <strong>Camilla Campani</strong><br>
+          IBAN: <strong>IT42G03268223000EMH02590789</strong><br>
+          Causale: <strong>Ordine Filamento #{order['id']} — {order['nome']} {order['cognome']}</strong><br>
+          <small>Il tuo ordine verrà messo in lavorazione alla ricezione del pagamento.</small>
+        </div>"""
+    sconto_riga = f"<tr><td>Sconto applicato</td><td><strong>{order.get('sconto_applicato','')}</strong></td></tr>" if order.get('sconto_applicato') else ""
+    return f"""
+    <div style="font-family:Georgia,serif;max-width:580px;margin:0 auto;color:#1A1714;">
+      <div style="background:#1A1714;padding:24px 32px;">
+        <h1 style="color:#fff;font-size:22px;margin:0;">Filamento</h1>
+      </div>
+      <div style="padding:32px;">
+        <h2 style="font-size:18px;">Grazie per il tuo ordine, {order['nome']}! 🎉</h2>
+        <p>Abbiamo ricevuto il tuo ordine <strong>#{order['id']}</strong>. Lo realizziamo con cura e te lo spediamo in 7–10 giorni lavorativi.</p>
+        {bonifico_note}
+        <table style="width:100%;border-collapse:collapse;margin:20px 0;font-size:14px;">
+          <tr style="background:#f5f5f5;"><td style="padding:8px 12px;"><strong>Lettera</strong></td><td style="padding:8px 12px;">{order['lettera']} ({order['dimensione']} cm)</td></tr>
+          <tr><td style="padding:8px 12px;">Nome sul pezzo</td><td style="padding:8px 12px;">{order.get('nome_bimbo','—')}</td></tr>
+          <tr style="background:#f5f5f5;"><td style="padding:8px 12px;">Pagamento</td><td style="padding:8px 12px;">{metodo}</td></tr>
+          {sconto_riga}
+          <tr><td style="padding:8px 12px;"><strong>Totale</strong></td><td style="padding:8px 12px;"><strong>€{order['totale']}</strong></td></tr>
+          <tr style="background:#f5f5f5;"><td style="padding:8px 12px;">Spedizione a</td><td style="padding:8px 12px;">{order.get('indirizzo_spedizione','—')}</td></tr>
+        </table>
+        <p style="color:#888;font-size:13px;">Per qualsiasi domanda scrivi a <a href="mailto:{NEGOZIO_EMAIL}">{NEGOZIO_EMAIL}</a></p>
+      </div>
+    </div>"""
+
+
+def email_negozio(order: dict, payment_method: str) -> str:
+    metodo = METODO_LABEL.get(payment_method, payment_method)
+    return f"""
+    <div style="font-family:monospace;max-width:580px;margin:0 auto;color:#1A1714;">
+      <h2>Nuovo ordine #{order['id']} — {metodo}</h2>
+      <p><strong>Cliente:</strong> {order['nome']} {order['cognome']} ({order['email']})<br>
+      <strong>Tel:</strong> {order.get('telefono','—')}</p>
+      <p><strong>Lettera:</strong> {order['lettera']} {order['dimensione']}cm<br>
+      <strong>Nome:</strong> {order.get('nome_bimbo','—')}<br>
+      <strong>Colore lettera:</strong> {order.get('colore_lettera','—')}<br>
+      <strong>Colore scritta:</strong> {order.get('colore_scritta','—')}<br>
+      <strong>Tema:</strong> {order.get('tema','—')}</p>
+      <p><strong>Spedizione:</strong> {order.get('indirizzo_spedizione','—')}</p>
+      <p><strong>Totale:</strong> €{order['totale']}{' (sconto ' + order['sconto_applicato'] + ')' if order.get('sconto_applicato') else ''}</p>
+      <p><a href="https://www.filamentoshop.it/admin/ordine/{order['id']}">→ Vedi ordine in admin</a></p>
+    </div>"""
 
 
 def calcola_totale(dimensione: str, num_deco: int, sconto_perc: int = 0) -> float:
@@ -298,6 +376,10 @@ async def ordina_post(
         cur.close()
         conn.close()
 
+    order["sconto_applicato"] = f"{sconto_perc}%" if sconto_perc else ""
+    invia_email(email, f"Conferma ordine #{order_id} — Filamento", email_cliente(order, payment_method))
+    invia_email(NEGOZIO_EMAIL, f"Nuovo ordine #{order_id} — {nome} {cognome}", email_negozio(order, payment_method))
+
     return templates.TemplateResponse("conferma.html", {
         "request": request, "config": CONFIG, "order": order,
     })
@@ -398,6 +480,19 @@ async def admin_elimina_codice(codice: str, username: str = Depends(verify_admin
     cur.close()
     conn.close()
     return RedirectResponse("/admin/sconti", status_code=303)
+
+
+@app.post("/admin/ordine/{order_id}/elimina", response_class=HTMLResponse)
+async def admin_elimina_ordine(order_id: str, username: str = Depends(verify_admin)):
+    if not DATABASE_URL:
+        raise HTTPException(status_code=503)
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM orders WHERE id = %s", (order_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return RedirectResponse("/admin", status_code=303)
 
 
 @app.get("/admin/ordine/{order_id}", response_class=HTMLResponse)

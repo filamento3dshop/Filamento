@@ -19,7 +19,10 @@
         <div class="legal-info-row"><span class="legal-info-label">Codice fiscale</span><strong>{{ order.codice_fiscale }}</strong></div>
         <div class="legal-info-row"><span class="legal-info-label">Indirizzo spedizione</span><strong>{{ order.indirizzo_spedizione }}</strong></div>
         <div class="legal-info-row"><span class="legal-info-label">Pagamento</span><strong>{{ order.payment_method }}</strong></div>
-        <div class="legal-info-row" style="border-bottom:none;"><span class="legal-info-label">Totale</span><strong>€{{ order.totale }}</strong></div>
+        <div class="legal-info-row"><span class="legal-info-label">Totale</span><strong>€{{ order.totale }}</strong></div>
+        {% if order.codice_sconto %}
+        <div class="legal-info-row" style="border-bottom:none;"><span class="legal-info-label">Sconto</span><strong>{{ order.codice_sconto }} ({{ order.sconto_applicato }})</strong></div>
+        {% endif %}
       </div>
 
       <h2>Prodotto</h2>
@@ -35,8 +38,14 @@
       </div>
     </div>
 
-    <div class="legal-footer-nav">
+    <div class="legal-footer-nav" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
       <a href="/admin" class="btn-ghost">← Torna agli ordini</a>
+      <form method="post" action="/admin/ordine/{{ order.id }}/elimina"
+        onsubmit="return confirm('Eliminare definitivamente l\'ordine #{{ order.id }}? Questa azione non è reversibile.')">
+        <button type="submit" style="background:none;border:1px solid #e55252;color:#e55252;border-radius:4px;padding:8px 16px;font-size:.85rem;cursor:pointer;font-family:inherit;">
+          🗑 Elimina ordine
+        </button>
+      </form>
     </div>
   </div>
 </div>
