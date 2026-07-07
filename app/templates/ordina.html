@@ -469,6 +469,18 @@
           </div>
         </div>
 
+        {# ── Codice sconto ── #}
+        <div class="sconto-wrap" style="margin-bottom:20px;">
+          <div class="sconto-row">
+            <input type="text" id="codice-sconto-input" placeholder="Hai un codice sconto?" maxlength="30"
+              style="text-transform:uppercase;flex:1;border:1px solid var(--c200);border-radius:4px;padding:9px 12px;font-size:.9rem;font-family:inherit;">
+            <button type="button" id="btn-applica-sconto" onclick="applicaSconto()"
+              style="background:var(--text);color:#fff;border:none;border-radius:4px;padding:9px 18px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;">Applica</button>
+          </div>
+          <div id="sconto-msg" style="font-size:.85rem;margin-top:6px;min-height:18px;"></div>
+          <input type="hidden" name="codice_sconto" id="codice_sconto_hidden">
+        </div>
+
         <div class="payment-tabs">
           <button type="button" class="pay-tab active" data-tab="stripe">
             <i class="fas fa-credit-card" style="margin-right:6px;" aria-hidden="true"></i>Carta
@@ -1099,6 +1111,8 @@ function validateStep(step) {
   return true;
 }
 
+let scontoPerc = 0;
+
 function updateRecap() {
   const lettera = document.getElementById('lettera').value || '—';
   const dim = document.querySelector('input[name="dimensione"]:checked');
@@ -1106,11 +1120,43 @@ function updateRecap() {
   const dimVal = dim ? dim.value : '20';
   const isRitiro = document.getElementById('tipo_ritiro') && document.getElementById('tipo_ritiro').checked;
   const spedCost = isRitiro ? 0 : 3;
-  const total = (PREZZI_DIM[dimVal] || 29.90) + (PREZZI_DECO[numDeco] || 0) + spedCost;
+  let total = (PREZZI_DIM[dimVal] || 29.90) + (PREZZI_DECO[numDeco] || 0) + spedCost;
+  if (scontoPerc > 0) total = Math.round(total * (1 - scontoPerc / 100) * 100) / 100;
   document.getElementById('r-lettera').textContent = lettera;
   document.getElementById('r-dim').textContent = dim ? dim.value + ' cm' : '—';
   document.getElementById('r-colore').textContent = colore ? colore.closest('label').querySelector('.cname').textContent : '—';
-  document.getElementById('r-totale').textContent = '€' + total.toFixed(2).replace('.', ',');
+  document.getElementById('r-totale').textContent = '€' + total.toFixed(2).replace('.', ',') + (scontoPerc > 0 ? ' (-' + scontoPerc + '%)' : '');
+}
+
+async function applicaSconto() {
+  const input = document.getElementById('codice-sconto-input');
+  const msg = document.getElementById('sconto-msg');
+  const hidden = document.getElementById('codice_sconto_hidden');
+  const codice = input.value.trim().toUpperCase();
+  if (!codice) return;
+  msg.style.color = 'var(--text2)';
+  msg.textContent = 'Verifica in corso…';
+  try {
+    const res = await fetch('/api/codice-sconto/' + encodeURIComponent(codice));
+    const data = await res.json();
+    if (data.valido) {
+      scontoPerc = data.percentuale;
+      hidden.value = codice;
+      input.disabled = true;
+      document.getElementById('btn-applica-sconto').disabled = true;
+      msg.style.color = '#155724';
+      msg.textContent = '✓ Sconto del ' + data.percentuale + '% applicato!';
+      updateRecap();
+    } else {
+      scontoPerc = 0;
+      hidden.value = '';
+      msg.style.color = 'var(--c500,#e55252)';
+      msg.textContent = data.errore || 'Codice non valido';
+    }
+  } catch {
+    msg.style.color = 'var(--c500,#e55252)';
+    msg.textContent = 'Errore di rete, riprova.';
+  }
 }
 
 // ══ Spedizione toggle ══

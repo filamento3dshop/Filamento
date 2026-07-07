@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Admin — Codici Sconto — Filamento{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+  <div class="legal-inner">
+    <div class="legal-header">
+      <span class="section-label">Admin</span>
+      <h1>Codici Sconto</h1>
+      <div class="divider"></div>
+      <p class="legal-meta"><a href="/admin" style="color:var(--text2);font-size:.9rem;">← Torna agli ordini</a></p>
+    </div>
+
+    <div class="legal-body">
+
+      {# Form crea nuovo codice #}
+      <div class="sconto-form-box">
+        <h2 style="font-size:1.05rem;margin-bottom:16px;">Crea nuovo codice</h2>
+        <form method="post" action="/admin/sconti/crea" class="sconto-form">
+          <div class="sconto-row">
+            <div class="sconto-field">
+              <label>Codice</label>
+              <input type="text" name="codice" placeholder="es. ESTATE25" required
+                style="text-transform:uppercase;" maxlength="30">
+            </div>
+            <div class="sconto-field sconto-field--sm">
+              <label>Sconto %</label>
+              <input type="number" name="percentuale" min="1" max="100" placeholder="10" required>
+            </div>
+            <div class="sconto-field sconto-field--btn">
+              <label>&nbsp;</label>
+              <button type="submit" class="btn-crea">Crea</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {# Lista codici #}
+      {% if codici %}
+      <table class="admin-table" style="margin-top:28px;">
+        <thead>
+          <tr>
+            <th>Codice</th>
+            <th>Sconto</th>
+            <th>Stato</th>
+            <th>Usato da</th>
+            <th>Ordine</th>
+            <th>Creato il</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in codici %}
+          <tr>
+            <td><strong>{{ c.codice }}</strong></td>
+            <td>{{ c.percentuale }}%</td>
+            <td>
+              {% if c.usato %}
+              <span class="badge badge-used">Usato</span>
+              {% else %}
+              <span class="badge badge-free">Disponibile</span>
+              {% endif %}
+            </td>
+            <td>{{ c.usato_da or '—' }}</td>
+            <td>{% if c.usato_in %}<a href="/admin/ordine/{{ c.usato_in }}">#{{ c.usato_in }}</a>{% else %}—{% endif %}</td>
+            <td>{{ c.creato_at[:16].replace('T', ' ') }}</td>
+            <td>
+              {% if not c.usato %}
+              <form method="post" action="/admin/sconti/elimina/{{ c.codice }}"
+                onsubmit="return confirm('Eliminare il codice {{ c.codice }}?')">
+                <button type="submit" class="btn-delete">Elimina</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="margin-top:24px;color:var(--text2);">Nessun codice sconto creato.</p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<style>
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.admin-table th, .admin-table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--c200); }
+.admin-table th { font-weight: 600; color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+
+.sconto-form-box { background: var(--c100); border: 1px solid var(--c200); border-radius: 8px; padding: 24px; }
+.sconto-form { }
+.sconto-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.sconto-field { display: flex; flex-direction: column; gap: 6px; }
+.sconto-field label { font-size: .8rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+.sconto-field input { border: 1px solid var(--c200); border-radius: 4px; padding: 9px 12px; font-size: .95rem; font-family: inherit; background: #fff; width: 220px; }
+.sconto-field--sm input { width: 100px; }
+.sconto-field--btn { }
+.btn-crea { background: var(--c600,#e55252); color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: .9rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-crea:hover { opacity: .88; }
+
+.badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .78rem; font-weight: 600; }
+.badge-free { background: #d4edda; color: #155724; }
+.badge-used { background: #f0f0f0; color: #888; }
+
+.btn-delete { background: none; border: 1px solid var(--c200); color: var(--text2); border-radius: 4px; padding: 4px 10px; font-size: .8rem; cursor: pointer; font-family: inherit; }
+.btn-delete:hover { border-color: var(--c600,#e55252); color: var(--c600,#e55252); }
+</style>
+{% endblock %}
