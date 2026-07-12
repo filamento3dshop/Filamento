@@ -95,6 +95,7 @@
                 </div>
               </div>
               <p class="preview-hint" id="deco-preview-name" style="text-align:center;font-weight:600;"></p>
+              <p class="preview-hint">Anteprima del risultato — i colori reali potrebbero variare leggermente</p>
             </div>
 
             <div class="live-total">
@@ -1562,50 +1563,9 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     scaleCurrent = 0.01; scaleTarget = 1.0;
   }
 
-  // ── Decorazioni con animazione pop ──
+  // ── Decorazioni: solo nel secondo viewer, non nella lettera ──
   function refreshDecos() {
     clearDecos();
-    const names = [...document.querySelectorAll('.deco-check:checked')].map(c => c.value).slice(0, 4);
-    if (!names.length) return;
-
-    const lb = letterMesh
-      ? new THREE.Box3().setFromObject(letterMesh)
-      : new THREE.Box3(new THREE.Vector3(-0.55,-0.6,-0.25), new THREE.Vector3(0.55,0.6,0.25));
-
-    const positions = [
-      { x: lb.max.x + 0.55, y: lb.max.y + 0.15 },
-      { x: lb.min.x - 0.55, y: lb.max.y + 0.15 },
-      { x: lb.max.x + 0.55, y: lb.min.y + 0.25 },
-      { x: lb.min.x - 0.55, y: lb.min.y + 0.25 }
-    ];
-
-    names.forEach((name, i) => {
-      const ap = positions[i] || positions[0];
-      const glbUrl = `/static/models/decorazioni/${decoFilename(name)}.glb`;
-
-      fetch(glbUrl, { method: 'HEAD' })
-        .then(r => {
-          if (r.ok) {
-            new GLTFLoader().load(glbUrl, gltf => {
-              const model = gltf.scene;
-              model.traverse(c => { if (c.isMesh) c.castShadow = true; });
-              const b = new THREE.Box3().setFromObject(model);
-              const sv = b.getSize(new THREE.Vector3());
-              const baseScale = 0.32 / Math.max(sv.x, sv.y, sv.z, 0.01);
-              model.userData.baseScale = baseScale;
-              model.userData.scaleCurrent = 0.01;
-              model.userData.scaleTarget = 1.0;
-              model.scale.setScalar(0.01);
-              model.position.set(ap.x, ap.y, 0.3);
-              letterGroup.add(model);
-              decoObjects.push(model);
-            });
-          } else {
-            addEmojiSprite(DECO_EMOJI[name] || '✦', ap.x, ap.y);
-          }
-        })
-        .catch(() => addEmojiSprite(DECO_EMOJI[name] || '✦', ap.x, ap.y));
-    });
   }
 
   function addEmojiSprite(emoji, x, y) {
