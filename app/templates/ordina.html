@@ -79,6 +79,24 @@
               <p class="preview-hint">Anteprima del risultato — i colori e le proporzioni reali potrebbero variare leggermente</p>
             </div>
 
+            {# ── Secondo viewer: decorazione selezionata ── #}
+            <div class="preview-card deco-preview-card" id="deco-preview-card" style="display:none;margin-top:16px;">
+              <div class="preview-card-label">Decorazione selezionata</div>
+              <div class="preview-stage" style="height:220px;">
+                <div id="deco-three-wrap" style="position:relative;width:100%;height:100%;">
+                  <canvas id="deco-canvas" style="width:100%;height:100%;display:block;"></canvas>
+                  <div id="deco-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--c50,#fdf8f5);">
+                    <div class="pl-spinner"></div>
+                  </div>
+                  <div id="deco-hint-rotate" class="three-hint-rotate" style="position:absolute;bottom:8px;right:10px;font-size:.7rem;color:var(--text3);display:flex;align-items:center;gap:4px;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                    Ruota
+                  </div>
+                </div>
+              </div>
+              <p class="preview-hint" id="deco-preview-name" style="text-align:center;font-weight:600;"></p>
+            </div>
+
             <div class="live-total">
               <div class="lt-row">
                 <span class="lt-label">Composizione <span id="lt-dim-label">20 cm</span></span>
@@ -1035,7 +1053,10 @@ document.querySelectorAll('.deco-slot').forEach(slot => {
     aggiornaDecoUI();
   });
 });
-document.querySelectorAll('.deco-check').forEach(cb => cb.addEventListener('change', aggiornaDecoCount));
+document.querySelectorAll('.deco-check').forEach(cb => cb.addEventListener('change', e => {
+  aggiornaDecoCount();
+  if (e.target.checked) loadDecoPreview(e.target.value);
+}));
 document.querySelectorAll('.deco-slot').forEach(s => {
   if (parseInt(s.dataset.n) === numDeco) s.classList.add('selected');
 });
@@ -2040,6 +2061,93 @@ function removeUpload() {
 
 // ══ Init ══
 updateTotal();
+
+// ══ Decoration preview viewer ══
+(async function initDecoViewer() {
+  let THREE, OrbitControls, GLTFLoader;
+  try {
+    THREE = await import('three');
+    ({ OrbitControls } = await import('/static/js/jsm/controls/OrbitControls.js'));
+    ({ GLTFLoader } = await import('/static/js/jsm/loaders/GLTFLoader.js'));
+  } catch(e) { console.warn('DecoViewer load error:', e); return; }
+
+  const canvas = document.getElementById('deco-canvas');
+  const wrap = document.getElementById('deco-three-wrap');
+  const loading = document.getElementById('deco-loading');
+  const card = document.getElementById('deco-preview-card');
+  const nameEl = document.getElementById('deco-preview-name');
+  if (!canvas || !wrap) return;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.3;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
+  camera.position.set(0, 0, 3);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 2;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 1.4));
+  const dir1 = new THREE.DirectionalLight(0xffffff, 1.6);
+  dir1.position.set(2, 3, 4);
+  scene.add(dir1);
+  const dir2 = new THREE.DirectionalLight(0xffffff, 0.6);
+  dir2.position.set(-2, -1, 2);
+  scene.add(dir2);
+
+  let currentModel = null;
+  let animRunning = false;
+
+  function resizeRenderer() {
+    const w = wrap.clientWidth || 300;
+    const h = 220;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  resizeRenderer();
+  new ResizeObserver(resizeRenderer).observe(wrap);
+
+  function animate() {
+    if (!animRunning) return;
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  window.loadDecoPreview = function(name) {
+    const url = `/static/models/decorazioni/${encodeURIComponent(name)}.glb`;
+    card.style.display = 'block';
+    nameEl.textContent = name;
+    loading.style.display = 'flex';
+    if (currentModel) { scene.remove(currentModel); currentModel = null; }
+    if (!animRunning) { animRunning = true; animate(); }
+
+    new GLTFLoader().load(url, (gltf) => {
+      const model = gltf.scene;
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3()).length();
+      model.position.sub(center);
+      model.scale.setScalar(2 / size);
+      scene.add(model);
+      currentModel = model;
+      camera.position.set(0, 0, 2.5);
+      controls.reset();
+      loading.style.display = 'none';
+    }, undefined, () => {
+      loading.style.display = 'none';
+      nameEl.textContent = name + ' — anteprima non disponibile';
+    });
+  };
+})();
 </script>
 
 {% endblock %}
