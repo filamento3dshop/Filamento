@@ -2119,6 +2119,21 @@ updateTotal();
 
     new GLTFLoader().load(url, (gltf) => {
       const model = gltf.scene;
+      // Forza vertex colors se presenti ma non collegati al materiale
+      model.traverse(child => {
+        if (child.isMesh && child.geometry) {
+          const geo = child.geometry;
+          const hasVertexColors = geo.attributes.color != null;
+          if (hasVertexColors) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach(m => { m.vertexColors = true; m.needsUpdate = true; });
+            } else {
+              child.material.vertexColors = true;
+              child.material.needsUpdate = true;
+            }
+          }
+        }
+      });
       const box = new THREE.Box3().setFromObject(model);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3()).length();
