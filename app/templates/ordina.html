@@ -302,25 +302,29 @@
               </div>
 
               {% set catalogo = [
-                ('<i class="fas fa-paw"></i>',    'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre']),
-                ('<i class="fas fa-rocket"></i>', 'Spazio',      ['Razzo','Pianeta','Stella','Luna','Astronauta','UFO']),
-                ('<i class="fas fa-fish"></i>',   'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo']),
-                ('<i class="fas fa-cloud-sun"></i>', 'Cielo',    ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino']),
-                ('<i class="fas fa-crown"></i>', 'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza']),
-                ('<i class="fas fa-futbol"></i>', 'Sport',       ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata']),
-                ('<i class="fas fa-car"></i>', 'Motori',         ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Bici','Treno']),
-                ('<i class="fas fa-leaf"></i>', 'Natura',        ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella']),
-                ('<i class="fas fa-ice-cream"></i>', 'Cibo',     ['Cono gelato','Pizza','Fragola','Fetta cocomero','Ciliege','More','Banana','Donut','Fetta torta']),
+                ('<i class="fas fa-paw"></i>',       'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre'],        []),
+                ('<i class="fas fa-rocket"></i>',    'Spazio',      ['Razzo','Pianeta','Stella','Astronauta','UFO'],                                            ['Stella','UFO']),
+                ('<i class="fas fa-fish"></i>',      'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino','Squalo'], ['Pesce','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Corallo','Cavalluccio marino','Squalo']),
+                ('<i class="fas fa-cloud-sun"></i>', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino'], ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino']),
+                ('<i class="fas fa-crown"></i>',     'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Borsetta','Rossetto','Carrozza'], ['Bacchetta magica','Unicorno','Fiocco','Fatina','Carrozza']),
+                ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da calcio','Pallone basket','Porta da calcio','Guantone boxe','Pallina tennis','Bicicletta','Palla da football']),
+                ('<i class="fas fa-car"></i>',       'Motori',      ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Bici','Treno'],               []),
+                ('<i class="fas fa-leaf"></i>',      'Natura',      ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella'],                                     ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella']),
+                ('<i class="fas fa-ice-cream"></i>', 'Cibo',        ['Cono gelato','Pizza','Fragola','Fetta cocomero','Ciliege','More','Banana','Donut','Fetta torta'], ['Cono gelato','Pizza','Fetta cocomero','Banana','Donut','Fetta torta']),
               ] %}
 
-              {% for ico, nome_tema, items in catalogo %}
+              {% for ico, nome_tema, items, flat_items in catalogo %}
               <div class="deco-tema-block" data-tema="{{ nome_tema.lower() }}">
                 <div class="deco-tema-title">{{ ico | safe }} {{ nome_tema }}</div>
                 <div class="deco-items">
                   {% for item in items %}
+                  {% set is_flat = item in flat_items %}
                   <label class="deco-item">
-                    <input type="checkbox" name="deco_item" value="{{ item }}" class="deco-check">
-                    <span class="deco-item-label">{{ item }}</span>
+                    <input type="checkbox" name="deco_item" value="{{ item }}" class="deco-check" data-tipo="{{ 'flat' if is_flat else '3d' }}">
+                    <span class="deco-item-label">
+                      {{ item }}
+                      <span class="deco-tipo-badge {{ 'deco-flat' if is_flat else 'deco-3d' }}">{{ 'flat' if is_flat else '3D' }}</span>
+                    </span>
                   </label>
                   {% endfor %}
                 </div>
@@ -750,6 +754,9 @@ textarea.form-control { resize: vertical; }
 .deco-item-label { display: inline-block; padding: 6px 13px; border: 1.5px solid var(--c200); border-radius: 20px; font-size: 0.8rem; color: var(--text2); background: var(--white); transition: all .15s; user-select: none; }
 .deco-item input:checked + .deco-item-label { border-color: var(--c500); color: var(--c500); background: #fff5f5; font-weight: 500; }
 .deco-item.disabled .deco-item-label { opacity: .4; cursor: not-allowed; }
+.deco-tipo-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
+.deco-3d { background: #e8f4fd; color: #2980b9; }
+.deco-flat { background: #f0f0f0; color: #888; }
 .deco-item.disabled input:not(:checked) { pointer-events: none; }
 
 /* ══ Wizard nav ══ */
@@ -1056,7 +1063,7 @@ document.querySelectorAll('.deco-slot').forEach(slot => {
 });
 document.querySelectorAll('.deco-check').forEach(cb => cb.addEventListener('change', e => {
   aggiornaDecoCount();
-  if (e.target.checked) loadDecoPreview(e.target.value);
+  if (e.target.checked) loadDecoPreview(e.target.value, e.target.dataset.tipo === 'flat');
 }));
 document.querySelectorAll('.deco-slot').forEach(s => {
   if (parseInt(s.dataset.n) === numDeco) s.classList.add('selected');
@@ -2082,10 +2089,30 @@ updateTotal();
     renderer.render(scene, camera);
   }
 
-  window.loadDecoPreview = function(name) {
+  const tipoBadge = document.createElement('span');
+  tipoBadge.style.cssText = 'display:inline-block;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;padding:2px 7px;border-radius:3px;margin-left:8px;vertical-align:middle;';
+  nameEl.after(tipoBadge);
+
+  window.loadDecoPreview = function(name, isFlat) {
     const url = `/static/models/decorazioni/${encodeURIComponent(name)}.glb`;
     card.style.display = 'block';
     nameEl.textContent = name;
+
+    // badge FLAT / 3D
+    if (isFlat) {
+      tipoBadge.textContent = 'flat';
+      tipoBadge.style.background = '#f0f0f0';
+      tipoBadge.style.color = '#888';
+    } else {
+      tipoBadge.textContent = '3D';
+      tipoBadge.style.background = '#e8f4fd';
+      tipoBadge.style.color = '#2980b9';
+    }
+
+    // controlli: flat = vista frontale fissa, 3D = rotazione automatica
+    controls.autoRotate = !isFlat;
+    controls.enableRotate = !isFlat;
+
     loading.style.display = 'flex';
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
     if (!animRunning) { animRunning = true; animate(); }
@@ -2099,7 +2126,11 @@ updateTotal();
       model.scale.setScalar(2 / size);
       scene.add(model);
       currentModel = model;
-      camera.position.set(0, 0, 2.5);
+      if (isFlat) {
+        camera.position.set(0, 0, 2.5);
+      } else {
+        camera.position.set(0, 0.2, 2.5);
+      }
       controls.reset();
       loading.style.display = 'none';
     }, undefined, () => {
