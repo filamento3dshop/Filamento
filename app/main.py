@@ -147,7 +147,7 @@ def email_cliente(order: dict, payment_method: str) -> str:
         bonifico_note = f"""
         <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:16px;margin:16px 0;">
           <strong>Istruzioni bonifico:</strong><br>
-          Intestato a: <strong>Camilla Campani</strong><br>
+          Intestato a: <strong>FOCUS 3D di Camilla Campani</strong><br>
           IBAN: <strong>IT42G03268223000EMH02590789</strong><br>
           Causale: <strong>Ordine Filamento #{order['id']} — {order['nome']} {order['cognome']}</strong><br>
           <small>Il tuo ordine verrà messo in lavorazione alla ricezione del pagamento.</small>
