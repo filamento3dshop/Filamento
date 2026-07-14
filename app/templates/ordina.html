@@ -2145,7 +2145,7 @@ updateTotal();
       model.position.sub(center);
       model.scale.setScalar(2 / size);
       // per-model rotation overrides
-      const rotY = { 'Pesce': Math.PI / 2, 'Cavalluccio marino': Math.PI / 2 };
+      const rotY = { 'Pesce': Math.PI / 2, 'Cavalluccio marino': Math.PI / 2, 'Squalo': Math.PI / 2 };
       if (rotY[name] !== undefined) model.rotation.y = rotY[name];
       scene.add(model);
       currentModel = model;
