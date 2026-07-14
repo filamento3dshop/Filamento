@@ -2147,10 +2147,11 @@ updateTotal();
       scene.add(model);
       currentModel = model;
       if (isFlat) {
-        camera.position.set(0, 0, 2.5);
+        camera.position.set(1.0, 0.6, 2.2);
       } else {
         camera.position.set(0, 0.2, 2.5);
       }
+      controls.target.set(0, 0, 0);
       controls.reset();
       loading.style.display = 'none';
     }, undefined, () => {
