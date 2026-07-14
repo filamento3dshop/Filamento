@@ -2053,7 +2053,7 @@ updateTotal();
   renderer.setClearColor(0x464543, 1);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 0.7;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
@@ -2065,11 +2065,11 @@ updateTotal();
   controls.autoRotate = true;
   controls.autoRotateSpeed = 2;
 
-  scene.add(new THREE.AmbientLight(0xffffff, 1.4));
-  const dir1 = new THREE.DirectionalLight(0xffffff, 1.6);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  const dir1 = new THREE.DirectionalLight(0xffffff, 0.8);
   dir1.position.set(2, 3, 4);
   scene.add(dir1);
-  const dir2 = new THREE.DirectionalLight(0xffffff, 0.6);
+  const dir2 = new THREE.DirectionalLight(0xffffff, 0.3);
   dir2.position.set(-2, -1, 2);
   scene.add(dir2);
 
@@ -2133,8 +2133,8 @@ updateTotal();
           mats.forEach(m => {
             if (geo.attributes.color) { m.vertexColors = true; }
             // Riduce l'effetto lucido/specchiato dei modelli Meshy
-            if (m.metalness !== undefined) m.metalness = Math.min(m.metalness, 0.1);
-            if (m.roughness !== undefined) m.roughness = Math.max(m.roughness, 0.75);
+            if (m.metalness !== undefined) m.metalness = 0;
+            if (m.roughness !== undefined) m.roughness = Math.max(m.roughness, 0.9);
             m.needsUpdate = true;
           });
         }
