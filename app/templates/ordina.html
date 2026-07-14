@@ -2053,7 +2053,7 @@ updateTotal();
   renderer.setClearColor(0x464543, 1);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.3;
+  renderer.toneMappingExposure = 1.0;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
@@ -2129,15 +2129,14 @@ updateTotal();
       model.traverse(child => {
         if (child.isMesh && child.geometry) {
           const geo = child.geometry;
-          const hasVertexColors = geo.attributes.color != null;
-          if (hasVertexColors) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach(m => { m.vertexColors = true; m.needsUpdate = true; });
-            } else {
-              child.material.vertexColors = true;
-              child.material.needsUpdate = true;
-            }
-          }
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach(m => {
+            if (geo.attributes.color) { m.vertexColors = true; }
+            // Riduce l'effetto lucido/specchiato dei modelli Meshy
+            if (m.metalness !== undefined) m.metalness = Math.min(m.metalness, 0.1);
+            if (m.roughness !== undefined) m.roughness = Math.max(m.roughness, 0.75);
+            m.needsUpdate = true;
+          });
         }
       });
       const box = new THREE.Box3().setFromObject(model);
