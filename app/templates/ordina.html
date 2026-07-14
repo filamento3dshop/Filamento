@@ -7,6 +7,7 @@
   "imports": {
     "three": "/static/js/three.module.min.js",
     "three/addons/": "/static/js/jsm/",
+    "meshopt-decoder": "/static/js/meshopt_decoder.mjs",
     "troika-three-text": "/static/js/troika-three-text.esm.js",
     "troika-three-utils": "/static/js/troika-three-utils.esm.js",
     "troika-worker-utils": "/static/js/troika-worker-utils.esm.js",
@@ -2031,11 +2032,13 @@ updateTotal();
 
 // ══ Decoration preview viewer ══
 (async function initDecoViewer() {
-  let THREE, OrbitControls, GLTFLoader;
+  let THREE, OrbitControls, GLTFLoader, MeshoptDecoder;
   try {
     THREE = await import('three');
     ({ OrbitControls } = await import('/static/js/jsm/controls/OrbitControls.js'));
     ({ GLTFLoader } = await import('/static/js/jsm/loaders/GLTFLoader.js'));
+    ({ MeshoptDecoder } = await import('/static/js/meshopt_decoder.mjs'));
+    await MeshoptDecoder.ready;
   } catch(e) { console.warn('DecoViewer load error:', e); return; }
 
   const canvas = document.getElementById('deco-canvas');
@@ -2118,7 +2121,9 @@ updateTotal();
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
     if (!animRunning) { animRunning = true; animate(); }
 
-    new GLTFLoader().load(url, (gltf) => {
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.setMeshoptDecoder(MeshoptDecoder);
+    gltfLoader.load(url, (gltf) => {
       const model = gltf.scene;
       // Forza vertex colors se presenti ma non collegati al materiale
       model.traverse(child => {
