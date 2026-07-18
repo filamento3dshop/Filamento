@@ -1535,6 +1535,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
           const model = gltf.scene;
           model.traverse(child => {
             if (!child.isMesh) return;
+            child.geometry.computeVertexNormals();
             child.material = letterMat;
             if (photoTex) child.material.map = photoTex;
             child.castShadow = true;
