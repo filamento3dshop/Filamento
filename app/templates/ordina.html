@@ -309,7 +309,7 @@
                 ('<i class="fas fa-fish"></i>',      'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino'], ['Pesce','Stella marina','Granchio','Balena','Medusa','Corallo','Cavalluccio marino']),
                 ('<i class="fas fa-cloud-sun"></i>', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino'], ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino']),
                 ('<i class="fas fa-crown"></i>',     'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Rossetto','Carrozza'], ['Bacchetta magica','Unicorno','Fiocco','Fatina','Carrozza']),
-                ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone da basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da calcio','Pallone da basket','Porta da calcio','Guantone boxe','Bicicletta']),
+                ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone da basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da calcio','Pallone da basket','Porta da calcio','Guantone boxe','Bicicletta','Palla da football']),
                 ('<i class="fas fa-car"></i>',       'Motori',      ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Bici','Treno'],               []),
                 ('<i class="fas fa-leaf"></i>',      'Natura',      ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella'],                                     ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella']),
                 ('<i class="fas fa-ice-cream"></i>', 'Cibo',        ['Cono gelato','Pizza','Fragola','Fetta cocomero','Ciliege','More','Banana','Donut','Fetta torta'], ['Cono gelato','Pizza','Fetta cocomero','Banana','Donut','Fetta torta']),
@@ -2171,12 +2171,16 @@ updateTotal();
       if (rotY[name] !== undefined) model.rotation.y = rotY[name];
       scene.add(model);
       currentModel = model;
-      if (isFlat) {
+      if (name === 'Arrampicata') {
+        camera.position.set(0, 3.5, 0.1);
+        controls.target.set(0, 0, 0);
+      } else if (isFlat) {
         camera.position.set(1.0, 0.6, 2.2);
+        controls.target.set(0, 0, 0);
       } else {
         camera.position.set(0, 0.2, 2.5);
+        controls.target.set(0, 0, 0);
       }
-      controls.target.set(0, 0, 0);
       controls.reset();
       loading.style.display = 'none';
     }, undefined, () => {
