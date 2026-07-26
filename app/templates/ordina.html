@@ -310,7 +310,7 @@
                 ('<i class="fas fa-cloud-sun"></i>', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino'], ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino']),
                 ('<i class="fas fa-crown"></i>',     'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Rossetto','Carrozza'], ['Bacchetta magica','Unicorno','Fiocco','Fatina','Carrozza']),
                 ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone da basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da calcio','Pallone da basket','Porta da calcio','Guantone boxe','Bicicletta','Palla da football']),
-                ('<i class="fas fa-car"></i>',       'Motori',      ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Bici','Treno'],               []),
+                ('<i class="fas fa-car"></i>',       'Motori',      ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Treno'],               []),
                 ('<i class="fas fa-leaf"></i>',      'Natura',      ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella'],                                     ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella']),
                 ('<i class="fas fa-ice-cream"></i>', 'Cibo',        ['Cono gelato','Pizza','Fragola','Fetta cocomero','Ciliege','More','Banana','Donut','Fetta torta'], ['Cono gelato','Pizza','Fetta cocomero','Banana','Donut','Fetta torta']),
               ] %}
@@ -332,6 +332,9 @@
                 </div>
               </div>
               {% endfor %}
+
+              {# Pannello colore per deco selezionate #}
+              <div id="deco-color-panel" style="display:none;margin-top:20px;"></div>
             </div>
           </div>
 
@@ -759,6 +762,14 @@ textarea.form-control { resize: vertical; }
 .deco-tipo-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; padding: 1px 5px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
 .deco-3d { background: #e8f4fd; color: #2980b9; }
 .deco-flat { background: #f0f0f0; color: #888; }
+.deco-color-block { background: var(--c100); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
+.deco-color-block-title { font-size: 0.8rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+.deco-color-block-title span { color: var(--text); }
+.deco-color-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.deco-color-chip { padding: 4px 11px; border-radius: 20px; border: 1.5px solid var(--c200); font-size: 0.75rem; color: var(--text2); background: var(--white); cursor: pointer; transition: all .15s; user-select: none; }
+.deco-color-chip.active { border-color: var(--c500); color: var(--c500); background: #fff5f5; font-weight: 600; }
+.deco-color-altro { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1.5px solid var(--c200); border-radius: 6px; font-size: 0.8rem; color: var(--text); background: var(--white); outline: none; }
+.deco-color-altro:focus { border-color: var(--c400); }
 .deco-item.disabled input:not(:checked) { pointer-events: none; }
 
 /* ══ Wizard nav ══ */
@@ -1063,8 +1074,59 @@ document.querySelectorAll('.deco-slot').forEach(slot => {
     aggiornaDecoUI();
   });
 });
+// ══ Deco colore preferito ══
+const DECO_COLORS = ['Rosso','Rosa','Blu','Verde','Giallo','Viola','Arancione','Bianco','Nero','Come la lettera'];
+const decoColorMap = {}; // { nomeItem: 'colore scelto o testo libero' }
+
+function renderDecoColorPanel() {
+  const checked = [...document.querySelectorAll('.deco-check:checked')];
+  const panel = document.getElementById('deco-color-panel');
+  if (checked.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  panel.innerHTML = '<p style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;">Vuoi un colore specifico per le decorazioni? (opzionale)</p>' +
+    checked.map(cb => {
+      const name = cb.value;
+      const cur = decoColorMap[name] || '';
+      const chips = DECO_COLORS.map(c =>
+        `<span class="deco-color-chip${cur===c?' active':''}" data-deco="${name}" data-color="${c}">${c}</span>`
+      ).join('');
+      const altroVal = DECO_COLORS.includes(cur) ? '' : cur;
+      return `<div class="deco-color-block">
+        <div class="deco-color-block-title">Colore per <span>${name}</span></div>
+        <div class="deco-color-chips">${chips}</div>
+        <input class="deco-color-altro" type="text" placeholder="Altro colore…" data-deco="${name}" value="${altroVal}">
+      </div>`;
+    }).join('');
+
+  // Chip click
+  panel.querySelectorAll('.deco-color-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const deco = chip.dataset.deco;
+      const color = chip.dataset.color;
+      decoColorMap[deco] = (decoColorMap[deco] === color) ? '' : color;
+      // Svuota campo libero se si sceglie chip
+      if (decoColorMap[deco]) {
+        const inp = panel.querySelector(`.deco-color-altro[data-deco="${deco}"]`);
+        if (inp) inp.value = '';
+      }
+      renderDecoColorPanel();
+    });
+  });
+
+  // Campo libero
+  panel.querySelectorAll('.deco-color-altro').forEach(inp => {
+    inp.addEventListener('input', () => {
+      decoColorMap[inp.dataset.deco] = inp.value;
+      // Deseleziona chip se si scrive
+      renderDecoColorPanel();
+    });
+  });
+}
+
 document.querySelectorAll('.deco-check').forEach(cb => cb.addEventListener('change', e => {
   aggiornaDecoCount();
+  if (!e.target.checked) delete decoColorMap[e.target.value];
+  renderDecoColorPanel();
   if (e.target.checked) loadDecoPreview(e.target.value, e.target.dataset.tipo === 'flat');
 }));
 document.querySelectorAll('.deco-slot').forEach(s => {
@@ -1101,8 +1163,20 @@ document.querySelectorAll('.nome-slot-btn').forEach(btn => {
 // ══ Stepper ══
 let currentStep = 1;
 
+function compileDecoColorsIntoNote() {
+  const entries = Object.entries(decoColorMap).filter(([,v]) => v && v.trim());
+  if (!entries.length) return;
+  const colorNote = entries.map(([k,v]) => `${k}: ${v}`).join(' | ');
+  const noteEl = document.getElementById('note');
+  const existing = noteEl.value.trim();
+  // Rimuovi eventuale nota colori precedente e riscrivi
+  const clean = existing.replace(/\n?🎨 Colori decorazioni:.*$/s, '').trimEnd();
+  noteEl.value = (clean ? clean + '\n' : '') + '🎨 Colori decorazioni: ' + colorNote;
+}
+
 function goStep(n) {
   if (n > currentStep && !validateStep(currentStep)) return;
+  if (n === 2 && currentStep === 1) compileDecoColorsIntoNote();
   document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.wstep').forEach((s, i) => {
     s.classList.remove('active', 'done');
