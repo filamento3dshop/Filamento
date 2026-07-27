@@ -772,6 +772,11 @@ textarea.form-control { resize: vertical; }
 .deco-cswatch-name { font-size: 0.55rem; color: var(--text2); text-align: center; max-width: 36px; line-height: 1.2; }
 .deco-color-altro { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1.5px solid var(--c200); border-radius: 6px; font-size: 0.8rem; color: var(--text); background: var(--white); outline: none; margin-top: 2px; }
 .deco-color-altro:focus { border-color: var(--c400); }
+.deco-color-block-sub { font-size: 0.72rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.deco-slot-pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 4px; }
+.deco-slot-pos-btn { padding: 6px 8px; border: 1.5px solid var(--c200); border-radius: 6px; font-size: 0.75rem; color: var(--text2); background: var(--white); cursor: pointer; text-align: center; transition: all .15s; }
+.deco-slot-pos-btn.active { border-color: var(--c500); color: var(--c500); background: #fff5f5; font-weight: 600; }
+.deco-slot-pos-btn:hover { border-color: var(--c300); }
 .deco-item.disabled input:not(:checked) { pointer-events: none; }
 
 /* ══ Wizard nav ══ */
@@ -1093,6 +1098,7 @@ const DECO_COLORS = [
   { nome: 'Nero',         hex: '#1A1A1A' },
 ];
 const decoColorMap = {};
+const decoSlotMap  = {}; // { nomeItem: indice slot scelto }
 
 function renderDecoColorPanel() {
   const checked = [...document.querySelectorAll('.deco-check:checked')];
@@ -1100,30 +1106,47 @@ function renderDecoColorPanel() {
   if (checked.length === 0) { panel.style.display = 'none'; return; }
   panel.style.display = 'block';
 
-  panel.innerHTML = '<p style="font-size:0.8rem;color:var(--text2);margin-bottom:12px;">Colore preferito per le decorazioni <span style="font-weight:400;">(opzionale)</span></p>' +
-    checked.map(cb => {
+  // Nomi slot leggibili per l'utente (stesso ordine di DECO_SLOT_MAP)
+  const SLOT_LABELS = ['Destra in alto','Sinistra in basso','Sinistra in alto','Destra in basso','Sopra al centro','Sotto al centro'];
+
+  panel.innerHTML = '<p style="font-size:0.8rem;color:var(--text2);margin-bottom:12px;">Personalizza le decorazioni <span style="font-weight:400;">(opzionale)</span></p>' +
+    checked.map((cb, idx) => {
       const name = cb.value;
       const cur = decoColorMap[name] || '';
       const isChip = DECO_COLORS.some(c => c.nome === cur);
       const altroVal = isChip ? '' : cur;
+      const curSlot = decoSlotMap[name] !== undefined ? decoSlotMap[name] : idx;
 
       const swatches = DECO_COLORS.map(c => {
         const active = cur === c.nome ? ' active' : '';
-        const style = c.hex
-          ? `background:${c.hex};${c.outline ? 'box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);' : ''}`
-          : `background: linear-gradient(135deg,#E8695A 33%,#3858C0 33% 66%,#38A068 66%);`;
+        const style = `background:${c.hex};${c.outline ? 'box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);' : ''}`;
         return `<div class="deco-cswatch-wrap${active}" data-deco="${name}" data-color="${c.nome}">
           <span class="deco-cswatch" style="${style}"></span>
           <span class="deco-cswatch-name">${c.nome}</span>
         </div>`;
       }).join('');
 
+      const slotBtns = SLOT_LABELS.map((lbl, si) =>
+        `<button type="button" class="deco-slot-pos-btn${curSlot===si?' active':''}" data-deco="${name}" data-slot="${si}">${lbl}</button>`
+      ).join('');
+
       return `<div class="deco-color-block">
-        <div class="deco-color-block-title">Colore per <span>${name}</span></div>
+        <div class="deco-color-block-title"><span>${name}</span></div>
+        <div class="deco-color-block-sub">Posizione nella composizione</div>
+        <div class="deco-slot-pos-grid">${slotBtns}</div>
+        <div class="deco-color-block-sub" style="margin-top:10px;">Colore preferito</div>
         <div class="deco-color-swatches">${swatches}</div>
         <input class="deco-color-altro" type="text" placeholder="Altro colore o nota…" data-deco="${name}" value="${altroVal}">
       </div>`;
     }).join('');
+
+  panel.querySelectorAll('.deco-slot-pos-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      decoSlotMap[btn.dataset.deco] = parseInt(btn.dataset.slot);
+      if (window._threeRefreshDecos) window._threeRefreshDecos();
+      renderDecoColorPanel();
+    });
+  });
 
   panel.querySelectorAll('.deco-cswatch-wrap').forEach(sw => {
     sw.addEventListener('click', () => {
@@ -1402,13 +1425,15 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
 // ══ Three.js 3D Viewer ══
 (async function initThreeViewer() {
-  let THREE, OrbitControls, GLTFLoader, RoomEnvironment, opentype;
+  let THREE, OrbitControls, GLTFLoader, RoomEnvironment, opentype, MeshoptDecoder;
   try {
     THREE = await import('three');
     ({ OrbitControls } = await import('/static/js/jsm/controls/OrbitControls.js'));
     ({ GLTFLoader } = await import('/static/js/jsm/loaders/GLTFLoader.js'));
     ({ RoomEnvironment } = await import('/static/js/jsm/environments/RoomEnvironment.js'));
     opentype = await import('opentype.js');
+    ({ MeshoptDecoder } = await import('/static/js/meshopt_decoder.mjs'));
+    await MeshoptDecoder.ready;
   } catch(e) { console.warn('Three.js load error:', e); return; }
 
   const wrap = document.getElementById('three-wrap');
@@ -1735,7 +1760,8 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     toLoad.forEach((cb, i) => {
       const name = cb.value;
       const isFlat = cb.dataset.tipo === 'flat';
-      const slot = slots[i];
+      const slotIdx = decoSlotMap[name] !== undefined ? decoSlotMap[name] : i;
+      const slot = slots[Math.min(slotIdx, slots.length - 1)];
       const url = `/static/models/decorazioni/${encodeURIComponent(name)}.glb`;
 
       const gltfLoader2 = new GLTFLoader();
