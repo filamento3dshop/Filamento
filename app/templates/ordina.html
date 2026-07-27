@@ -1106,8 +1106,8 @@ function renderDecoColorPanel() {
   if (checked.length === 0) { panel.style.display = 'none'; return; }
   panel.style.display = 'block';
 
-  // Nomi slot leggibili per l'utente (stesso ordine di DECO_SLOT_MAP)
-  const SLOT_LABELS = ['Destra in alto','Sinistra in basso','Sinistra in alto','Destra in basso','Sopra al centro','Sotto al centro'];
+  // Nomi slot — ordine fisso: 0=destra-alto, 1=sinistra-alto, 2=destra-basso, 3=sinistra-basso, 4=sopra, 5=sotto
+  const SLOT_LABELS = ['Destra in alto','Sinistra in alto','Destra in basso','Sinistra in basso','Sopra al centro','Sotto al centro'];
 
   panel.innerHTML = '<p style="font-size:0.8rem;color:var(--text2);margin-bottom:12px;">Personalizza le decorazioni <span style="font-weight:400;">(opzionale)</span></p>' +
     checked.map((cb, idx) => {
@@ -1700,42 +1700,39 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   // coordinate relative al centro lettera (y=0 = centro lettera, lettera occupa ~±0.7u)
   // X: ±1.0 = fianco lettera, ±0.4 = vicino al bordo
   // Y: 0.8 = sopra, 0 = centro, -0.7 = sotto
+  // Ordine fisso in tutti i map: 0=dx-alto, 1=sx-alto, 2=dx-basso, 3=sx-basso, 4=sopra, 5=sotto
   const DECO_SLOT_MAP = {
-    // Lettera PIENA — nome in BASSO: spazio libero sopra e ai lati, basso occupato dal nome
     'piena-base': [
-      [ 1.05,  0.65, 0],  // destra-alto
-      [-1.05,  0.65, 0],  // sinistra-alto
-      [ 1.05,  0.05, 0],  // destra-centro
-      [-1.05,  0.05, 0],  // sinistra-centro
-      [ 0.38,  1.05, 0],  // sopra-destra
-      [-0.38,  1.05, 0],  // sopra-sinistra
+      [ 1.05,  0.65, 0],  // 0 destra-alto
+      [-1.05,  0.65, 0],  // 1 sinistra-alto
+      [ 1.05,  0.05, 0],  // 2 destra-centro (nome è sotto, non basso)
+      [-1.05,  0.05, 0],  // 3 sinistra-centro
+      [ 0.0,   1.10, 0],  // 4 sopra centro
+      [ 0.0,  -0.95, 0],  // 5 sotto centro (sopra il nome)
     ],
-    // Lettera PIENA — nome al CENTRO: nome occupa il mezzo, spazio sui lati e vertici
     'piena-centro': [
-      [ 1.05,  0.65, 0],  // destra-alto
-      [-1.05,  0.65, 0],  // sinistra-alto
-      [ 1.05, -0.55, 0],  // destra-basso
-      [-1.05, -0.55, 0],  // sinistra-basso
-      [ 0.0,   1.05, 0],  // sopra centro
-      [ 0.0,  -1.00, 0],  // sotto centro
+      [ 1.05,  0.65, 0],  // 0 destra-alto
+      [-1.05,  0.65, 0],  // 1 sinistra-alto
+      [ 1.05, -0.55, 0],  // 2 destra-basso
+      [-1.05, -0.55, 0],  // 3 sinistra-basso
+      [ 0.0,   1.05, 0],  // 4 sopra centro
+      [ 0.0,  -1.00, 0],  // 5 sotto centro
     ],
-    // Lettera SCATOLA — nome in BASSO: struttura aperta, deco vanno soprattutto sopra e ai lati alti
     'scatola-base': [
-      [ 1.05,  0.70, 0],  // destra-alto
-      [-1.05,  0.70, 0],  // sinistra-alto
-      [ 1.05,  0.10, 0],  // destra-centro
-      [-1.05,  0.10, 0],  // sinistra-centro
-      [ 0.38,  1.10, 0],  // sopra-destra
-      [-0.38,  1.10, 0],  // sopra-sinistra
+      [ 1.05,  0.70, 0],  // 0 destra-alto
+      [-1.05,  0.70, 0],  // 1 sinistra-alto
+      [ 1.05,  0.10, 0],  // 2 destra-centro
+      [-1.05,  0.10, 0],  // 3 sinistra-centro
+      [ 0.0,   1.15, 0],  // 4 sopra centro
+      [ 0.0,  -0.90, 0],  // 5 sotto centro
     ],
-    // Lettera SCATOLA — nome al CENTRO: nome visibile al centro, deco distribuite agli angoli
     'scatola-centro': [
-      [ 1.05,  0.70, 0],  // destra-alto
-      [-1.05,  0.70, 0],  // sinistra-alto
-      [ 1.05, -0.50, 0],  // destra-basso
-      [-1.05, -0.50, 0],  // sinistra-basso
-      [ 0.0,   1.10, 0],  // sopra centro
-      [ 0.0,  -1.05, 0],  // sotto centro
+      [ 1.05,  0.70, 0],  // 0 destra-alto
+      [-1.05,  0.70, 0],  // 1 sinistra-alto
+      [ 1.05, -0.50, 0],  // 2 destra-basso
+      [-1.05, -0.50, 0],  // 3 sinistra-basso
+      [ 0.0,   1.10, 0],  // 4 sopra centro
+      [ 0.0,  -1.05, 0],  // 5 sotto centro
     ],
   };
 
@@ -1755,7 +1752,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     // Prendi fino a 6 deco, assegna uno slot ciascuna
     const slots = getDecoSlots();
     const toLoad = checked.slice(0, slots.length);
-    const decoSize = 0.38; // dimensione target deco in unità scena
+    const decoSize = 0.22; // dimensione target deco in unità scena
 
     toLoad.forEach((cb, i) => {
       const name = cb.value;
