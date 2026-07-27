@@ -1091,7 +1091,6 @@ const DECO_COLORS = [
   { nome: 'Arancione',    hex: '#E8904A' },
   { nome: 'Bianco',       hex: '#F8F6F3', outline: true },
   { nome: 'Nero',         hex: '#1A1A1A' },
-  { nome: 'Come lettera', hex: null },
 ];
 const decoColorMap = {};
 
@@ -1164,6 +1163,7 @@ function setForma(val) {
   document.getElementById('forma-piena-card').setAttribute('aria-pressed', val === 'piena');
   document.getElementById('forma-scatola-card').setAttribute('aria-pressed', val === 'scatola');
   if (window._threeRefreshScene) window._threeRefreshScene();
+  if (window._threeRefreshDecos) window._threeRefreshDecos();
   scrollToPreview();
 }
 document.getElementById('forma-piena-card').addEventListener('keydown', e => {
@@ -1671,8 +1671,105 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   }
 
   // ── Decorazioni: solo nel secondo viewer, non nella lettera ──
+  // 6 slot per combinazione forma × posizione nome
+  // coordinate relative al centro lettera (y=0 = centro lettera, lettera occupa ~±0.7u)
+  // X: ±1.0 = fianco lettera, ±0.4 = vicino al bordo
+  // Y: 0.8 = sopra, 0 = centro, -0.7 = sotto
+  const DECO_SLOT_MAP = {
+    // Lettera PIENA — nome in BASSO: spazio libero sopra e ai lati, basso occupato dal nome
+    'piena-base': [
+      [ 1.05,  0.65, 0],  // destra-alto
+      [-1.05,  0.65, 0],  // sinistra-alto
+      [ 1.05,  0.05, 0],  // destra-centro
+      [-1.05,  0.05, 0],  // sinistra-centro
+      [ 0.38,  1.05, 0],  // sopra-destra
+      [-0.38,  1.05, 0],  // sopra-sinistra
+    ],
+    // Lettera PIENA — nome al CENTRO: nome occupa il mezzo, spazio sui lati e vertici
+    'piena-centro': [
+      [ 1.05,  0.65, 0],  // destra-alto
+      [-1.05,  0.65, 0],  // sinistra-alto
+      [ 1.05, -0.55, 0],  // destra-basso
+      [-1.05, -0.55, 0],  // sinistra-basso
+      [ 0.0,   1.05, 0],  // sopra centro
+      [ 0.0,  -1.00, 0],  // sotto centro
+    ],
+    // Lettera SCATOLA — nome in BASSO: struttura aperta, deco vanno soprattutto sopra e ai lati alti
+    'scatola-base': [
+      [ 1.05,  0.70, 0],  // destra-alto
+      [-1.05,  0.70, 0],  // sinistra-alto
+      [ 1.05,  0.10, 0],  // destra-centro
+      [-1.05,  0.10, 0],  // sinistra-centro
+      [ 0.38,  1.10, 0],  // sopra-destra
+      [-0.38,  1.10, 0],  // sopra-sinistra
+    ],
+    // Lettera SCATOLA — nome al CENTRO: nome visibile al centro, deco distribuite agli angoli
+    'scatola-centro': [
+      [ 1.05,  0.70, 0],  // destra-alto
+      [-1.05,  0.70, 0],  // sinistra-alto
+      [ 1.05, -0.50, 0],  // destra-basso
+      [-1.05, -0.50, 0],  // sinistra-basso
+      [ 0.0,   1.10, 0],  // sopra centro
+      [ 0.0,  -1.05, 0],  // sotto centro
+    ],
+  };
+
+  function getDecoSlots() {
+    const forma = document.getElementById('forma').value || 'piena';
+    const slot  = document.getElementById('nome_posizione').value || 'centro';
+    const key = `${forma}-${slot}`;
+    return DECO_SLOT_MAP[key] || DECO_SLOT_MAP['piena-centro'];
+  }
+
   function refreshDecos() {
     clearDecos();
+    if (!letterMesh) return;
+    const checked = [...document.querySelectorAll('.deco-check:checked')];
+    if (!checked.length) return;
+
+    // Prendi fino a 6 deco, assegna uno slot ciascuna
+    const slots = getDecoSlots();
+    const toLoad = checked.slice(0, slots.length);
+    const decoSize = 0.38; // dimensione target deco in unità scena
+
+    toLoad.forEach((cb, i) => {
+      const name = cb.value;
+      const isFlat = cb.dataset.tipo === 'flat';
+      const slot = slots[i];
+      const url = `/static/models/decorazioni/${encodeURIComponent(name)}.glb`;
+
+      const gltfLoader2 = new GLTFLoader();
+      gltfLoader2.setMeshoptDecoder(MeshoptDecoder);
+      gltfLoader2.load(url, gltf => {
+        const deco = gltf.scene;
+
+        // Normalizza dimensione
+        const b = new THREE.Box3().setFromObject(deco);
+        const s = b.getSize(new THREE.Vector3());
+        const maxDim = Math.max(s.x, s.y, s.z);
+        if (maxDim > 0) deco.scale.setScalar(decoSize / maxDim);
+
+        // Centra il modello attorno alla sua origin
+        const b2 = new THREE.Box3().setFromObject(deco);
+        const c2 = b2.getCenter(new THREE.Vector3());
+        deco.position.sub(c2);
+
+        // Posiziona nello slot
+        deco.position.x += slot[0];
+        deco.position.y += slot[1] + 0.7; // +0.7 per compensare il letter offset
+        deco.position.z += slot[2];
+
+        deco.userData.baseScale = 1.0;
+        deco.userData.scaleCurrent = 0.01;
+        deco.userData.scaleTarget = 1.0;
+        deco.scale.multiplyScalar(0.01);
+
+        letterGroup.add(deco);
+        decoObjects.push(deco);
+      }, undefined, () => {
+        // se GLB non carica (flat senza modello) ignora silenziosamente
+      });
+    });
   }
 
   function addEmojiSprite(emoji, x, y) {
@@ -2020,7 +2117,10 @@ document.querySelectorAll('input[name="colore_scritta"]').forEach(r => r.addEven
 
 // Aggiorna posizione slot + scroll preview
 document.querySelectorAll('.nome-slot-btn').forEach(btn => btn.addEventListener('click', () => {
-  setTimeout(() => { if (window._threeUpdateNamePos) window._threeUpdateNamePos(_getSlot()); }, 10);
+  setTimeout(() => {
+    if (window._threeUpdateNamePos) window._threeUpdateNamePos(_getSlot());
+    if (window._threeRefreshDecos) window._threeRefreshDecos();
+  }, 10);
   scrollToPreview();
 }));
 
