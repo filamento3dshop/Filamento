@@ -1613,6 +1613,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   // ── Stato ──
   let letterMesh = null;
   let letterBoundsLocal = null; // bounding box lettera in spazio letterGroup (scale=1)
+  let letterSlotsComputed = null; // 6 slot calcolati via raycasting sulla geometria reale
   let decoObjects = [];
   let photoTex = null;
   let currentLetterVal = '';
@@ -1680,6 +1681,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
           // Salva bounds in spazio letterGroup locale (scale=1) prima di aggiungerla al gruppo
           letterBoundsLocal = new THREE.Box3().setFromObject(model);
           letterGroup.add(letterMesh);
+          computeLetterSlots();
           hidePlaceholder();
           animateIn();
           fitCamera();
@@ -1695,30 +1697,82 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       letterMesh.traverse && letterMesh.traverse(c => { if (c.geometry) c.geometry.dispose(); });
       letterMesh = null;
       letterBoundsLocal = null;
+      letterSlotsComputed = null;
     }
     clearDecos();
     scaleCurrent = 0.01; scaleTarget = 1.0;
   }
 
-  // Slot calcolati dinamicamente dalla bounding box reale della lettera
-  // Le posizioni sono DENTRO la lettera (non fuori dai bordi)
-  function getDecoSlots() {
-    if (!letterBoundsLocal) return [];
+  // Raycasting sulla geometria reale per trovare punti sulla lettera
+  function computeLetterSlots() {
+    if (!letterMesh || !letterBoundsLocal) return;
     const b = letterBoundsLocal;
     const cx = (b.min.x + b.max.x) / 2;
     const cy = (b.min.y + b.max.y) / 2;
-    const H  = b.max.y - b.min.y;
     const W  = b.max.x - b.min.x;
-    const ix = W * 0.25; // inset orizzontale dal bordo
-    const iy = H * 0.18; // inset verticale dal bordo
-    return [
-      [b.max.x - ix,  b.max.y - iy,  0],  // 0: Destra in alto
-      [b.min.x + ix,  b.max.y - iy,  0],  // 1: Sinistra in alto
-      [b.max.x - ix,  b.min.y + iy,  0],  // 2: Destra in basso
-      [b.min.x + ix,  b.min.y + iy,  0],  // 3: Sinistra in basso
-      [cx,            b.max.y - iy,  0],  // 4: Sopra al centro
-      [cx,            b.min.y + iy,  0],  // 5: Sotto al centro
+    const H  = b.max.y - b.min.y;
+
+    // Imposta temporaneamente scale=1 per il raycasting in world space
+    const savedScale = letterGroup.scale.clone();
+    letterGroup.scale.set(1, 1, 1);
+    letterGroup.updateMatrixWorld(true);
+
+    const raycaster = new THREE.Raycaster();
+    const dir = new THREE.Vector3(0, 0, -1);
+    const N = 16;
+    const valid = [];
+
+    for (let xi = 0; xi <= N; xi++) {
+      for (let yi = 0; yi <= N; yi++) {
+        const x = b.min.x + W * xi / N;
+        const y = b.min.y + H * yi / N;
+        raycaster.set(new THREE.Vector3(x, y, 5), dir);
+        if (raycaster.intersectObject(letterMesh, true).length > 0) {
+          valid.push([x, y]);
+        }
+      }
+    }
+
+    // Ripristina scale originale
+    letterGroup.scale.copy(savedScale);
+    letterGroup.updateMatrixWorld(true);
+
+    if (!valid.length) { letterSlotsComputed = null; return; }
+
+    function closest(pts, px, py) {
+      return pts.reduce((best, p) => {
+        const d = (p[0]-px)**2 + (p[1]-py)**2;
+        return d < best.d ? {p, d} : best;
+      }, {p: pts[0], d: Infinity}).p;
+    }
+
+    const mw = W * 0.28;
+    const topR  = valid.filter(p => p[0] > cx && p[1] > cy);
+    const topL  = valid.filter(p => p[0] < cx && p[1] > cy);
+    const botR  = valid.filter(p => p[0] > cx && p[1] < cy);
+    const botL  = valid.filter(p => p[0] < cx && p[1] < cy);
+    const topC  = valid.filter(p => Math.abs(p[0]-cx) < mw && p[1] > cy);
+    const botC  = valid.filter(p => Math.abs(p[0]-cx) < mw && p[1] < cy);
+    const all   = valid;
+
+    const pick = (pts, px, py) => {
+      const src = pts.length ? pts : all;
+      const p = closest(src, px, py);
+      return [p[0], p[1], 0];
+    };
+
+    letterSlotsComputed = [
+      pick(topR, b.max.x, b.max.y),   // 0: Destra in alto
+      pick(topL, b.min.x, b.max.y),   // 1: Sinistra in alto
+      pick(botR, b.max.x, b.min.y),   // 2: Destra in basso
+      pick(botL, b.min.x, b.min.y),   // 3: Sinistra in basso
+      pick(topC, cx,      b.max.y),   // 4: Sopra al centro
+      pick(botC, cx,      b.min.y),   // 5: Sotto al centro
     ];
+  }
+
+  function getDecoSlots() {
+    return letterSlotsComputed || [];
   }
 
   function refreshDecos() {
