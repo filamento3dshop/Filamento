@@ -1145,6 +1145,7 @@ function renderDecoColorPanel() {
       decoSlotMap[btn.dataset.deco] = parseInt(btn.dataset.slot);
       if (window._threeRefreshDecos) window._threeRefreshDecos();
       renderDecoColorPanel();
+      scrollToPreview();
     });
   });
 
@@ -1766,26 +1767,30 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       gltfLoader2.load(url, gltf => {
         const deco = gltf.scene;
 
-        // Normalizza dimensione
+        // Normalizza dimensione in rapporto alla lettera (lettera normalizzata a 1.4 unità)
+        const LETTER_H = 1.4;
+        const TARGET_RATIO = 0.17; // deco = 17% dell'altezza lettera
         const b = new THREE.Box3().setFromObject(deco);
         const s = b.getSize(new THREE.Vector3());
         const maxDim = Math.max(s.x, s.y, s.z);
-        if (maxDim > 0) deco.scale.setScalar(decoSize / maxDim);
+        const normalizedScale = maxDim > 0 ? (LETTER_H * TARGET_RATIO) / maxDim : 1;
+        deco.scale.setScalar(normalizedScale);
 
         // Centra il modello attorno alla sua origin
         const b2 = new THREE.Box3().setFromObject(deco);
         const c2 = b2.getCenter(new THREE.Vector3());
         deco.position.sub(c2);
 
-        // Posiziona nello slot
+        // Posiziona nello slot; flat items sul fronte della lettera
         deco.position.x += slot[0];
         deco.position.y += slot[1] + 0.7; // +0.7 per compensare il letter offset
-        deco.position.z += slot[2];
+        deco.position.z = isFlat ? 0.18 : (slot[2] || 0);
 
-        deco.userData.baseScale = 1.0;
+        // baseScale = normalizedScale così l'animazione rispetta le proporzioni
+        deco.userData.baseScale = normalizedScale;
         deco.userData.scaleCurrent = 0.01;
         deco.userData.scaleTarget = 1.0;
-        deco.scale.multiplyScalar(0.01);
+        deco.scale.setScalar(normalizedScale * 0.01);
 
         letterGroup.add(deco);
         decoObjects.push(deco);
