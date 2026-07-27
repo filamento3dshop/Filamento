@@ -1701,20 +1701,23 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   }
 
   // Slot calcolati dinamicamente dalla bounding box reale della lettera
+  // Le posizioni sono DENTRO la lettera (non fuori dai bordi)
   function getDecoSlots() {
     if (!letterBoundsLocal) return [];
     const b = letterBoundsLocal;
     const cx = (b.min.x + b.max.x) / 2;
     const cy = (b.min.y + b.max.y) / 2;
     const H  = b.max.y - b.min.y;
-    const m  = 0.13; // margine fuori dal bordo lettera
+    const W  = b.max.x - b.min.x;
+    const ix = W * 0.25; // inset orizzontale dal bordo
+    const iy = H * 0.18; // inset verticale dal bordo
     return [
-      [b.max.x + m,  cy + H * 0.22, 0],  // 0: Destra in alto
-      [b.min.x - m,  cy + H * 0.22, 0],  // 1: Sinistra in alto
-      [b.max.x + m,  cy - H * 0.22, 0],  // 2: Destra in basso
-      [b.min.x - m,  cy - H * 0.22, 0],  // 3: Sinistra in basso
-      [cx,           b.max.y + m,   0],  // 4: Sopra al centro
-      [cx,           b.min.y - m,   0],  // 5: Sotto al centro
+      [b.max.x - ix,  b.max.y - iy,  0],  // 0: Destra in alto
+      [b.min.x + ix,  b.max.y - iy,  0],  // 1: Sinistra in alto
+      [b.max.x - ix,  b.min.y + iy,  0],  // 2: Destra in basso
+      [b.min.x + ix,  b.min.y + iy,  0],  // 3: Sinistra in basso
+      [cx,            b.max.y - iy,  0],  // 4: Sopra al centro
+      [cx,            b.min.y + iy,  0],  // 5: Sotto al centro
     ];
   }
 
