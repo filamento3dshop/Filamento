@@ -268,7 +268,7 @@
           {# Decorazioni #}
           <div class="form-group deco-box">
             <label class="form-label">Decorazioni <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
-            <p class="form-hint" style="margin-bottom:16px;">Piccole stampe 3D da abbinare alla lettera — circa 8 cm.</p>
+            <p class="form-hint" style="margin-bottom:16px;">Piccole stampe 3D da abbinare alla lettera. Puoi scegliere il colore di ogni decorazione in fondo alla pagina (opzionale)</p>
 
             <div class="deco-pricing">
               <div class="deco-slot selected" data-n="0">
@@ -763,12 +763,14 @@ textarea.form-control { resize: vertical; }
 .deco-3d { background: #e8f4fd; color: #2980b9; }
 .deco-flat { background: #f0f0f0; color: #888; }
 .deco-color-block { background: var(--c100); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
-.deco-color-block-title { font-size: 0.8rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+.deco-color-block-title { font-size: 0.8rem; font-weight: 600; color: var(--text2); margin-bottom: 10px; }
 .deco-color-block-title span { color: var(--text); }
-.deco-color-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.deco-color-chip { padding: 4px 11px; border-radius: 20px; border: 1.5px solid var(--c200); font-size: 0.75rem; color: var(--text2); background: var(--white); cursor: pointer; transition: all .15s; user-select: none; }
-.deco-color-chip.active { border-color: var(--c500); color: var(--c500); background: #fff5f5; font-weight: 600; }
-.deco-color-altro { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1.5px solid var(--c200); border-radius: 6px; font-size: 0.8rem; color: var(--text); background: var(--white); outline: none; }
+.deco-color-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.deco-cswatch-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.deco-cswatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; outline: 2.5px solid transparent; transition: outline-color .15s, transform .15s; }
+.deco-cswatch-wrap.active .deco-cswatch { outline-color: var(--c500); transform: scale(1.14); }
+.deco-cswatch-name { font-size: 0.55rem; color: var(--text2); text-align: center; max-width: 36px; line-height: 1.2; }
+.deco-color-altro { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1.5px solid var(--c200); border-radius: 6px; font-size: 0.8rem; color: var(--text); background: var(--white); outline: none; margin-top: 2px; }
 .deco-color-altro:focus { border-color: var(--c400); }
 .deco-item.disabled input:not(:checked) { pointer-events: none; }
 
@@ -1075,50 +1077,70 @@ document.querySelectorAll('.deco-slot').forEach(slot => {
   });
 });
 // ══ Deco colore preferito ══
-const DECO_COLORS = ['Rosso','Rosa','Blu','Verde','Giallo','Viola','Arancione','Bianco','Nero','Come la lettera'];
-const decoColorMap = {}; // { nomeItem: 'colore scelto o testo libero' }
+const DECO_COLORS = [
+  { nome: 'Rosso',        hex: '#E8695A' },
+  { nome: 'Rosa',         hex: '#E8B4A8' },
+  { nome: 'Fucsia',       hex: '#E5107A' },
+  { nome: 'Viola',        hex: '#8858C0' },
+  { nome: 'Lilla',        hex: '#C8A8D0' },
+  { nome: 'Blu',          hex: '#3858C0' },
+  { nome: 'Celeste',      hex: '#A8CCE0' },
+  { nome: 'Verde',        hex: '#38A068' },
+  { nome: 'Menta',        hex: '#A8D8C0' },
+  { nome: 'Giallo',       hex: '#F4E060' },
+  { nome: 'Arancione',    hex: '#E8904A' },
+  { nome: 'Bianco',       hex: '#F8F6F3', outline: true },
+  { nome: 'Nero',         hex: '#1A1A1A' },
+  { nome: 'Come lettera', hex: null },
+];
+const decoColorMap = {};
 
 function renderDecoColorPanel() {
   const checked = [...document.querySelectorAll('.deco-check:checked')];
   const panel = document.getElementById('deco-color-panel');
   if (checked.length === 0) { panel.style.display = 'none'; return; }
   panel.style.display = 'block';
-  panel.innerHTML = '<p style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;">Vuoi un colore specifico per le decorazioni? (opzionale)</p>' +
+
+  panel.innerHTML = '<p style="font-size:0.8rem;color:var(--text2);margin-bottom:12px;">Colore preferito per le decorazioni <span style="font-weight:400;">(opzionale)</span></p>' +
     checked.map(cb => {
       const name = cb.value;
       const cur = decoColorMap[name] || '';
-      const chips = DECO_COLORS.map(c =>
-        `<span class="deco-color-chip${cur===c?' active':''}" data-deco="${name}" data-color="${c}">${c}</span>`
-      ).join('');
-      const altroVal = DECO_COLORS.includes(cur) ? '' : cur;
+      const isChip = DECO_COLORS.some(c => c.nome === cur);
+      const altroVal = isChip ? '' : cur;
+
+      const swatches = DECO_COLORS.map(c => {
+        const active = cur === c.nome ? ' active' : '';
+        const style = c.hex
+          ? `background:${c.hex};${c.outline ? 'box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);' : ''}`
+          : `background: linear-gradient(135deg,#E8695A 33%,#3858C0 33% 66%,#38A068 66%);`;
+        return `<div class="deco-cswatch-wrap${active}" data-deco="${name}" data-color="${c.nome}">
+          <span class="deco-cswatch" style="${style}"></span>
+          <span class="deco-cswatch-name">${c.nome}</span>
+        </div>`;
+      }).join('');
+
       return `<div class="deco-color-block">
         <div class="deco-color-block-title">Colore per <span>${name}</span></div>
-        <div class="deco-color-chips">${chips}</div>
-        <input class="deco-color-altro" type="text" placeholder="Altro colore…" data-deco="${name}" value="${altroVal}">
+        <div class="deco-color-swatches">${swatches}</div>
+        <input class="deco-color-altro" type="text" placeholder="Altro colore o nota…" data-deco="${name}" value="${altroVal}">
       </div>`;
     }).join('');
 
-  // Chip click
-  panel.querySelectorAll('.deco-color-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const deco = chip.dataset.deco;
-      const color = chip.dataset.color;
+  panel.querySelectorAll('.deco-cswatch-wrap').forEach(sw => {
+    sw.addEventListener('click', () => {
+      const deco = sw.dataset.deco;
+      const color = sw.dataset.color;
       decoColorMap[deco] = (decoColorMap[deco] === color) ? '' : color;
-      // Svuota campo libero se si sceglie chip
-      if (decoColorMap[deco]) {
-        const inp = panel.querySelector(`.deco-color-altro[data-deco="${deco}"]`);
-        if (inp) inp.value = '';
-      }
+      const inp = panel.querySelector(`.deco-color-altro[data-deco="${deco}"]`);
+      if (inp && decoColorMap[deco]) inp.value = '';
       renderDecoColorPanel();
     });
   });
 
-  // Campo libero
   panel.querySelectorAll('.deco-color-altro').forEach(inp => {
     inp.addEventListener('input', () => {
       decoColorMap[inp.dataset.deco] = inp.value;
-      // Deseleziona chip se si scrive
-      renderDecoColorPanel();
+      // non fare re-render per non perdere il focus
     });
   });
 }
