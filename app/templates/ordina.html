@@ -1612,6 +1612,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
   // ── Stato ──
   let letterMesh = null;
+  let letterBoundsLocal = null; // bounding box lettera in spazio letterGroup (scale=1)
   let decoObjects = [];
   let photoTex = null;
   let currentLetterVal = '';
@@ -1676,6 +1677,8 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
           model.position.sub(c);
           model.position.y = -box.min.y;
           letterMesh = model;
+          // Salva bounds in spazio letterGroup locale (scale=1) prima di aggiungerla al gruppo
+          letterBoundsLocal = new THREE.Box3().setFromObject(model);
           letterGroup.add(letterMesh);
           hidePlaceholder();
           animateIn();
@@ -1691,57 +1694,28 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       letterGroup.remove(letterMesh);
       letterMesh.traverse && letterMesh.traverse(c => { if (c.geometry) c.geometry.dispose(); });
       letterMesh = null;
+      letterBoundsLocal = null;
     }
     clearDecos();
     scaleCurrent = 0.01; scaleTarget = 1.0;
   }
 
-  // ── Decorazioni: solo nel secondo viewer, non nella lettera ──
-  // 6 slot per combinazione forma × posizione nome
-  // coordinate relative al centro lettera (y=0 = centro lettera, lettera occupa ~±0.7u)
-  // X: ±1.0 = fianco lettera, ±0.4 = vicino al bordo
-  // Y: 0.8 = sopra, 0 = centro, -0.7 = sotto
-  // Ordine fisso in tutti i map: 0=dx-alto, 1=sx-alto, 2=dx-basso, 3=sx-basso, 4=sopra, 5=sotto
-  const DECO_SLOT_MAP = {
-    'piena-base': [
-      [ 1.05,  0.65, 0],  // 0 destra-alto
-      [-1.05,  0.65, 0],  // 1 sinistra-alto
-      [ 1.05,  0.05, 0],  // 2 destra-centro (nome è sotto, non basso)
-      [-1.05,  0.05, 0],  // 3 sinistra-centro
-      [ 0.0,   1.10, 0],  // 4 sopra centro
-      [ 0.0,  -0.95, 0],  // 5 sotto centro (sopra il nome)
-    ],
-    'piena-centro': [
-      [ 1.05,  0.65, 0],  // 0 destra-alto
-      [-1.05,  0.65, 0],  // 1 sinistra-alto
-      [ 1.05, -0.55, 0],  // 2 destra-basso
-      [-1.05, -0.55, 0],  // 3 sinistra-basso
-      [ 0.0,   1.05, 0],  // 4 sopra centro
-      [ 0.0,  -1.00, 0],  // 5 sotto centro
-    ],
-    'scatola-base': [
-      [ 1.05,  0.70, 0],  // 0 destra-alto
-      [-1.05,  0.70, 0],  // 1 sinistra-alto
-      [ 1.05,  0.10, 0],  // 2 destra-centro
-      [-1.05,  0.10, 0],  // 3 sinistra-centro
-      [ 0.0,   1.15, 0],  // 4 sopra centro
-      [ 0.0,  -0.90, 0],  // 5 sotto centro
-    ],
-    'scatola-centro': [
-      [ 1.05,  0.70, 0],  // 0 destra-alto
-      [-1.05,  0.70, 0],  // 1 sinistra-alto
-      [ 1.05, -0.50, 0],  // 2 destra-basso
-      [-1.05, -0.50, 0],  // 3 sinistra-basso
-      [ 0.0,   1.10, 0],  // 4 sopra centro
-      [ 0.0,  -1.05, 0],  // 5 sotto centro
-    ],
-  };
-
+  // Slot calcolati dinamicamente dalla bounding box reale della lettera
   function getDecoSlots() {
-    const forma = document.getElementById('forma').value || 'piena';
-    const slot  = document.getElementById('nome_posizione').value || 'centro';
-    const key = `${forma}-${slot}`;
-    return DECO_SLOT_MAP[key] || DECO_SLOT_MAP['piena-centro'];
+    if (!letterBoundsLocal) return [];
+    const b = letterBoundsLocal;
+    const cx = (b.min.x + b.max.x) / 2;
+    const cy = (b.min.y + b.max.y) / 2;
+    const H  = b.max.y - b.min.y;
+    const m  = 0.13; // margine fuori dal bordo lettera
+    return [
+      [b.max.x + m,  cy + H * 0.22, 0],  // 0: Destra in alto
+      [b.min.x - m,  cy + H * 0.22, 0],  // 1: Sinistra in alto
+      [b.max.x + m,  cy - H * 0.22, 0],  // 2: Destra in basso
+      [b.min.x - m,  cy - H * 0.22, 0],  // 3: Sinistra in basso
+      [cx,           b.max.y + m,   0],  // 4: Sopra al centro
+      [cx,           b.min.y - m,   0],  // 5: Sotto al centro
+    ];
   }
 
   function refreshDecos() {
@@ -1781,9 +1755,9 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
         const c2 = b2.getCenter(new THREE.Vector3());
         deco.position.sub(c2);
 
-        // Posiziona nello slot; flat items sul fronte della lettera
+        // Posiziona nello slot (coordinate assolute letterGroup); flat items sul fronte
         deco.position.x += slot[0];
-        deco.position.y += slot[1] + 0.7; // +0.7 per compensare il letter offset
+        deco.position.y += slot[1];
         deco.position.z = isFlat ? 0.18 : (slot[2] || 0);
 
         // baseScale = normalizedScale così l'animazione rispetta le proporzioni
