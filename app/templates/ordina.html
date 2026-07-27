@@ -1670,15 +1670,17 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   }
 
   // ── Decorazioni: solo nel secondo viewer, non nella lettera ──
-  // Slot positions (relative to letter center, lettera ~1.4u alta)
-  // [dx, dy, dz] — distribuiti attorno alla lettera
+  // 8 slot distribuiti attorno alla lettera — lettera normalizzata a ~1.4u
+  // ordinati per priorità: prima i 4 angoli, poi i 4 lati
   const DECO_SLOTS = [
-    [ 1.05,  0.55, 0],   // destra-alto
-    [ 1.05, -0.45, 0],   // destra-basso
-    [-1.05,  0.55, 0],   // sinistra-alto
-    [-1.05, -0.45, 0],   // sinistra-basso
-    [ 0.0,   1.15, 0],   // sopra centro
-    [ 0.0,  -1.10, 0],   // sotto centro
+    [ 1.05,  0.55, 0],   // 1 — destra-alto
+    [-1.05, -0.45, 0],   // 2 — sinistra-basso
+    [-1.05,  0.55, 0],   // 3 — sinistra-alto
+    [ 1.05, -0.45, 0],   // 4 — destra-basso
+    [ 0.0,   1.20, 0],   // 5 — sopra centro
+    [ 0.0,  -1.15, 0],   // 6 — sotto centro
+    [ 1.20,  0.05, 0],   // 7 — destra centro
+    [-1.20,  0.05, 0],   // 8 — sinistra centro
   ];
 
   function refreshDecos() {
