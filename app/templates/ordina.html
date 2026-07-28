@@ -1762,6 +1762,16 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     const botC  = valid.filter(p => Math.abs(p[0]-cx) < mw && p[1] < cy);
     const all   = valid;
 
+    // Per slot in alto: se il quadrante è vuoto, fallback al centro (x=cx)
+    const pickTop = (pts, px, py) => {
+      if (pts.length) {
+        const p = closest(pts, px, py);
+        return [p[0], p[1], 0];
+      }
+      // Quadrante vuoto → usa x centrale (lettera senza materiale in quel corner)
+      const fallback = topC.length ? closest(topC, cx, py) : closest(all, cx, py);
+      return [fallback[0], fallback[1], 0];
+    };
     const pick = (pts, px, py) => {
       const src = pts.length ? pts : all;
       const p = closest(src, px, py);
@@ -1769,12 +1779,12 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     };
 
     letterSlotsComputed = [
-      pick(topR, b.max.x, b.max.y),   // 0: Destra in alto
-      pick(topL, b.min.x, b.max.y),   // 1: Sinistra in alto
-      pick(botR, b.max.x, b.min.y),   // 2: Destra in basso
-      pick(botL, b.min.x, b.min.y),   // 3: Sinistra in basso
-      pick(topC, cx,      b.max.y),   // 4: Sopra al centro
-      pick(botC, cx,      b.min.y),   // 5: Sotto al centro
+      pickTop(topR, b.max.x, b.max.y),  // 0: Destra in alto
+      pickTop(topL, b.min.x, b.max.y),  // 1: Sinistra in alto
+      pick(botR, b.max.x, b.min.y),     // 2: Destra in basso
+      pick(botL, b.min.x, b.min.y),     // 3: Sinistra in basso
+      pickTop(topC, cx,     b.max.y),   // 4: Sopra al centro
+      pick(botC, cx,        b.min.y),   // 5: Sotto al centro (y non usata per 3D)
     ];
   }
 
@@ -1842,19 +1852,19 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
             deco.position.y = lcy + halfH;
             deco.position.z = lz;
           } else if (slotIdx === 5) {
-            // Sotto centro: sul bordo inferiore centrale della lettera
-            // Raycast verso l'alto per trovare la superficie inferiore della lettera
-            const rayUp = new THREE.Raycaster();
+            // Sotto centro: sul bordo SUPERIORE del braccio inferiore della lettera
+            // Raycast verso il BASSO da metà altezza → trova la superficie superiore del braccio basso
+            const rayD = new THREE.Raycaster();
             const savedSc = letterGroup.scale.clone();
             letterGroup.scale.set(1, 1, 1);
             letterGroup.updateMatrixWorld(true);
-            rayUp.set(new THREE.Vector3(lcx, -0.5, lz), new THREE.Vector3(0, 1, 0));
-            const upHits = rayUp.intersectObject(letterMesh, true);
+            rayD.set(new THREE.Vector3(lcx, lcy * 0.4, letterFrontZ - 0.01), new THREE.Vector3(0, -1, 0));
+            const dHits = rayD.intersectObject(letterMesh, true);
             letterGroup.scale.copy(savedSc);
             letterGroup.updateMatrixWorld(true);
-            const bottomY = upHits.length > 0 ? upHits[0].point.y : 0;
+            const bottomSurfY = dHits.length > 0 ? dHits[0].point.y : 0;
             deco.position.x = lcx;
-            deco.position.y = bottomY + halfH;
+            deco.position.y = bottomSurfY + halfH;
             deco.position.z = lz;
           } else {
             // Sotto dx (2) o sx (3): fuori dalla lettera sul tavolo
