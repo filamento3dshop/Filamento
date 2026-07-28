@@ -415,6 +415,57 @@
 {% endif %}
 
 <style>
+/* ── Layout (mirror di ordina.html) ── */
+.ordina-header { background: var(--c100); border-bottom: 1px solid var(--c200); padding: 40px 32px 0; }
+.ordina-header-inner { max-width: 1080px; margin: 0 auto; }
+.ordina-h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem,3vw,2.4rem); color: var(--text); margin: 6px 0; }
+.ordina-sub { font-size: 0.88rem; color: var(--text2); margin-bottom: 28px; font-weight: 300; }
+.wizard-steps { display: flex; align-items: center; margin-bottom: -1px; }
+.wstep { display: flex; align-items: center; gap: 10px; padding: 16px 0; opacity: .45; transition: opacity .2s; }
+.wstep.active { opacity: 1; }
+.wstep.done { opacity: .7; }
+.wstep-num { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--c300); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: var(--text2); background: var(--white); transition: all .2s; }
+.wstep.active .wstep-num { background: var(--c500); border-color: var(--c500); color: var(--white); }
+.wstep.done .wstep-num { background: var(--c300); border-color: var(--c300); color: var(--white); }
+.wstep-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); }
+.wstep.active .wstep-label { color: var(--text); }
+.wstep-line { flex: 1; height: 1px; background: var(--c200); margin: 0 16px; }
+.ordina-wrap { padding: 0 32px 80px; }
+.wizard-panel { display: none; }
+.wizard-panel.active { display: block; }
+.panel-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--c200); }
+.step1-layout { display: grid; grid-template-columns: 340px 1fr; gap: 48px; max-width: 1080px; margin: 0 auto; padding-top: 40px; align-items: start; }
+.preview-col {}
+.config-col { min-width: 0; }
+.preview-sticky { position: sticky; top: 84px; }
+.preview-card { background: var(--c100); border: 1px solid var(--c200); border-radius: 6px; padding: 16px 16px 12px; margin-bottom: 16px; }
+.preview-card-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; text-align: center; }
+.preview-hint { font-size: 0.7rem; color: var(--text2); margin-top: 10px; font-style: italic; text-align: center; }
+.dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dim-opt input { display: none; }
+.dim-card { padding: 22px 12px; border: 1.5px solid var(--c200); border-radius: 4px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
+.dim-opt input:checked + .dim-card { border-color: var(--c500); background: #fff5f5; }
+.dim-size { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-top: 4px; }
+.dim-tag { font-size: 0.7rem; color: var(--text2); margin-top: 4px; }
+.dim-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--c500); color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; }
+.color-picker { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 4px; }
+.color-opt { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+.color-opt input { display: none; }
+.cswatch { display: block; width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; outline: 2.5px solid transparent; transition: outline-color .15s, transform .15s; }
+.color-opt input:checked + .cswatch { outline-color: var(--c500); transform: scale(1.14); }
+.cname { font-size: 0.58rem; color: var(--text2); text-align: center; }
+.req { color: var(--c500); }
+.form-hint { font-size: 0.78rem; color: var(--text2); margin-top: 6px; font-weight: 300; }
+
+@media (max-width: 860px) {
+  .step1-layout { grid-template-columns: 1fr; gap: 0; }
+  .preview-sticky { position: static; }
+  .preview-card { margin-bottom: 24px; }
+  .ordina-wrap { padding: 0 16px 60px; }
+  .ordina-header { padding: 28px 16px 0; }
+  .wstep-label { display: none; }
+}
+
 /* ── Scritta preview ── */
 .scritta-preview {
   width: 100%;
