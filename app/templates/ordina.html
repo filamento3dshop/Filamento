@@ -1842,9 +1842,19 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
             deco.position.y = lcy + halfH;
             deco.position.z = lz;
           } else if (slotIdx === 5) {
-            // Sotto centro: sul contorno inferiore centrale della lettera
+            // Sotto centro: sul bordo inferiore centrale della lettera
+            // Raycast verso l'alto per trovare la superficie inferiore della lettera
+            const rayUp = new THREE.Raycaster();
+            const savedSc = letterGroup.scale.clone();
+            letterGroup.scale.set(1, 1, 1);
+            letterGroup.updateMatrixWorld(true);
+            rayUp.set(new THREE.Vector3(lcx, -0.5, lz), new THREE.Vector3(0, 1, 0));
+            const upHits = rayUp.intersectObject(letterMesh, true);
+            letterGroup.scale.copy(savedSc);
+            letterGroup.updateMatrixWorld(true);
+            const bottomY = upHits.length > 0 ? upHits[0].point.y : 0;
             deco.position.x = lcx;
-            deco.position.y = halfH;
+            deco.position.y = bottomY + halfH;
             deco.position.z = lz;
           } else {
             // Sotto dx (2) o sx (3): fuori dalla lettera sul tavolo
