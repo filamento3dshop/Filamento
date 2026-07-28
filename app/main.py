@@ -37,7 +37,10 @@ templates = Jinja2Templates(directory="app/templates")
 
 PREZZI_DIM = {"20": 29.90, "30": 39.90}
 PREZZI_DECO = {0: 0.0, 1: 8.0, 2: 15.0, 3: 20.0, 4: 25.0}
-PREZZI_SCRITTA = {"corto": 19.90, "lungo": 29.90}  # <=5 lettere / >5 lettere
+PREZZI_SCRITTA = {
+    "5":  {"corto": 15.90, "lungo": 19.90},
+    "10": {"corto": 25.90, "lungo": 29.90},
+}
 SPEDIZIONE = 3.0
 
 CONFIG = {
@@ -454,7 +457,8 @@ async def scritte_post(
             sconto_perc = row["percentuale"]
             codice_sconto_valido = codice_sconto.upper().strip()
 
-    prezzo_base = PREZZI_SCRITTA[fascia]
+    prezzi_dim = PREZZI_SCRITTA.get(dimensione, PREZZI_SCRITTA["10"])
+    prezzo_base = prezzi_dim[fascia]
     sped_cost = SPEDIZIONE if usa_spedizione else 0.0
     subtotal = prezzo_base + sped_cost
     if sconto_perc > 0:

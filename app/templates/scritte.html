@@ -2,7 +2,7 @@
 {% block title %}Scritte 3D — Filamento{% endblock %}
 
 {% block head %}
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Rokkitt:wght@700&family=Nunito:wght@800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Rokkitt:wght@700&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
 <script src="https://js.stripe.com/v3/"></script>
 {% endblock %}
 
@@ -103,11 +103,11 @@
               </label>
 
               <label class="font-opt">
-                <input type="radio" name="font_style" value="tondo">
+                <input type="radio" name="font_style" value="geometrico">
                 <div class="font-card">
-                  <div class="font-sample font-tondo">ABC</div>
-                  <div class="font-card-name">Tondo</div>
-                  <div class="font-card-desc">Arrotondato, morbido, giocoso</div>
+                  <div class="font-sample font-geometrico">ABC</div>
+                  <div class="font-card-name">Geometrico</div>
+                  <div class="font-card-desc">Pulito, moderno, minimal</div>
                 </div>
               </label>
 
@@ -122,6 +122,7 @@
                 <input type="radio" name="dimensione" value="5"
                        {% if form.get('dimensione','10')=='5' %}checked{% endif %}>
                 <div class="dim-card">
+                  <div class="dim-price">€15,90 – €19,90</div>
                   <div class="dim-size">5 cm</div>
                   <div class="dim-tag">Compatta</div>
                 </div>
@@ -131,11 +132,13 @@
                        {% if form.get('dimensione','10')!='5' %}checked{% endif %}>
                 <div class="dim-card dim-popular">
                   <div class="dim-badge">Più richiesta</div>
+                  <div class="dim-price">€25,90 – €29,90</div>
                   <div class="dim-size">10 cm</div>
                   <div class="dim-tag">Grande impatto</div>
                 </div>
               </label>
             </div>
+            <p class="form-hint">Il prezzo varia in base alla lunghezza del nome: ≤5 lettere = prezzo base, >5 lettere = prezzo lungo</p>
           </div>
 
           {# Colore #}
@@ -445,6 +448,7 @@
 .dim-opt input { display: none; }
 .dim-card { padding: 22px 12px; border: 1.5px solid var(--c200); border-radius: 4px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
 .dim-opt input:checked + .dim-card { border-color: var(--c500); background: #fff5f5; }
+.dim-price { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
 .dim-size { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-top: 4px; }
 .dim-tag { font-size: 0.7rem; color: var(--text2); margin-top: 4px; }
 .dim-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--c500); color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; white-space: nowrap; }
@@ -456,6 +460,7 @@
 .cname { font-size: 0.58rem; color: var(--text2); text-align: center; }
 .req { color: var(--c500); }
 .form-hint { font-size: 0.78rem; color: var(--text2); margin-top: 6px; font-weight: 300; }
+.section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c500); display: block; margin-bottom: 4px; }
 
 @media (max-width: 860px) {
   .step1-layout { grid-template-columns: 1fr; gap: 0; }
@@ -490,7 +495,7 @@
 }
 .scritta-preview-text.font-moderno { font-family: 'Oswald', 'Arial Black', sans-serif; }
 .scritta-preview-text.font-slab    { font-family: 'Rokkitt', 'Rockwell', serif; }
-.scritta-preview-text.font-tondo   { font-family: 'Nunito', 'Comic Sans MS', cursive; }
+.scritta-preview-text.font-geometrico   { font-family: 'Josefin Sans', 'Century Gothic', 'Futura', sans-serif; }
 
 /* ── Price recap card ── */
 .price-recap-card {
@@ -566,7 +571,7 @@
 }
 .font-sample.font-moderno { font-family: 'Oswald', 'Arial Black', sans-serif; }
 .font-sample.font-slab    { font-family: 'Rokkitt', 'Rockwell', serif; }
-.font-sample.font-tondo   { font-family: 'Nunito', 'Comic Sans MS', cursive; }
+.font-sample.font-geometrico   { font-family: 'Josefin Sans', 'Century Gothic', 'Futura', sans-serif; }
 .font-card-name {
   font-size: 0.78rem;
   font-weight: 700;
@@ -658,9 +663,12 @@
 
 <script>
 // ── Prezzi ──
-const PREZZI = { corto: 19.90, lungo: 29.90 };
+const PREZZI = {
+  '5':  { corto: 15.90, lungo: 19.90 },
+  '10': { corto: 25.90, lungo: 29.90 },
+};
 const SPEDIZIONE = 3.00;
-const FONT_LABELS = { moderno: 'Moderno', slab: 'Slab', tondo: 'Tondo' };
+const FONT_LABELS = { moderno: 'Moderno', slab: 'Slab', geometrico: 'Geometrico' };
 const COLOR_MAP = {
   rosa_antico: '#E8B4A8', corallo: '#E8695A', fucsia: '#E5107A',
   magenta: '#D84098', viola: '#8858C0', lilla: '#C8A8D0',
@@ -701,7 +709,9 @@ function updatePreview() {
 
   const nLettere = testo.replace(/\s/g,'').length;
   const isLungo = nLettere > 5;
-  prezzoBase = isLungo ? PREZZI.lungo : PREZZI.corto;
+  const dim = getSelectedDim();
+  const prezziDim = PREZZI[dim] || PREZZI['10'];
+  prezzoBase = prezziDim[isLungo ? 'lungo' : 'corto'];
 
   const lenLabel = document.getElementById('testo-len-label');
   const priceBadge = document.getElementById('testo-price-badge');
@@ -905,8 +915,15 @@ async function applicaSconto() {
 }
 
 // ── Init ──
+// Mostra prezzo base al caricamento anche senza testo digitato
+(function initPriceDisplay() {
+  const dim = getSelectedDim();
+  const prezziDim = PREZZI[dim] || PREZZI['10'];
+  document.getElementById('pr-scritta').textContent = '€' + prezziDim.corto.toFixed(2).replace('.',',') + ' – €' + prezziDim.lungo.toFixed(2).replace('.',',');
+  document.getElementById('pr-sped').textContent = '€3,00';
+  document.getElementById('pr-totale').textContent = '—';
+})();
 updatePreview();
-// Set initial color in preview
 const initColoreEl = document.querySelector('input[name="colore"]:checked');
 if (initColoreEl) {
   document.getElementById('preview-text').style.color = COLOR_MAP[initColoreEl.value] || '#E8695A';
