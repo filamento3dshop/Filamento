@@ -37,6 +37,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 PREZZI_DIM = {"20": 29.90, "30": 39.90}
 PREZZI_DECO = {0: 0.0, 1: 8.0, 2: 15.0, 3: 20.0, 4: 25.0}
+PREZZI_SCRITTA = {"corto": 19.90, "lungo": 29.90}  # <=5 lettere / >5 lettere
 SPEDIZIONE = 3.0
 
 CONFIG = {
@@ -376,6 +377,167 @@ async def ordina_post(
         conn.close()
 
     order["sconto_applicato"] = f"{sconto_perc}%" if sconto_perc else ""
+    invia_email(email, f"Conferma ordine #{order_id} — Filamento", email_cliente(order, payment_method))
+    invia_email(NEGOZIO_EMAIL, f"Nuovo ordine #{order_id} — {nome} {cognome}", email_negozio(order, payment_method))
+
+    return templates.TemplateResponse("conferma.html", {
+        "request": request, "config": CONFIG, "order": order,
+    })
+
+
+@app.get("/scritte", response_class=HTMLResponse)
+async def scritte_get(request: Request):
+    return templates.TemplateResponse("scritte.html", {
+        "request": request,
+        "config": CONFIG,
+        "form": {},
+        "error": None,
+    })
+
+
+@app.post("/scritte", response_class=HTMLResponse)
+async def scritte_post(
+    request: Request,
+    testo: str = Form(...),
+    testo_maiuscolo: str = Form(""),
+    font_style: str = Form("moderno"),
+    dimensione: str = Form("10"),
+    colore: str = Form("corallo"),
+    note: Optional[str] = Form(None),
+    nome: str = Form(...),
+    cognome: str = Form(...),
+    codice_fiscale: str = Form(...),
+    email: str = Form(...),
+    telefono: str = Form(...),
+    res_indirizzo: str = Form(...),
+    res_citta: str = Form(...),
+    res_cap: str = Form(...),
+    res_provincia: Optional[str] = Form(None),
+    tipo_consegna: str = Form("spedizione"),
+    spedizione_diversa: Optional[str] = Form(None),
+    indirizzo: Optional[str] = Form(None),
+    citta: Optional[str] = Form(None),
+    cap: Optional[str] = Form(None),
+    provincia: Optional[str] = Form(None),
+    payment_method: str = Form("stripe"),
+    stripe_token: Optional[str] = Form(None),
+    paypal_order_id: Optional[str] = Form(None),
+    codice_sconto: Optional[str] = Form(None),
+):
+    testo_clean = (testo_maiuscolo or testo).strip().upper()
+    n_lettere = len(testo_clean.replace(" ", ""))
+    fascia = "lungo" if n_lettere > 5 else "corto"
+    usa_spedizione = tipo_consegna != "ritiro"
+
+    form_data = {
+        "testo": testo_clean, "font_style": font_style, "dimensione": dimensione,
+        "colore": colore, "note": note,
+        "nome": nome, "cognome": cognome, "codice_fiscale": codice_fiscale,
+        "email": email, "telefono": telefono,
+        "res_indirizzo": res_indirizzo, "res_citta": res_citta,
+        "res_cap": res_cap, "res_provincia": res_provincia,
+        "tipo_consegna": tipo_consegna,
+        "spedizione_diversa": spedizione_diversa,
+        "indirizzo": indirizzo, "citta": citta, "cap": cap, "provincia": provincia,
+    }
+
+    sconto_perc = 0
+    codice_sconto_valido = None
+    if codice_sconto and DATABASE_URL:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT percentuale, usato FROM codici_sconto WHERE codice = %s", (codice_sconto.upper().strip(),))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        if row and not row["usato"]:
+            sconto_perc = row["percentuale"]
+            codice_sconto_valido = codice_sconto.upper().strip()
+
+    prezzo_base = PREZZI_SCRITTA[fascia]
+    sped_cost = SPEDIZIONE if usa_spedizione else 0.0
+    subtotal = prezzo_base + sped_cost
+    if sconto_perc > 0:
+        subtotal = round(subtotal * (1 - sconto_perc / 100), 2)
+    totale = round(subtotal, 2)
+    totale_centesimi = int(totale * 100)
+    order_id = str(uuid.uuid4())[:8].upper()
+
+    try:
+        if payment_method == "stripe":
+            if not stripe_token:
+                raise ValueError("Token Stripe mancante.")
+            stripe.PaymentIntent.create(
+                amount=totale_centesimi,
+                currency="eur",
+                payment_method=stripe_token,
+                confirm=True,
+                description=f"Filamento Scritta #{order_id} — {testo_clean} ({colore}) {dimensione}cm",
+                receipt_email=email,
+            )
+        elif payment_method == "paypal":
+            if not paypal_order_id:
+                raise ValueError("ID ordine PayPal mancante.")
+    except stripe.error.CardError as e:
+        return templates.TemplateResponse("scritte.html", {
+            "request": request, "config": CONFIG, "form": form_data,
+            "error": f"Pagamento rifiutato: {e.user_message}",
+        })
+    except Exception as e:
+        return templates.TemplateResponse("scritte.html", {
+            "request": request, "config": CONFIG, "form": form_data,
+            "error": f"Errore durante il pagamento: {str(e)}",
+        })
+
+    indirizzo_spedizione = (
+        f"{indirizzo}, {citta} {cap}" if spedizione_diversa and indirizzo
+        else f"{res_indirizzo}, {res_citta} {res_cap}"
+    )
+
+    order = {
+        "id": order_id,
+        "email": email,
+        "nome": nome,
+        "cognome": cognome,
+        "lettera": testo_clean,
+        "nome_bimbo": f"Scritta: {testo_clean}",
+        "colore_lettera": colore,
+        "colore_scritta": font_style,
+        "dimensione": dimensione,
+        "tema": "scritta3d",
+        "decorazioni_scelte": None,
+        "codice_fiscale": codice_fiscale,
+        "indirizzo_spedizione": indirizzo_spedizione,
+        "totale": f"{totale:.2f}",
+        "sconto_applicato": f"{sconto_perc}%" if sconto_perc else "",
+    }
+
+    if DATABASE_URL:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO orders (
+                id, created_at, payment_method, email, nome, cognome, telefono,
+                lettera, nome_bimbo, colore_lettera, colore_scritta, dimensione,
+                tema, decorazioni_scelte, note, codice_fiscale, indirizzo_spedizione, totale,
+                codice_sconto, sconto_applicato
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (
+                order["id"], datetime.utcnow().isoformat(), payment_method, email, nome, cognome, telefono,
+                testo_clean, order["nome_bimbo"], colore, font_style, dimensione,
+                "scritta3d", None, note, codice_fiscale, indirizzo_spedizione, order["totale"],
+                codice_sconto_valido, f"{sconto_perc}%" if sconto_perc else None,
+            ),
+        )
+        if codice_sconto_valido:
+            cur.execute(
+                "UPDATE codici_sconto SET usato = TRUE, usato_da = %s, usato_in = %s WHERE codice = %s",
+                (email, order["id"], codice_sconto_valido),
+            )
+        conn.commit()
+        cur.close()
+        conn.close()
+
     invia_email(email, f"Conferma ordine #{order_id} — Filamento", email_cliente(order, payment_method))
     invia_email(NEGOZIO_EMAIL, f"Nuovo ordine #{order_id} — {nome} {cognome}", email_negozio(order, payment_method))
 
