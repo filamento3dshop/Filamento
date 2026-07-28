@@ -1826,19 +1826,33 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
           deco.position.y += slot[1];
           deco.position.z = letterFrontZ + 0.02;
         } else {
-          // 3D: appoggiato sul contorno lettera
-          // slot 0,1,4 = alto → seduto sul bordo superiore lettera
-          // slot 2,3,5 = basso → seduto a terra al piede della lettera
+          // 3D: posizione dipende dallo slot
           const db = new THREE.Box3().setFromObject(deco);
-          const halfH = (db.max.y - db.min.y) / 2;
-          const letterCenterZ = letterBoundsLocal
-            ? (letterBoundsLocal.min.z + letterBoundsLocal.max.z) / 2
-            : 0;
-          const letterTopY = letterBoundsLocal ? letterBoundsLocal.max.y : 1.4;
-          const isTopSlot = [0, 1, 4].includes(slotIdx);
-          deco.position.x += slot[0];
-          deco.position.y = isTopSlot ? letterTopY + halfH : halfH;
-          deco.position.z = letterCenterZ;
+          const halfH  = (db.max.y - db.min.y) / 2;
+          const halfW  = (db.max.x - db.min.x) / 2;
+          const lz  = letterBoundsLocal ? (letterBoundsLocal.min.z + letterBoundsLocal.max.z) / 2 : 0;
+          const lcy = letterBoundsLocal ? letterBoundsLocal.max.y : 1.4;
+          const lcx = letterBoundsLocal ? (letterBoundsLocal.min.x + letterBoundsLocal.max.x) / 2 : 0;
+          const lmx = letterBoundsLocal ? letterBoundsLocal.max.x : 0.7;
+          const lmnx= letterBoundsLocal ? letterBoundsLocal.min.x : -0.7;
+
+          if ([0, 1, 4].includes(slotIdx)) {
+            // Alto: seduto sul bordo superiore lettera, x dal raycasting
+            deco.position.x = slot[0];
+            deco.position.y = lcy + halfH;
+            deco.position.z = lz;
+          } else if (slotIdx === 5) {
+            // Sotto centro: sul contorno inferiore centrale della lettera
+            deco.position.x = lcx;
+            deco.position.y = halfH;
+            deco.position.z = lz;
+          } else {
+            // Sotto dx (2) o sx (3): fuori dalla lettera sul tavolo
+            const gap = halfW + 0.08;
+            deco.position.x = slotIdx === 2 ? lmx + gap : lmnx - gap;
+            deco.position.y = halfH;
+            deco.position.z = lz;
+          }
         }
 
         // baseScale = normalizedScale così l'animazione rispetta le proporzioni
