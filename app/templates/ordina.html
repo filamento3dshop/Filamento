@@ -1614,6 +1614,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   let letterMesh = null;
   let letterBoundsLocal = null; // bounding box lettera in spazio letterGroup (scale=1)
   let letterSlotsComputed = null; // 6 slot calcolati via raycasting sulla geometria reale
+  let letterFrontZ = 0.12; // z della faccia frontale lettera (calcolato via raycasting)
   let decoObjects = [];
   let photoTex = null;
   let currentLetterVal = '';
@@ -1698,6 +1699,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
       letterMesh = null;
       letterBoundsLocal = null;
       letterSlotsComputed = null;
+      letterFrontZ = 0.12;
     }
     clearDecos();
     scaleCurrent = 0.01; scaleTarget = 1.0;
@@ -1721,17 +1723,22 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
     const dir = new THREE.Vector3(0, 0, -1);
     const N = 16;
     const valid = [];
+    let firstHitZ = null;
 
     for (let xi = 0; xi <= N; xi++) {
       for (let yi = 0; yi <= N; yi++) {
         const x = b.min.x + W * xi / N;
         const y = b.min.y + H * yi / N;
         raycaster.set(new THREE.Vector3(x, y, 5), dir);
-        if (raycaster.intersectObject(letterMesh, true).length > 0) {
+        const hits = raycaster.intersectObject(letterMesh, true);
+        if (hits.length > 0) {
           valid.push([x, y]);
+          if (firstHitZ === null) firstHitZ = hits[0].point.z;
         }
       }
     }
+    // Salva z della faccia frontale della lettera
+    if (firstHitZ !== null) letterFrontZ = firstHitZ;
 
     // Ripristina scale originale
     letterGroup.scale.copy(savedScale);
@@ -1812,10 +1819,19 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
         const c2 = b2.getCenter(new THREE.Vector3());
         deco.position.sub(c2);
 
-        // Posiziona nello slot (coordinate assolute letterGroup); flat items sul fronte
+        // Posiziona nello slot (coordinate assolute letterGroup)
         deco.position.x += slot[0];
         deco.position.y += slot[1];
-        deco.position.z = isFlat ? 0.18 : (slot[2] || 0);
+
+        // z: flat = leggermente sovrapposto alla faccia frontale (incollato)
+        //    3D  = appoggiato alla faccia frontale (il retro tocca la lettera)
+        if (isFlat) {
+          deco.position.z = letterFrontZ - 0.01;
+        } else {
+          const db = new THREE.Box3().setFromObject(deco);
+          const halfDepth = (db.max.z - db.min.z) / 2;
+          deco.position.z = letterFrontZ + halfDepth + 0.01;
+        }
 
         // baseScale = normalizedScale così l'animazione rispetta le proporzioni
         deco.userData.baseScale = normalizedScale;
