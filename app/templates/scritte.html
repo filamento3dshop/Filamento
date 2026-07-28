@@ -1,0 +1,864 @@
+{% extends "base.html" %}
+{% block title %}Scritte 3D — Filamento{% endblock %}
+
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Rokkitt:wght@700&family=Nunito:wght@800&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="ordina-header">
+  <div class="ordina-header-inner">
+    <span class="section-label">Nuovo prodotto</span>
+    <h1 class="ordina-h1">Scritta 3D personalizzata</h1>
+    <p class="ordina-sub">Il nome di chi ami in grandi lettere 3D — stampato e rifinito a mano</p>
+    <div class="wizard-steps">
+      <div class="wstep active" data-step="1"><div class="wstep-num">1</div><div class="wstep-label">Personalizza</div></div>
+      <div class="wstep-line"></div>
+      <div class="wstep" data-step="2"><div class="wstep-num">2</div><div class="wstep-label">Spedizione</div></div>
+      <div class="wstep-line"></div>
+      <div class="wstep" data-step="3"><div class="wstep-num">3</div><div class="wstep-label">Pagamento</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="ordina-wrap">
+  <form id="order-form" method="post" action="/scritte">
+
+    <input type="hidden" name="tipo_prodotto" value="scritta3d">
+    <input type="hidden" name="testo_maiuscolo" id="testo_maiuscolo" value="">
+
+    {# ══ STEP 1 ══ #}
+    <div class="wizard-panel active" id="panel-1">
+      <div class="step1-layout">
+
+        {# ── LEFT: preview ── #}
+        <div class="preview-col">
+          <div class="preview-sticky">
+            <div class="preview-card">
+              <div class="preview-card-label">Anteprima scritta</div>
+              <div class="scritta-preview" id="scritta-preview">
+                <span class="scritta-preview-text" id="preview-text">NOME</span>
+              </div>
+              <p class="preview-hint">L'anteprima mostra il font — colore e rilievo reali potrebbero variare leggermente</p>
+            </div>
+
+            <div class="price-recap-card" id="price-recap-card">
+              <div class="price-recap-row">
+                <span>Scritta</span>
+                <span id="pr-scritta">—</span>
+              </div>
+              <div class="price-recap-row">
+                <span>Spedizione</span>
+                <span id="pr-sped">€3,00</span>
+              </div>
+              <div class="price-recap-row price-recap-total">
+                <span>Totale</span>
+                <span id="pr-totale">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ── RIGHT: form ── #}
+        <div class="config-col">
+
+          {# Testo #}
+          <div class="form-group">
+            <label class="form-label" for="testo_input">Testo della scritta <span class="req">*</span></label>
+            <input class="form-control" type="text" id="testo_input" name="testo"
+                   placeholder="es. SOFIA" maxlength="20"
+                   value="{{ form.get('testo','') }}"
+                   oninput="onTestoChange(this.value)"
+                   style="text-transform:uppercase;font-size:1.1rem;letter-spacing:0.1em;">
+            <p class="form-hint">Solo lettere, solo maiuscolo — massimo 20 caratteri</p>
+            <div class="testo-info" id="testo-info">
+              <span id="testo-len-label">—</span>
+              <span class="testo-price-badge" id="testo-price-badge"></span>
+            </div>
+          </div>
+
+          {# Font #}
+          <div class="form-group">
+            <label class="form-label">Stile carattere <span class="req">*</span></label>
+            <div class="font-picker" id="font-picker">
+
+              <label class="font-opt">
+                <input type="radio" name="font_style" value="moderno" checked>
+                <div class="font-card">
+                  <div class="font-sample font-moderno">ABC</div>
+                  <div class="font-card-name">Moderno</div>
+                  <div class="font-card-desc">Geometrico, bold, essenziale</div>
+                </div>
+              </label>
+
+              <label class="font-opt">
+                <input type="radio" name="font_style" value="slab">
+                <div class="font-card">
+                  <div class="font-sample font-slab">ABC</div>
+                  <div class="font-card-name">Slab</div>
+                  <div class="font-card-desc">Graziato, classico, elegante</div>
+                </div>
+              </label>
+
+              <label class="font-opt">
+                <input type="radio" name="font_style" value="tondo">
+                <div class="font-card">
+                  <div class="font-sample font-tondo">ABC</div>
+                  <div class="font-card-name">Tondo</div>
+                  <div class="font-card-desc">Arrotondato, morbido, giocoso</div>
+                </div>
+              </label>
+
+            </div>
+          </div>
+
+          {# Dimensione #}
+          <div class="form-group">
+            <label class="form-label">Altezza delle lettere <span class="req">*</span></label>
+            <div class="dim-grid">
+              <label class="dim-opt">
+                <input type="radio" name="dimensione" value="5"
+                       {% if form.get('dimensione','10')=='5' %}checked{% endif %}>
+                <div class="dim-card">
+                  <div class="dim-size">5 cm</div>
+                  <div class="dim-tag">Compatta</div>
+                </div>
+              </label>
+              <label class="dim-opt">
+                <input type="radio" name="dimensione" value="10"
+                       {% if form.get('dimensione','10')!='5' %}checked{% endif %}>
+                <div class="dim-card dim-popular">
+                  <div class="dim-badge">Più richiesta</div>
+                  <div class="dim-size">10 cm</div>
+                  <div class="dim-tag">Grande impatto</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {# Colore #}
+          {% set colori = [
+            ('rosa_antico',    '#E8B4A8', 'Rosa antico'),
+            ('corallo',        '#E8695A', 'Corallo'),
+            ('fucsia',         '#E5107A', 'Fucsia'),
+            ('magenta',        '#D84098', 'Magenta'),
+            ('viola',          '#8858C0', 'Viola'),
+            ('lilla',          '#C8A8D0', 'Lilla'),
+            ('giallo_burro',   '#F4E060', 'Giallo burro'),
+            ('ruggine',        '#B86040', 'Ruggine'),
+            ('menta',          '#A8D8C0', 'Menta'),
+            ('verde_smeraldo', '#38A068', 'Verde smeraldo'),
+            ('celeste',        '#A8CCE0', 'Celeste'),
+            ('blu_elettrico',  '#3858C0', 'Blu elettrico'),
+            ('blu_scuro',      '#1A2A6C', 'Blu scuro'),
+            ('grigio_nebbia',  '#B0ACAA', 'Grigio nebbia'),
+            ('bianco_puro',    '#F8F6F3', 'Bianco'),
+            ('nero',           '#1A1A1A', 'Nero'),
+          ] %}
+          <div class="form-group">
+            <label class="form-label">Colore della scritta <span class="req">*</span></label>
+            <div class="color-picker" id="color-picker-scritta">
+              {% for val, hex, label in colori %}
+              <label class="color-opt" title="{{ label }}">
+                <input type="radio" name="colore" value="{{ val }}"
+                       {% if form.get('colore','corallo') == val %}checked{% endif %}
+                       onchange="onColoreChange('{{ hex }}', '{{ label }}')">
+                <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
+                <span class="cname">{{ label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          {# Note #}
+          <div class="form-group">
+            <label class="form-label" for="note">Note <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
+            <textarea class="form-control" id="note" name="note"
+                      placeholder="Richieste particolari, combinazioni…" rows="3">{{ form.get('note','') }}</textarea>
+          </div>
+
+          <div class="wizard-nav" style="margin-top:32px;">
+            <span></span>
+            <button type="button" class="btn-next" onclick="goStep(2)">Continua → Spedizione</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    {# ══ STEP 2 ══ #}
+    <div class="wizard-panel" id="panel-2">
+      <div class="step-single">
+        <h2 class="panel-title">Dati e spedizione</h2>
+
+        <div class="form-section-title">Dati anagrafici</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="nome">Nome <span class="req">*</span></label>
+            <input class="form-control" type="text" id="nome" name="nome"
+                   placeholder="Mario" value="{{ form.get('nome','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cognome">Cognome <span class="req">*</span></label>
+            <input class="form-control" type="text" id="cognome" name="cognome"
+                   placeholder="Rossi" value="{{ form.get('cognome','') }}">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="codice_fiscale">Codice fiscale <span class="req">*</span></label>
+            <input class="form-control" type="text" id="codice_fiscale" name="codice_fiscale"
+                   placeholder="RSSMRA80A01H501U" maxlength="16" style="text-transform:uppercase;"
+                   value="{{ form.get('codice_fiscale','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Email <span class="req">*</span></label>
+            <input class="form-control" type="email" id="email" name="email"
+                   placeholder="mario@esempio.it" value="{{ form.get('email','') }}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="telefono">Telefono <span class="req">*</span></label>
+          <input class="form-control" type="tel" id="telefono" name="telefono"
+                 placeholder="+39 333 1234567" value="{{ form.get('telefono','') }}">
+        </div>
+
+        <div class="form-section-title" style="margin-top:24px;">Indirizzo di residenza</div>
+
+        <div class="form-group">
+          <label class="form-label" for="res_indirizzo">Via e numero civico <span class="req">*</span></label>
+          <input class="form-control" type="text" id="res_indirizzo" name="res_indirizzo"
+                 placeholder="Via Roma 1" value="{{ form.get('res_indirizzo','') }}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="res_citta">Città <span class="req">*</span></label>
+            <input class="form-control" type="text" id="res_citta" name="res_citta"
+                   placeholder="Milano" value="{{ form.get('res_citta','') }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="res_cap">CAP <span class="req">*</span></label>
+            <input class="form-control" type="text" id="res_cap" name="res_cap"
+                   placeholder="20100" maxlength="5" value="{{ form.get('res_cap','') }}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="res_provincia">Provincia</label>
+          <input class="form-control" type="text" id="res_provincia" name="res_provincia"
+                 placeholder="MI" maxlength="2" value="{{ form.get('res_provincia','') }}">
+        </div>
+
+        <div class="consegna-options">
+          <label class="consegna-opt">
+            <input type="radio" name="tipo_consegna" value="spedizione" id="tipo_spedizione"
+                   {% if form.get('tipo_consegna','spedizione') == 'spedizione' %}checked{% endif %}>
+            <span class="consegna-opt-box"></span>
+            <span class="consegna-opt-inner">
+              <span class="consegna-opt-label"><i class="fas fa-truck"></i> Spedizione in Italia — <strong>€3,00</strong></span>
+              <span class="consegna-opt-sub">Consegna tracciata in 7–10 giorni</span>
+            </span>
+          </label>
+          <label class="consegna-opt">
+            <input type="radio" name="tipo_consegna" value="ritiro" id="tipo_ritiro"
+                   {% if form.get('tipo_consegna') == 'ritiro' %}checked{% endif %}>
+            <span class="consegna-opt-box"></span>
+            <span class="consegna-opt-inner">
+              <span class="consegna-opt-label"><i class="fas fa-hand-holding-box"></i> Ritiro a mano — <strong>gratuito</strong></span>
+              <span class="consegna-opt-sub">Zona Scandiano (RE) — ti contatteremo per concordare il punto di ritiro</span>
+            </span>
+          </label>
+        </div>
+
+        <label class="spedizione-toggle" id="toggle-spedizione-diversa">
+          <input type="checkbox" id="spedizione_diversa" name="spedizione_diversa" value="1"
+                 {% if form.get('spedizione_diversa') %}checked{% endif %}>
+          <span class="spedizione-toggle-box"></span>
+          <span class="spedizione-toggle-label">L'indirizzo di spedizione è diverso da quello di residenza</span>
+        </label>
+
+        <div id="spedizione-extra" style="display:none;margin-top:20px;">
+          <div class="form-section-title">Indirizzo di spedizione</div>
+          <div class="form-group">
+            <label class="form-label" for="indirizzo">Via e numero civico <span class="req">*</span></label>
+            <input class="form-control" type="text" id="indirizzo" name="indirizzo"
+                   placeholder="Via Roma 1" value="{{ form.get('indirizzo','') }}">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="citta">Città <span class="req">*</span></label>
+              <input class="form-control" type="text" id="citta" name="citta"
+                     placeholder="Milano" value="{{ form.get('citta','') }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cap">CAP <span class="req">*</span></label>
+              <input class="form-control" type="text" id="cap" name="cap"
+                     placeholder="20100" maxlength="5" value="{{ form.get('cap','') }}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="provincia">Provincia</label>
+            <input class="form-control" type="text" id="provincia" name="provincia"
+                   placeholder="MI" maxlength="2" value="{{ form.get('provincia','') }}">
+          </div>
+        </div>
+
+        <div class="wizard-nav">
+          <button type="button" class="btn-back" onclick="goStep(1)">← Indietro</button>
+          <button type="button" class="btn-next" onclick="goStep(3)">Continua → Pagamento</button>
+        </div>
+      </div>
+    </div>
+
+    {# ══ STEP 3 ══ #}
+    <div class="wizard-panel" id="panel-3">
+      <div class="step-single">
+        <h2 class="panel-title">Pagamento</h2>
+
+        <div class="recap-bar">
+          <div class="recap-col">
+            <span class="recap-lbl">Scritta</span>
+            <span class="recap-val" id="r-scritta">—</span>
+          </div>
+          <div class="recap-col">
+            <span class="recap-lbl">Dimensione</span>
+            <span class="recap-val" id="r-dim">—</span>
+          </div>
+          <div class="recap-col">
+            <span class="recap-lbl">Font</span>
+            <span class="recap-val" id="r-font">—</span>
+          </div>
+          <div class="recap-col">
+            <span class="recap-lbl">Totale</span>
+            <span class="recap-val recap-total" id="r-totale">—</span>
+          </div>
+        </div>
+
+        {# Codice sconto #}
+        <div class="sconto-wrap" style="margin-bottom:20px;">
+          <div class="sconto-row">
+            <input type="text" id="codice-sconto-input" placeholder="Hai un codice sconto?" maxlength="30"
+              style="text-transform:uppercase;flex:1;border:1px solid var(--c200);border-radius:4px;padding:9px 12px;font-size:.9rem;font-family:inherit;">
+            <button type="button" id="btn-applica-sconto" onclick="applicaSconto()"
+              style="background:var(--text);color:#fff;border:none;border-radius:4px;padding:9px 18px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;">Applica</button>
+          </div>
+          <div id="sconto-msg" style="font-size:.85rem;margin-top:6px;min-height:18px;"></div>
+          <input type="hidden" name="codice_sconto" id="codice_sconto_hidden">
+        </div>
+
+        <div class="payment-tabs">
+          <button type="button" class="pay-tab active" data-tab="stripe">
+            <i class="fas fa-credit-card" style="margin-right:6px;"></i>Carta
+          </button>
+          <button type="button" class="pay-tab" data-tab="paypal">
+            <i class="fab fa-paypal" style="margin-right:6px;"></i>PayPal
+          </button>
+          <button type="button" class="pay-tab" data-tab="bonifico">
+            <i class="fas fa-university" style="margin-right:6px;"></i>Bonifico
+          </button>
+        </div>
+
+        <div class="pay-panel active" id="panel-stripe">
+          <div id="card-element"></div>
+          <div id="stripe-error"></div>
+          <input type="hidden" name="payment_method" id="payment_method" value="stripe">
+          <input type="hidden" name="stripe_token" id="stripe_token">
+        </div>
+
+        <div class="pay-panel" id="panel-paypal">
+          <p class="paypal-note">Verrai reindirizzato su PayPal per completare il pagamento in sicurezza.</p>
+          <div id="paypal-button-container" style="margin-top:16px;"></div>
+          <input type="hidden" name="paypal_order_id" id="paypal_order_id">
+        </div>
+
+        <div class="pay-panel" id="panel-bonifico">
+          <div class="bonifico-box">
+            <p class="bonifico-intro">Effettua un bonifico bancario istantaneo con i dati seguenti. Il tuo ordine verrà messo in lavorazione alla ricezione del pagamento.</p>
+            <div class="bonifico-row">
+              <span class="bonifico-lbl">Intestato a</span>
+              <span class="bonifico-val">FOCUS 3D di Camilla Campani</span>
+            </div>
+            <div class="bonifico-row">
+              <span class="bonifico-lbl">IBAN</span>
+              <span class="bonifico-val bonifico-iban">IT42G03268223000EMH02590789</span>
+            </div>
+            <div class="bonifico-row">
+              <span class="bonifico-lbl">Causale</span>
+              <span class="bonifico-val bonifico-causale" id="bonifico-causale">Ordine Filamento — <em>il tuo nome verrà inserito automaticamente</em></span>
+            </div>
+            <p class="bonifico-nota"><i class="fas fa-info-circle"></i> Riceverai una email di conferma con la causale esatta da usare.</p>
+          </div>
+        </div>
+
+        <p class="ssl-note"><i class="fas fa-lock"></i>Pagamento sicuro 256-bit SSL</p>
+
+        <div class="wizard-nav">
+          <button type="button" class="btn-back" onclick="goStep(2)">← Indietro</button>
+          <button type="submit" class="btn-next" id="submit-btn">
+            <i class="fas fa-lock" style="margin-right:6px;"></i>Conferma e paga
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+{% if error %}
+<div class="error-banner">
+  <i class="fas fa-exclamation-circle"></i> {{ error }}
+</div>
+{% endif %}
+
+<style>
+/* ── Scritta preview ── */
+.scritta-preview {
+  width: 100%;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0ebe4;
+  border-radius: 6px;
+  padding: 24px 16px;
+  overflow: hidden;
+}
+.scritta-preview-text {
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--c500);
+  transition: font-family .25s, color .25s;
+  word-break: break-all;
+  text-align: center;
+  line-height: 1.1;
+}
+.scritta-preview-text.font-moderno { font-family: 'Oswald', 'Arial Black', sans-serif; }
+.scritta-preview-text.font-slab    { font-family: 'Rokkitt', 'Rockwell', serif; }
+.scritta-preview-text.font-tondo   { font-family: 'Nunito', 'Comic Sans MS', cursive; }
+
+/* ── Price recap card ── */
+.price-recap-card {
+  background: var(--c100);
+  border: 1px solid var(--c200);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+.price-recap-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--text2);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--c150);
+}
+.price-recap-row:last-child { border-bottom: none; }
+.price-recap-total {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 1rem;
+  margin-top: 4px;
+}
+
+/* ── Testo info ── */
+.testo-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--text2);
+}
+.testo-price-badge {
+  display: inline-block;
+  background: var(--c100);
+  border: 1px solid var(--c200);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--c600);
+}
+
+/* ── Font picker ── */
+.font-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.font-opt { position: relative; }
+.font-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.font-card {
+  border: 1.5px solid var(--c200);
+  border-radius: 6px;
+  padding: 16px 10px 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s, background .15s;
+  background: var(--white);
+}
+.font-opt input:checked + .font-card {
+  border-color: var(--c500);
+  background: #fff5f5;
+}
+.font-sample {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.font-sample.font-moderno { font-family: 'Oswald', 'Arial Black', sans-serif; }
+.font-sample.font-slab    { font-family: 'Rokkitt', 'Rockwell', serif; }
+.font-sample.font-tondo   { font-family: 'Nunito', 'Comic Sans MS', cursive; }
+.font-card-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.font-card-desc {
+  font-size: 0.7rem;
+  color: var(--text2);
+}
+
+/* ── Error banner ── */
+.error-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #c0392b;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+}
+
+/* ── Shared wizard classes (defined inline here since not in global CSS) ── */
+.wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--c200); }
+.btn-next { display: inline-flex; align-items: center; padding: 14px 28px; background: var(--c500); color: var(--white); border: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: background .2s; }
+.btn-next:hover { background: var(--c600); }
+.btn-next:disabled { opacity: .6; cursor: not-allowed; }
+.btn-back { display: inline-block; padding: 13px 20px; border: 1.5px solid var(--c200); background: none; font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--text2); border-radius: 2px; cursor: pointer; transition: border-color .2s, color .2s; }
+.btn-back:hover { border-color: var(--text2); color: var(--text); }
+.step-single { max-width: 640px; margin: 0 auto; padding-top: 40px; }
+.consegna-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.consegna-opt { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; padding: 14px 16px; border: 1.5px solid var(--c200); border-radius: 2px; background: var(--c100); transition: border-color .2s; }
+.consegna-opt:has(input:checked) { border-color: var(--c500); background: #fff5f5; }
+.consegna-opt input[type="radio"] { display: none; }
+.consegna-opt-box { width: 18px; height: 18px; border: 1.5px solid var(--c300); border-radius: 50%; background: var(--white); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.consegna-opt:has(input:checked) .consegna-opt-box { background: var(--c500); border-color: var(--c500); }
+.consegna-opt:has(input:checked) .consegna-opt-box::after { content: ''; width: 6px; height: 6px; background: #fff; border-radius: 50%; display: block; }
+.consegna-opt-inner { display: flex; flex-direction: column; gap: 3px; }
+.consegna-opt-label { font-size: 0.88rem; color: var(--text); font-weight: 500; }
+.consegna-opt-label i { color: var(--c500); margin-right: 4px; }
+.consegna-opt-sub { font-size: 0.78rem; color: var(--text2); }
+.spedizione-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-top: 8px; padding: 14px 16px; border: 1.5px solid var(--c200); border-radius: 2px; background: var(--c100); transition: border-color .2s; }
+.spedizione-toggle:hover { border-color: var(--c300); }
+.spedizione-toggle input[type="checkbox"] { display: none; }
+.spedizione-toggle-box { width: 20px; height: 20px; border: 1.5px solid var(--c300); border-radius: 2px; background: var(--white); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.spedizione-toggle input:checked + .spedizione-toggle-box { background: var(--c500); border-color: var(--c500); }
+.spedizione-toggle input:checked + .spedizione-toggle-box::after { content: '✓'; color: #fff; font-size: 0.7rem; font-weight: 700; }
+.spedizione-toggle-label { font-size: 0.88rem; color: var(--text2); }
+.recap-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--c200); border: 1px solid var(--c200); border-radius: 4px; overflow: hidden; margin-bottom: 28px; }
+.recap-col { background: var(--white); padding: 14px 12px; text-align: center; }
+.recap-lbl { display: block; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
+.recap-val { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; color: var(--text); }
+.recap-total { color: var(--c500); font-size: 1.2rem; }
+.sconto-wrap {}
+.sconto-row { display: flex; gap: 8px; }
+.payment-tabs { display: flex; gap: 2px; margin-bottom: 20px; border: 1px solid var(--c200); border-radius: 2px; overflow: hidden; }
+.pay-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); background: var(--c100); border: none; transition: background .2s, color .2s; }
+.pay-tab.active { background: var(--c500); color: var(--white); }
+.pay-panel { display: none; }
+.pay-panel.active { display: block; }
+.paypal-note { font-size: 0.85rem; color: var(--text2); text-align: center; padding: 14px; background: var(--c100); border-radius: 2px; }
+.ssl-note { font-size: 0.75rem; color: var(--text2); margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+.bonifico-box { background: var(--c100); border: 1.5px solid var(--c200); border-radius: 2px; padding: 20px; }
+.bonifico-intro { font-size: 0.84rem; color: var(--text2); margin-bottom: 16px; line-height: 1.6; }
+.bonifico-row { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--c200); }
+.bonifico-row:last-of-type { border-bottom: none; }
+.bonifico-lbl { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); min-width: 90px; flex-shrink: 0; }
+.bonifico-val { font-size: 0.9rem; color: var(--text); }
+.bonifico-iban { font-family: monospace; font-size: 0.95rem; letter-spacing: 0.05em; color: var(--c600); font-weight: 600; }
+.bonifico-nota { font-size: 0.78rem; color: var(--text2); margin-top: 14px; display: flex; gap: 6px; align-items: flex-start; }
+.bonifico-nota i { color: var(--c500); margin-top: 2px; flex-shrink: 0; }
+
+/* ── Responsive ── */
+@media (max-width: 760px) {
+  .font-picker { grid-template-columns: 1fr 1fr 1fr; }
+  .font-sample { font-size: 1.5rem; }
+  .recap-bar { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 480px) {
+  .font-picker { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+// ── Prezzi ──
+const PREZZI = { corto: 19.90, lungo: 29.90 };
+const SPEDIZIONE = 3.00;
+const FONT_LABELS = { moderno: 'Moderno', slab: 'Slab', tondo: 'Tondo' };
+const COLOR_MAP = {
+  rosa_antico: '#E8B4A8', corallo: '#E8695A', fucsia: '#E5107A',
+  magenta: '#D84098', viola: '#8858C0', lilla: '#C8A8D0',
+  giallo_burro: '#F4E060', ruggine: '#B86040', menta: '#A8D8C0',
+  verde_smeraldo: '#38A068', celeste: '#A8CCE0', blu_elettrico: '#3858C0',
+  blu_scuro: '#1A2A6C', grigio_nebbia: '#B0ACAA', bianco_puro: '#F8F6F3',
+  nero: '#1A1A1A'
+};
+
+let scontoPerc = 0;
+let prezzoBase = 0;
+
+function getSelectedFont() {
+  const r = document.querySelector('input[name="font_style"]:checked');
+  return r ? r.value : 'moderno';
+}
+function getSelectedDim() {
+  const r = document.querySelector('input[name="dimensione"]:checked');
+  return r ? r.value : '10';
+}
+function getSelectedColore() {
+  const r = document.querySelector('input[name="colore"]:checked');
+  return r ? r.value : 'corallo';
+}
+function getTesto() {
+  return (document.getElementById('testo_input').value || '').replace(/[^A-Za-zÀ-ú ]/g, '').toUpperCase().trim();
+}
+
+function updatePreview() {
+  const testo = getTesto();
+  const font = getSelectedFont();
+  const colore = getSelectedColore();
+
+  const previewEl = document.getElementById('preview-text');
+  previewEl.textContent = testo || 'NOME';
+  previewEl.className = 'scritta-preview-text font-' + font;
+  previewEl.style.color = COLOR_MAP[colore] || '#E8695A';
+
+  const nLettere = testo.replace(/\s/g,'').length;
+  const isLungo = nLettere > 5;
+  prezzoBase = isLungo ? PREZZI.lungo : PREZZI.corto;
+
+  const lenLabel = document.getElementById('testo-len-label');
+  const priceBadge = document.getElementById('testo-price-badge');
+  if (testo) {
+    lenLabel.textContent = nLettere + ' lettere — ' + (isLungo ? 'nome lungo' : 'nome corto');
+    priceBadge.textContent = '€' + prezzoBase.toFixed(2).replace('.',',');
+  } else {
+    lenLabel.textContent = '—';
+    priceBadge.textContent = '';
+  }
+
+  updatePriceRecap();
+}
+
+function updatePriceRecap() {
+  const testo = getTesto();
+  const dim = getSelectedDim();
+  const font = getSelectedFont();
+
+  let totale = prezzoBase;
+  const consegna = document.querySelector('input[name="tipo_consegna"]:checked');
+  const usaSpedizione = !consegna || consegna.value === 'spedizione';
+  if (usaSpedizione) totale += SPEDIZIONE;
+  if (scontoPerc > 0) totale = totale * (1 - scontoPerc / 100);
+  totale = Math.round(totale * 100) / 100;
+
+  const fmtPrice = v => '€' + v.toFixed(2).replace('.',',');
+
+  document.getElementById('pr-scritta').textContent = prezzoBase > 0 ? fmtPrice(prezzoBase) : '—';
+  document.getElementById('pr-sped').textContent = usaSpedizione ? fmtPrice(SPEDIZIONE) : 'Gratuita';
+  document.getElementById('pr-totale').textContent = prezzoBase > 0 ? fmtPrice(totale) : '—';
+
+  // Recap step 3
+  document.getElementById('r-scritta').textContent = testo || '—';
+  document.getElementById('r-dim').textContent = dim ? dim + ' cm' : '—';
+  document.getElementById('r-font').textContent = FONT_LABELS[font] || '—';
+  document.getElementById('r-totale').textContent = prezzoBase > 0 ? fmtPrice(totale) : '—';
+}
+
+function onTestoChange(val) {
+  const clean = val.replace(/[^A-Za-zÀ-ú ]/g,'').toUpperCase();
+  if (val !== clean) document.getElementById('testo_input').value = clean;
+  document.getElementById('testo_maiuscolo').value = clean.trim();
+  updatePreview();
+}
+
+function onColoreChange(hex, label) {
+  document.getElementById('preview-text').style.color = hex;
+}
+
+// Font change
+document.querySelectorAll('input[name="font_style"]').forEach(r => {
+  r.addEventListener('change', updatePreview);
+});
+document.querySelectorAll('input[name="dimensione"]').forEach(r => {
+  r.addEventListener('change', updatePreview);
+});
+document.querySelectorAll('input[name="colore"]').forEach(r => {
+  r.addEventListener('change', updatePreview);
+});
+document.querySelectorAll('input[name="tipo_consegna"]').forEach(r => {
+  r.addEventListener('change', updatePriceRecap);
+});
+
+// ── Wizard navigation ──
+function goStep(n) {
+  if (n > 1 && !validateStep1()) return;
+
+  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.wstep').forEach((s, i) => {
+    s.classList.toggle('active', i + 1 === n);
+    s.classList.toggle('done', i + 1 < n);
+  });
+  document.getElementById('panel-' + n).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (n === 3) updatePriceRecap();
+}
+
+function validateStep1() {
+  const testo = getTesto();
+  if (!testo || testo.replace(/\s/g,'').length < 2) {
+    alert('Inserisci almeno 2 lettere per la scritta.');
+    return false;
+  }
+  if (!getSelectedFont()) { alert('Scegli uno stile di carattere.'); return false; }
+  if (!getSelectedColore()) { alert('Scegli un colore.'); return false; }
+  return true;
+}
+
+// ── Spedizione diversa ──
+document.getElementById('spedizione_diversa').addEventListener('change', function() {
+  document.getElementById('spedizione-extra').style.display = this.checked ? 'block' : 'none';
+});
+if (document.getElementById('spedizione_diversa').checked) {
+  document.getElementById('spedizione-extra').style.display = 'block';
+}
+
+// ── Payment tabs ──
+document.querySelectorAll('.pay-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pay-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.pay-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    document.getElementById('payment_method').value = btn.dataset.tab;
+  });
+});
+
+// ── Stripe ──
+const stripe = Stripe('{{ config.stripe_publishable_key }}');
+const elements = stripe.elements();
+const cardElement = elements.create('card', {
+  style: {
+    base: { fontFamily: "'Jost', sans-serif", fontSize: '16px', color: '#1A1714' },
+    invalid: { color: '#c0392b' }
+  }
+});
+cardElement.mount('#card-element');
+cardElement.on('change', e => {
+  document.getElementById('stripe-error').textContent = e.error ? e.error.message : '';
+});
+
+// ── PayPal ──
+const PAYPAL_CLIENT_ID = '{{ config.paypal_client_id }}';
+if (PAYPAL_CLIENT_ID) {
+  const s = document.createElement('script');
+  s.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=EUR`;
+  s.onload = () => {
+    paypal.Buttons({
+      createOrder: (data, actions) => {
+        const tot = Math.max(prezzoBase + SPEDIZIONE, 1);
+        return actions.order.create({
+          purchase_units: [{ amount: { value: tot.toFixed(2) } }]
+        });
+      },
+      onApprove: (data, actions) => actions.order.capture().then(() => {
+        document.getElementById('paypal_order_id').value = data.orderID;
+        document.getElementById('payment_method').value = 'paypal';
+        document.getElementById('order-form').submit();
+      })
+    }).render('#paypal-button-container');
+  };
+  document.head.appendChild(s);
+}
+
+// ── Form submit (Stripe) ──
+document.getElementById('order-form').addEventListener('submit', async e => {
+  const pm = document.getElementById('payment_method').value;
+  if (pm !== 'stripe') return;
+  e.preventDefault();
+
+  const testo = getTesto();
+  if (!testo || testo.replace(/\s/g,'').length < 2) {
+    alert('Inserisci la scritta prima di procedere.');
+    goStep(1); return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Elaborazione…';
+
+  const { paymentMethod, error } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
+  if (error) {
+    document.getElementById('stripe-error').textContent = error.message;
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-lock" style="margin-right:6px;"></i>Conferma e paga';
+    return;
+  }
+  document.getElementById('stripe_token').value = paymentMethod.id;
+  e.target.submit();
+});
+
+// ── Sconto ──
+async function applicaSconto() {
+  const codice = document.getElementById('codice-sconto-input').value.trim();
+  if (!codice) return;
+  const msg = document.getElementById('sconto-msg');
+  msg.style.color = 'var(--text2)';
+  msg.textContent = 'Verifica…';
+  try {
+    const r = await fetch('/api/codice-sconto/' + encodeURIComponent(codice));
+    const data = await r.json();
+    if (data.valido) {
+      scontoPerc = data.percentuale;
+      document.getElementById('codice_sconto_hidden').value = codice;
+      msg.style.color = 'green';
+      msg.textContent = '✓ Codice applicato — ' + scontoPerc + '% di sconto';
+      updatePriceRecap();
+    } else {
+      scontoPerc = 0;
+      document.getElementById('codice_sconto_hidden').value = '';
+      msg.style.color = 'var(--c500)';
+      msg.textContent = data.errore || 'Codice non valido';
+      updatePriceRecap();
+    }
+  } catch {
+    msg.style.color = 'var(--c500)';
+    msg.textContent = 'Errore di rete, riprova.';
+  }
+}
+
+// ── Init ──
+updatePreview();
+// Set initial color in preview
+const initColoreEl = document.querySelector('input[name="colore"]:checked');
+if (initColoreEl) {
+  document.getElementById('preview-text').style.color = COLOR_MAP[initColoreEl.value] || '#E8695A';
+}
+</script>
+{% endblock %}
