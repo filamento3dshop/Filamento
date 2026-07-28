@@ -1819,18 +1819,23 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
         const c2 = b2.getCenter(new THREE.Vector3());
         deco.position.sub(c2);
 
-        // Posiziona nello slot (coordinate assolute letterGroup)
-        deco.position.x += slot[0];
-        deco.position.y += slot[1];
-
-        // z: flat = leggermente sovrapposto alla faccia frontale (incollato)
-        //    3D  = appoggiato alla faccia frontale (il retro tocca la lettera)
+        // Posiziona nello slot
         if (isFlat) {
-          deco.position.z = letterFrontZ - 0.01;
+          // Flat: incollato sulla faccia frontale della lettera
+          deco.position.x += slot[0];
+          deco.position.y += slot[1];
+          deco.position.z = letterFrontZ + 0.02;
         } else {
+          // 3D: appoggiato sul bordo superiore della lettera
+          // x = posizione slot, y = sopra il top della lettera, z = centro profondità
           const db = new THREE.Box3().setFromObject(deco);
-          const halfDepth = (db.max.z - db.min.z) / 2;
-          deco.position.z = letterFrontZ + halfDepth + 0.01;
+          const halfH = (db.max.y - db.min.y) / 2;
+          const letterCenterZ = letterBoundsLocal
+            ? (letterBoundsLocal.min.z + letterBoundsLocal.max.z) / 2
+            : 0;
+          deco.position.x += slot[0];
+          deco.position.y = (letterBoundsLocal ? letterBoundsLocal.max.y : 1.4) + halfH;
+          deco.position.z = letterCenterZ;
         }
 
         // baseScale = normalizedScale così l'animazione rispetta le proporzioni
