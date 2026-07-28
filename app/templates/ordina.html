@@ -104,246 +104,283 @@
           </div>
         </div>
 
-        {# ── RIGHT: config ── #}
+        {# ── RIGHT: config (3 sotto-step) ── #}
         <div class="config-col">
 
           {% if error %}<div class="form-alert">{{ error }}</div>{% endif %}
 
-          {# Lettera #}
-          <div class="form-group">
-            <label class="form-label" for="lettera">Lettera iniziale <span class="req">*</span></label>
-            <select class="form-control" id="lettera" name="lettera" required>
-              <option value="">— Scegli —</option>
-              {% for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
-              <option value="{{ c }}" {% if form.get('lettera')==c %}selected{% endif %}>{{ c }}</option>
-              {% endfor %}
-              {% for n in range(10) %}
-              <option value="{{ n }}" {% if form.get('lettera')==(n|string) %}selected{% endif %}>{{ n }}</option>
-              {% endfor %}
-            </select>
+          {# ── Indicatore sotto-step ── #}
+          <div class="substep-indicator">
+            <div class="substep-pill active" id="spill-1a"><span class="spill-num">1</span> Lettera</div>
+            <div class="substep-arrow">›</div>
+            <div class="substep-pill" id="spill-1b"><span class="spill-num">2</span> Nome</div>
+            <div class="substep-arrow">›</div>
+            <div class="substep-pill" id="spill-1c"><span class="spill-num">3</span> Decorazioni</div>
           </div>
 
-          {# Nome bimbo + slot posizione #}
-          <div class="form-group">
-            <label class="form-label" for="nome_bimbo">Nome da personalizzare <span class="req">*</span></label>
-            <input class="form-control" type="text" id="nome_bimbo" name="nome_bimbo"
-                   placeholder="Es. Greta, Matteo…" required
-                   value="{{ form.get('nome_bimbo','') }}">
-            <p class="form-hint">Verrà inciso sulla composizione</p>
-            <div class="nome-slot-row">
-              <button type="button" class="nome-slot-btn nome-slot-active" data-slot="centro">Al centro</button>
-              <button type="button" class="nome-slot-btn" data-slot="base">Alla base</button>
+          {# ════ SOTTO-STEP A: Lettera ════ #}
+          <div class="substep-panel active" id="panel-1a">
+
+            <div class="substep-title">La tua lettera</div>
+
+            {# Lettera #}
+            <div class="form-group">
+              <label class="form-label" for="lettera">Lettera iniziale <span class="req">*</span></label>
+              <select class="form-control" id="lettera" name="lettera" required>
+                <option value="">— Scegli —</option>
+                {% for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+                <option value="{{ c }}" {% if form.get('lettera')==c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+                {% for n in range(10) %}
+                <option value="{{ n }}" {% if form.get('lettera')==(n|string) %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
             </div>
-          </div>
 
-          {# Forma #}
-          <div class="form-group">
-            <label class="form-label">Forma della lettera <span class="req">*</span></label>
-            <div class="forma-grid">
-              <div class="forma-opt forma-opt-active" id="forma-piena-card"
-                   onclick="setForma('piena')" role="button" tabindex="0" aria-pressed="true">
-                <div class="forma-icon">
-                  <svg viewBox="0 0 56 56" width="42" height="42" aria-hidden="true">
-                    <rect x="6" y="6" width="44" height="44" rx="5" fill="currentColor"/>
-                  </svg>
+            {# Forma #}
+            <div class="form-group">
+              <label class="form-label">Tipologia <span class="req">*</span></label>
+              <div class="forma-grid">
+                <div class="forma-opt forma-opt-active" id="forma-piena-card"
+                     onclick="setForma('piena')" role="button" tabindex="0" aria-pressed="true">
+                  <div class="forma-icon">
+                    <svg viewBox="0 0 56 56" width="42" height="42" aria-hidden="true">
+                      <rect x="6" y="6" width="44" height="44" rx="5" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <div class="forma-name">Lettera piena</div>
+                  <div class="forma-desc">Superficie solida</div>
                 </div>
-                <div class="forma-name">Lettera piena</div>
-                <div class="forma-desc">Superficie solida</div>
-              </div>
-              <div class="forma-opt" id="forma-scatola-card"
-                   onclick="setForma('scatola')" role="button" tabindex="0" aria-pressed="false">
-                <div class="forma-icon">
-                  <svg viewBox="0 0 56 56" width="42" height="42" aria-hidden="true">
-                    <rect x="6" y="6" width="44" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="7"/>
-                  </svg>
-                </div>
-                <div class="forma-name">Lettera a scatola</div>
-                <div class="forma-desc">Struttura aperta</div>
-              </div>
-            </div>
-            <p class="forma-desc-live" id="forma-desc-live">Superficie solida, look moderno e minimale. Ideale per ambienti luminosi.</p>
-          </div>
-
-          {# Colori #}
-          {% set colori = [
-            ('rosa_antico',    '#E8B4A8', 'Rosa antico'),
-            ('corallo',        '#E8695A', 'Corallo'),
-            ('fucsia',         '#E5107A', 'Fucsia'),
-            ('magenta',        '#D84098', 'Magenta'),
-            ('viola',          '#8858C0', 'Viola'),
-            ('lilla',          '#C8A8D0', 'Lilla'),
-            ('giallo_burro',   '#F4E060', 'Giallo burro'),
-            ('ruggine',        '#B86040', 'Ruggine'),
-            ('menta',          '#A8D8C0', 'Menta'),
-            ('verde_smeraldo', '#38A068', 'Verde smeraldo'),
-            ('celeste',        '#A8CCE0', 'Celeste'),
-            ('blu_elettrico',  '#3858C0', 'Blu elettrico'),
-            ('blu_scuro',      '#1A2A6C', 'Blu scuro'),
-            ('grigio_nebbia',  '#B0ACAA', 'Grigio nebbia'),
-            ('bianco_puro',    '#F8F6F3', 'Bianco'),
-            ('nero',           '#1A1A1A', 'Nero'),
-          ] %}
-
-          <div class="form-group">
-            <label class="form-label">Colore della lettera <span class="req">*</span></label>
-            <div class="color-picker" id="color-picker-lettera">
-              {% for val, hex, label in colori %}
-              <label class="color-opt" title="{{ label }}">
-                <input type="radio" name="colore_lettera" value="{{ val }}"
-                       {% if form.get('colore_lettera','corallo') == val %}checked{% endif %}>
-                <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
-                <span class="cname">{{ label }}</span>
-              </label>
-              {% endfor %}
-            </div>
-            <p class="color-desc-live" id="color-desc-live">La tonalità più amata per le camerette — vivace ma mai eccessiva.</p>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Colore della scritta (nome) <span class="req">*</span></label>
-            <div class="color-picker" id="color-picker-scritta">
-              {% for val, hex, label in colori %}
-              <label class="color-opt" title="{{ label }}">
-                <input type="radio" name="colore_scritta" value="{{ val }}"
-                       {% if form.get('colore_scritta','bianco_puro') == val %}checked{% endif %}>
-                <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
-                <span class="cname">{{ label }}</span>
-              </label>
-              {% endfor %}
-            </div>
-          </div>
-
-          {# Dimensione #}
-          <div class="form-group">
-            <label class="form-label">Dimensione <span class="req">*</span></label>
-            <div class="dim-grid">
-              <label class="dim-opt">
-                <input type="radio" name="dimensione" value="20"
-                       {% if form.get('dimensione')=='20' %}checked{% endif %}>
-                <div class="dim-card">
-                  <div class="dim-price">€29,90</div>
-                  <div class="dim-size">20 cm</div>
-                  <div class="dim-tag">Standard</div>
-                </div>
-              </label>
-              <label class="dim-opt">
-                <input type="radio" name="dimensione" value="30"
-                       {% if form.get('dimensione','30')=='30' or not form.get('dimensione') %}checked{% endif %}>
-                <div class="dim-card dim-popular">
-                  <div class="dim-badge">Grande impatto</div>
-                  <div class="dim-price">€39,90</div>
-                  <div class="dim-size">30 cm</div>
-                  <div class="dim-tag">Formato grande</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          {# Note #}
-          <div class="form-group">
-            <label class="form-label" for="note">Note <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
-            <textarea class="form-control" id="note" name="note"
-                      placeholder="Richieste particolari, combinazioni di colori…" rows="3">{{ form.get('note','') }}</textarea>
-          </div>
-
-          {# ── Viewer decorazione: sotto Note, sopra Decorazioni ── #}
-          <div class="preview-card deco-preview-card" id="deco-preview-card" style="display:none;margin-bottom:20px;">
-            <div class="preview-card-label">Decorazione selezionata</div>
-            <div class="preview-stage" style="height:220px;">
-              <div id="deco-three-wrap" style="position:relative;width:100%;height:100%;background:#464543;">
-                <canvas id="deco-canvas" style="width:100%;height:100%;display:block;"></canvas>
-                <div id="deco-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#464543;">
-                  <div class="pl-spinner"></div>
-                </div>
-                <div id="deco-hint-rotate" class="three-hint-rotate" style="position:absolute;bottom:8px;right:10px;font-size:.7rem;color:var(--text3);display:flex;align-items:center;gap:4px;">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
-                  Ruota
+                <div class="forma-opt" id="forma-scatola-card"
+                     onclick="setForma('scatola')" role="button" tabindex="0" aria-pressed="false">
+                  <div class="forma-icon">
+                    <svg viewBox="0 0 56 56" width="42" height="42" aria-hidden="true">
+                      <rect x="6" y="6" width="44" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="7"/>
+                    </svg>
+                  </div>
+                  <div class="forma-name">Lettera a scatola</div>
+                  <div class="forma-desc">Struttura aperta</div>
                 </div>
               </div>
-            </div>
-            <p class="preview-hint" id="deco-preview-name" style="text-align:center;font-weight:600;"></p>
-            <p class="preview-hint">Anteprima del risultato — i colori reali potrebbero variare leggermente</p>
-          </div>
-
-          {# Decorazioni #}
-          <div class="form-group deco-box">
-            <label class="form-label">Decorazioni <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
-            <p class="form-hint" style="margin-bottom:16px;">Piccole stampe 3D da abbinare alla lettera. Puoi scegliere il colore di ogni decorazione in fondo alla pagina (opzionale)</p>
-
-            <div class="deco-pricing">
-              <div class="deco-slot selected" data-n="0">
-                <div class="deco-slot-lbl">Nessuna</div>
-                <div class="deco-slot-price">—</div>
-              </div>
-              <div class="deco-slot" data-n="1">
-                <div class="deco-slot-lbl">1 deco</div>
-                <div class="deco-slot-price">€8</div>
-                <div class="deco-slot-each">€8,00</div>
-              </div>
-              <div class="deco-slot" data-n="2">
-                <div class="deco-slot-lbl">2 deco</div>
-                <div class="deco-slot-price">€15</div>
-                <div class="deco-slot-each">€7,50</div>
-              </div>
-              <div class="deco-slot" data-n="3">
-                <div class="deco-slot-lbl">3 deco</div>
-                <div class="deco-slot-price">€20</div>
-                <div class="deco-slot-each">€6,67</div>
-              </div>
-              <div class="deco-slot best" data-n="4">
-                <div class="deco-slot-lbl">4 deco</div>
-                <div class="deco-slot-price">€25</div>
-                <div class="deco-slot-each">€6,25</div>
-              </div>
+              <p class="forma-desc-live" id="forma-desc-live">Superficie solida, look moderno e minimale. Ideale per ambienti luminosi.</p>
             </div>
 
-            <div id="deco-catalog" style="display:none;margin-top:20px;">
-              <div class="deco-counter-bar">
-                <span>Seleziona <strong id="deco-max">0</strong> decorazioni</span>
-                <span class="deco-counter-badge"><span id="deco-count">0</span> / <span id="deco-max2">0</span></span>
+            {# Colore lettera #}
+            {% set colori = [
+              ('rosa_antico',    '#E8B4A8', 'Rosa antico'),
+              ('corallo',        '#E8695A', 'Corallo'),
+              ('fucsia',         '#E5107A', 'Fucsia'),
+              ('magenta',        '#D84098', 'Magenta'),
+              ('viola',          '#8858C0', 'Viola'),
+              ('lilla',          '#C8A8D0', 'Lilla'),
+              ('giallo_burro',   '#F4E060', 'Giallo burro'),
+              ('ruggine',        '#B86040', 'Ruggine'),
+              ('menta',          '#A8D8C0', 'Menta'),
+              ('verde_smeraldo', '#38A068', 'Verde smeraldo'),
+              ('celeste',        '#A8CCE0', 'Celeste'),
+              ('blu_elettrico',  '#3858C0', 'Blu elettrico'),
+              ('blu_scuro',      '#1A2A6C', 'Blu scuro'),
+              ('grigio_nebbia',  '#B0ACAA', 'Grigio nebbia'),
+              ('bianco_puro',    '#F8F6F3', 'Bianco'),
+              ('nero',           '#1A1A1A', 'Nero'),
+            ] %}
+
+            <div class="form-group">
+              <label class="form-label">Colore della lettera <span class="req">*</span></label>
+              <div class="color-picker" id="color-picker-lettera">
+                {% for val, hex, label in colori %}
+                <label class="color-opt" title="{{ label }}">
+                  <input type="radio" name="colore_lettera" value="{{ val }}"
+                         {% if form.get('colore_lettera','corallo') == val %}checked{% endif %}>
+                  <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
+                  <span class="cname">{{ label }}</span>
+                </label>
+                {% endfor %}
               </div>
+              <p class="color-desc-live" id="color-desc-live">La tonalità più amata per le camerette — vivace ma mai eccessiva.</p>
+            </div>
 
-              {% set catalogo = [
-                ('<i class="fas fa-paw"></i>',       'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre'],        []),
-                ('<i class="fas fa-rocket"></i>',    'Spazio',      ['Razzo','Pianeta','Stella','Astronauta','UFO'],                                            ['Stella','UFO']),
-                ('<i class="fas fa-fish"></i>',      'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino'], ['Pesce','Stella marina','Granchio','Balena','Medusa','Corallo','Cavalluccio marino']),
-                ('<i class="fas fa-cloud-sun"></i>', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino'], ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino']),
-                ('<i class="fas fa-crown"></i>',     'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Rossetto','Carrozza'], ['Bacchetta magica','Unicorno','Fiocco','Fatina','Carrozza']),
-                ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone da basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da calcio','Pallone da basket','Porta da calcio','Guantone boxe','Bicicletta','Palla da football']),
-                ('<i class="fas fa-car"></i>',       'Motori',      ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Treno'],               []),
-                ('<i class="fas fa-leaf"></i>',      'Natura',      ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella'],                                     ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella']),
-                ('<i class="fas fa-ice-cream"></i>', 'Cibo',        ['Cono gelato','Pizza','Fragola','Fetta cocomero','Ciliege','More','Banana','Donut','Fetta torta'], ['Cono gelato','Pizza','Fetta cocomero','Banana','Donut','Fetta torta']),
-              ] %}
+            {# Dimensione #}
+            <div class="form-group">
+              <label class="form-label">Dimensione <span class="req">*</span></label>
+              <div class="dim-grid">
+                <label class="dim-opt">
+                  <input type="radio" name="dimensione" value="20"
+                         {% if form.get('dimensione')=='20' %}checked{% endif %}>
+                  <div class="dim-card">
+                    <div class="dim-price">€29,90</div>
+                    <div class="dim-size">20 cm</div>
+                    <div class="dim-tag">Standard</div>
+                  </div>
+                </label>
+                <label class="dim-opt">
+                  <input type="radio" name="dimensione" value="30"
+                         {% if form.get('dimensione','30')=='30' or not form.get('dimensione') %}checked{% endif %}>
+                  <div class="dim-card dim-popular">
+                    <div class="dim-badge">Grande impatto</div>
+                    <div class="dim-price">€39,90</div>
+                    <div class="dim-size">30 cm</div>
+                    <div class="dim-tag">Formato grande</div>
+                  </div>
+                </label>
+              </div>
+            </div>
 
-              {% for ico, nome_tema, items, flat_items in catalogo %}
-              <div class="deco-tema-block" data-tema="{{ nome_tema.lower() }}">
-                <div class="deco-tema-title">{{ ico | safe }} {{ nome_tema }}</div>
-                <div class="deco-items">
-                  {% for item in items %}
-                  {% set is_flat = item in flat_items %}
-                  <label class="deco-item">
-                    <input type="checkbox" name="deco_item" value="{{ item }}" class="deco-check" data-tipo="{{ 'flat' if is_flat else '3d' }}">
-                    <span class="deco-item-label">
-                      {{ item }}
-                      <span class="deco-tipo-badge {{ 'deco-flat' if is_flat else 'deco-3d' }}">{{ 'flat' if is_flat else '3D' }}</span>
-                    </span>
-                  </label>
-                  {% endfor %}
+            <div class="wizard-nav">
+              <span></span>
+              <button type="button" class="btn-next" onclick="goSubStep('1b')">
+                Continua → Nome <i class="fas fa-arrow-right" style="margin-left:6px;font-size:.8rem;"></i>
+              </button>
+            </div>
+          </div>{# /panel-1a #}
+
+          {# ════ SOTTO-STEP B: Nome e scritta ════ #}
+          <div class="substep-panel" id="panel-1b">
+
+            <div class="substep-title">Nome e scritta</div>
+
+            <div class="form-group">
+              <label class="form-label" for="nome_bimbo">Nome da personalizzare <span class="req">*</span></label>
+              <input class="form-control" type="text" id="nome_bimbo" name="nome_bimbo"
+                     placeholder="Es. Greta, Matteo…" required
+                     value="{{ form.get('nome_bimbo','') }}">
+              <p class="form-hint">Verrà inciso sulla composizione</p>
+              <div class="nome-slot-row">
+                <button type="button" class="nome-slot-btn nome-slot-active" data-slot="centro">Al centro</button>
+                <button type="button" class="nome-slot-btn" data-slot="base">Alla base</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Colore della scritta (nome) <span class="req">*</span></label>
+              <p class="form-hint" style="margin-bottom:10px;">Scegli il colore con cui verrà scritto il nome sulla lettera</p>
+              <div class="color-picker" id="color-picker-scritta">
+                {% for val, hex, label in colori %}
+                <label class="color-opt" title="{{ label }}">
+                  <input type="radio" name="colore_scritta" value="{{ val }}"
+                         {% if form.get('colore_scritta','bianco_puro') == val %}checked{% endif %}>
+                  <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
+                  <span class="cname">{{ label }}</span>
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="note">Note <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.82rem;color:var(--text2);">(opzionale)</span></label>
+              <textarea class="form-control" id="note" name="note"
+                        placeholder="Richieste particolari, combinazioni di colori…" rows="3">{{ form.get('note','') }}</textarea>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn-back" onclick="goSubStep('1a')">← Indietro</button>
+              <button type="button" class="btn-next" onclick="goSubStep('1c')">
+                Continua → Decorazioni <i class="fas fa-arrow-right" style="margin-left:6px;font-size:.8rem;"></i>
+              </button>
+            </div>
+          </div>{# /panel-1b #}
+
+          {# ════ SOTTO-STEP C: Decorazioni ════ #}
+          <div class="substep-panel" id="panel-1c">
+
+            <div class="substep-title">Decorazioni <span style="font-weight:400;font-size:0.85rem;text-transform:none;letter-spacing:0;color:var(--text2);">(opzionale)</span></div>
+            <p class="form-hint" style="margin-bottom:20px;">Piccole stampe 3D da abbinare alla lettera — aggiungono carattere e colore alla composizione.</p>
+
+            {# Viewer deco standalone (grande) #}
+            <div class="preview-card deco-preview-card" id="deco-preview-card" style="display:none;margin-bottom:20px;">
+              <div class="preview-card-label">Decorazione selezionata</div>
+              <div class="preview-stage" style="height:240px;">
+                <div id="deco-three-wrap" style="position:relative;width:100%;height:100%;background:#464543;">
+                  <canvas id="deco-canvas" style="width:100%;height:100%;display:block;"></canvas>
+                  <div id="deco-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#464543;">
+                    <div class="pl-spinner"></div>
+                  </div>
+                  <div id="deco-hint-rotate" class="three-hint-rotate" style="position:absolute;bottom:8px;right:10px;font-size:.7rem;color:var(--text3);display:flex;align-items:center;gap:4px;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                    Ruota
+                  </div>
                 </div>
               </div>
-              {% endfor %}
-
-              {# Pannello colore per deco selezionate #}
-              <div id="deco-color-panel" style="display:none;margin-top:20px;"></div>
+              <p class="preview-hint" id="deco-preview-name" style="text-align:center;font-weight:600;"></p>
+              <p class="preview-hint">Anteprima del risultato — i colori reali potrebbero variare leggermente</p>
             </div>
-          </div>
 
-          <div class="wizard-nav">
-            <span></span>
-            <button type="button" class="btn-next" onclick="goStep(2)">
-              Continua → Spedizione
-            </button>
-          </div>
+            <div class="form-group deco-box">
+              <div class="deco-pricing">
+                <div class="deco-slot selected" data-n="0">
+                  <div class="deco-slot-lbl">Nessuna</div>
+                  <div class="deco-slot-price">—</div>
+                </div>
+                <div class="deco-slot" data-n="1">
+                  <div class="deco-slot-lbl">1 deco</div>
+                  <div class="deco-slot-price">€8</div>
+                  <div class="deco-slot-each">€8,00</div>
+                </div>
+                <div class="deco-slot" data-n="2">
+                  <div class="deco-slot-lbl">2 deco</div>
+                  <div class="deco-slot-price">€15</div>
+                  <div class="deco-slot-each">€7,50</div>
+                </div>
+                <div class="deco-slot" data-n="3">
+                  <div class="deco-slot-lbl">3 deco</div>
+                  <div class="deco-slot-price">€20</div>
+                  <div class="deco-slot-each">€6,67</div>
+                </div>
+                <div class="deco-slot best" data-n="4">
+                  <div class="deco-slot-lbl">4 deco</div>
+                  <div class="deco-slot-price">€25</div>
+                  <div class="deco-slot-each">€6,25</div>
+                </div>
+              </div>
+
+              <div id="deco-catalog" style="display:none;margin-top:20px;">
+                <div class="deco-counter-bar">
+                  <span>Seleziona <strong id="deco-max">0</strong> decorazioni</span>
+                  <span class="deco-counter-badge"><span id="deco-count">0</span> / <span id="deco-max2">0</span></span>
+                </div>
+
+                {% set catalogo = [
+                  ('<i class="fas fa-paw"></i>',       'Safari',      ['Elefante','Giraffa','Leone','Zebra','Scimmia','Coccodrillo','Ippopotamo','Tigre'],        []),
+                  ('<i class="fas fa-rocket"></i>',    'Spazio',      ['Razzo','Pianeta','Stella','Astronauta','UFO'],                                            ['Stella','UFO']),
+                  ('<i class="fas fa-fish"></i>',      'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino'], ['Pesce','Stella marina','Granchio','Balena','Medusa','Corallo','Cavalluccio marino']),
+                  ('<i class="fas fa-cloud-sun"></i>', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino'], ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino']),
+                  ('<i class="fas fa-crown"></i>',     'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Rossetto','Carrozza'], ['Bacchetta magica','Unicorno','Fiocco','Fatina','Carrozza']),
+                  ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone da basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da calcio','Pallone da basket','Porta da calcio','Guantone boxe','Bicicletta','Palla da football']),
+                  ('<i class="fas fa-car"></i>',       'Motori',      ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Treno'],               []),
+                  ('<i class="fas fa-leaf"></i>',      'Natura',      ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella'],                                     ['Fiore','Foglia','Albero','Fungo','Ape','Coccinella']),
+                  ('<i class="fas fa-ice-cream"></i>', 'Cibo',        ['Cono gelato','Pizza','Fragola','Fetta cocomero','Ciliege','More','Banana','Donut','Fetta torta'], ['Cono gelato','Pizza','Fetta cocomero','Banana','Donut','Fetta torta']),
+                ] %}
+
+                {% for ico, nome_tema, items, flat_items in catalogo %}
+                <div class="deco-tema-block" data-tema="{{ nome_tema.lower() }}">
+                  <div class="deco-tema-title">{{ ico | safe }} {{ nome_tema }}</div>
+                  <div class="deco-items">
+                    {% for item in items %}
+                    {% set is_flat = item in flat_items %}
+                    <label class="deco-item">
+                      <input type="checkbox" name="deco_item" value="{{ item }}" class="deco-check" data-tipo="{{ 'flat' if is_flat else '3d' }}">
+                      <span class="deco-item-label">
+                        {{ item }}
+                        <span class="deco-tipo-badge {{ 'deco-flat' if is_flat else 'deco-3d' }}">{{ 'flat' if is_flat else '3D' }}</span>
+                      </span>
+                    </label>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% endfor %}
+
+                {# Pannello colore per deco selezionate #}
+                <div id="deco-color-panel" style="display:none;margin-top:20px;"></div>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn-back" onclick="goSubStep('1b')">← Indietro</button>
+              <button type="button" class="btn-next" id="btn-continua-deco" onclick="goStep(2)">
+                <span id="btn-deco-label">Continua senza decorazioni →</span>
+              </button>
+            </div>
+          </div>{# /panel-1c #}
 
         </div>{# /config-col #}
       </div>{# /step1-layout #}
@@ -973,6 +1010,23 @@ textarea.form-control { resize: vertical; }
   transition: background .2s;
 }
 .pe-apply:hover { background: var(--c600); }
+
+/* ── Substep indicator ── */
+.substep-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 24px; }
+.substep-pill { display: flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); background: var(--c100); transition: background .2s, color .2s; cursor: default; }
+.substep-pill .spill-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--c200); color: var(--text2); font-size: 0.7rem; font-weight: 700; transition: background .2s, color .2s; }
+.substep-pill.active { color: var(--c600); background: #fff0ee; }
+.substep-pill.active .spill-num { background: var(--c500); color: #fff; }
+.substep-pill.done { color: var(--text2); }
+.substep-pill.done .spill-num { background: var(--c300); color: #fff; }
+.substep-arrow { color: var(--c300); font-size: 1.1rem; padding: 0 6px; }
+
+/* ── Substep panels ── */
+.substep-panel { display: none; }
+.substep-panel.active { display: block; }
+
+/* ── Substep title ── */
+.substep-title { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 600; color: var(--text); margin-bottom: 20px; }
 </style>
 
 <script>
@@ -1079,6 +1133,9 @@ document.querySelectorAll('.deco-slot').forEach(slot => {
     document.querySelectorAll('.deco-slot').forEach(s => s.classList.remove('selected'));
     slot.classList.add('selected');
     aggiornaDecoUI();
+    // Update continue button label
+    const lbl = document.getElementById('btn-deco-label');
+    if (lbl) lbl.textContent = numDeco > 0 ? `Continua con ${numDeco} decorazion${numDeco === 1 ? 'e' : 'i'} →` : 'Continua senza decorazioni →';
   });
 });
 // ══ Deco colore preferito ══
@@ -1218,6 +1275,35 @@ function compileDecoColorsIntoNote() {
   // Rimuovi eventuale nota colori precedente e riscrivi
   const clean = existing.replace(/\n?🎨 Colori decorazioni:.*$/s, '').trimEnd();
   noteEl.value = (clean ? clean + '\n' : '') + '🎨 Colori decorazioni: ' + colorNote;
+}
+
+function goSubStep(id) {
+  // Validate before advancing
+  if (id === '1b') {
+    if (!document.getElementById('lettera').value) { alert('Scegli la lettera iniziale'); return; }
+    if (!document.querySelector('input[name="colore_lettera"]:checked')) { alert('Scegli il colore della lettera'); return; }
+    if (!document.querySelector('input[name="dimensione"]:checked')) { alert('Scegli la dimensione'); return; }
+  }
+  if (id === '1c') {
+    if (!document.getElementById('nome_bimbo').value.trim()) { alert('Inserisci il nome da personalizzare'); return; }
+    if (!document.querySelector('input[name="colore_scritta"]:checked')) { alert('Scegli il colore della scritta'); return; }
+  }
+
+  // Show/hide panels
+  document.querySelectorAll('.substep-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+
+  // Update pills
+  const order = ['1a', '1b', '1c'];
+  const cur = order.indexOf(id);
+  order.forEach((pid, i) => {
+    const pill = document.getElementById('spill-' + pid);
+    pill.classList.remove('active', 'done');
+    if (i < cur) pill.classList.add('done');
+    else if (i === cur) pill.classList.add('active');
+  });
+
+  window.scrollTo({ top: document.querySelector('.config-col').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
 }
 
 function goStep(n) {
