@@ -1826,15 +1826,18 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
           deco.position.y += slot[1];
           deco.position.z = letterFrontZ + 0.02;
         } else {
-          // 3D: appoggiato sul bordo superiore della lettera
-          // x = posizione slot, y = sopra il top della lettera, z = centro profondità
+          // 3D: appoggiato sul contorno lettera
+          // slot 0,1,4 = alto → seduto sul bordo superiore lettera
+          // slot 2,3,5 = basso → seduto a terra al piede della lettera
           const db = new THREE.Box3().setFromObject(deco);
           const halfH = (db.max.y - db.min.y) / 2;
           const letterCenterZ = letterBoundsLocal
             ? (letterBoundsLocal.min.z + letterBoundsLocal.max.z) / 2
             : 0;
+          const letterTopY = letterBoundsLocal ? letterBoundsLocal.max.y : 1.4;
+          const isTopSlot = [0, 1, 4].includes(slotIdx);
           deco.position.x += slot[0];
-          deco.position.y = (letterBoundsLocal ? letterBoundsLocal.max.y : 1.4) + halfH;
+          deco.position.y = isTopSlot ? letterTopY + halfH : halfH;
           deco.position.z = letterCenterZ;
         }
 
