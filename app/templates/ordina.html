@@ -2517,11 +2517,46 @@ updateTotal();
   tipoBadge.style.cssText = 'display:inline-block;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;padding:2px 7px;border-radius:3px;margin-left:8px;vertical-align:middle;';
   nameEl.after(tipoBadge);
 
+  // Decorazioni con anteprima immagine (PNG flat) invece del viewer 3D
+  const DECO_IMG = {
+    'Pallone da calcio': '/static/img/deco-pallone-calcio.png',
+  };
+
   window.loadDecoPreview = function(name, isFlat) {
     const url = `/static/models/decorazioni/${encodeURIComponent(name)}.glb`;
     card.style.display = 'block';
     nameEl.textContent = name;
     scrollToDecoPreview();
+
+    // Se c'è un'immagine flat dedicata, mostrala invece del viewer 3D
+    if (DECO_IMG[name]) {
+      loading.style.display = 'none';
+      if (currentModel) { scene.remove(currentModel); currentModel = null; }
+      // Nascondi canvas, mostra img
+      const cv = document.getElementById('deco-canvas');
+      let imgEl = document.getElementById('deco-flat-img');
+      if (!imgEl) {
+        imgEl = document.createElement('img');
+        imgEl.id = 'deco-flat-img';
+        imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:20px;box-sizing:border-box;';
+        cv.parentElement.appendChild(imgEl);
+      }
+      imgEl.src = DECO_IMG[name];
+      imgEl.style.display = 'block';
+      cv.style.display = 'none';
+      document.getElementById('deco-hint-rotate').style.display = 'none';
+      tipoBadge.textContent = 'flat';
+      tipoBadge.style.background = '#f0f0f0';
+      tipoBadge.style.color = '#888';
+      return;
+    }
+
+    // Ripristina canvas se si torna a un modello 3D
+    const cv2 = document.getElementById('deco-canvas');
+    const imgEl2 = document.getElementById('deco-flat-img');
+    if (imgEl2) imgEl2.style.display = 'none';
+    cv2.style.display = 'block';
+    document.getElementById('deco-hint-rotate').style.display = '';
 
     // badge FLAT / 3D
     if (isFlat) {
