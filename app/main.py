@@ -565,6 +565,36 @@ async def spedizioni(request: Request):
     return templates.TemplateResponse("spedizioni.html", {"request": request, "config": CONFIG})
 
 
+from fastapi.responses import Response as FastAPIResponse
+
+@app.get("/sitemap.xml")
+async def sitemap():
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://filamentoshop.it/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://filamentoshop.it/ordina</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://filamentoshop.it/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://filamentoshop.it/termini</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://filamentoshop.it/spedizioni</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+</urlset>"""
+    return FastAPIResponse(content=xml, media_type="application/xml")
+
+@app.get("/google19690eee5b182cfd.html")
+async def google_verify():
+    return FastAPIResponse(content="google-site-verification: google19690eee5b182cfd.html", media_type="text/html")
+
+@app.get("/robots.txt")
+async def robots():
+    txt = """User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /conferma
+
+Sitemap: https://filamentoshop.it/sitemap.xml
+"""
+    return FastAPIResponse(content=txt, media_type="text/plain")
+
+
 @app.get("/conferma", response_class=HTMLResponse)
 async def conferma(request: Request):
     order = {

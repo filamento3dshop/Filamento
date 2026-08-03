@@ -1,5 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Filamento – Decorazioni personalizzate con il nome del tuo bambino{% endblock %}
+{% block title %}Lettere 3D Personalizzate — Filamento{% endblock %}
+
+{% block seo %}
+<link rel="preload" as="image" href="/static/img/hero-esempio.jpg">
+<meta name="description" content="Lettere 3D personalizzate stampate a mano in Italia. Scegli lettera, colore, dimensione e decorazioni. Consegna in 7–10 giorni. Da €29,90.">
+<meta name="keywords" content="lettere 3D personalizzate, decorazioni cameretta, lettere nome bambino, lettere stampate 3D, decorazioni neonato, lettere colorate bambini, composizione lettere 3D, decorazioni cameretta personalizzate">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://filamentoshop.it/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Filamento">
+<meta property="og:title" content="Lettere 3D Personalizzate — Filamento">
+<meta property="og:description" content="Lettere e numeri 3D stampati a mano in Italia. Scegli lettera, colore, tema e nome — ricevi la tua composizione in 7–10 giorni. Da €29,90.">
+<meta property="og:url" content="https://filamentoshop.it/">
+<meta property="og:image" content="https://filamentoshop.it/static/img/hero-esempio.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lettere 3D Personalizzate — Filamento">
+<meta name="twitter:description" content="Lettere e numeri 3D stampati a mano in Italia. Scegli lettera, colore, tema e nome — ricevi in 7–10 giorni.">
+<meta name="twitter:image" content="https://filamentoshop.it/static/img/hero-esempio.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "Filamento",
+  "url": "https://filamentoshop.it",
+  "logo": "https://filamentoshop.it/static/img/logo-filamento.png",
+  "image": "https://filamentoshop.it/static/img/hero-esempio.jpg",
+  "description": "Lettere 3D personalizzate stampate e rifinite a mano in Italia. Realizzate a mano in Italia con nome, colori e temi a scelta.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "IT"
+  },
+  "priceRange": "€€",
+  "email": "filamento3d.shop@gmail.com",
+  "telephone": "+393494167428",
+  "sameAs": ["https://www.instagram.com/_filamento3d"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Lettera 3D personalizzata",
+  "description": "Lettera decorativa stampata in 3D, rifinita a mano in Italia. Disponibile in 16 colori, 2 dimensioni (20 e 30 cm), piena o a scatola. Con decorazioni a tema opzionali.",
+  "brand": { "@type": "Brand", "name": "Filamento" },
+  "image": "https://filamentoshop.it/static/img/hero-esempio.jpg",
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "EUR",
+    "lowPrice": "29.90",
+    "highPrice": "64.90",
+    "offerCount": "2",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Cosa sono le lettere 3D personalizzate?","acceptedAnswer":{"@type":"Answer","text":"Sono decorazioni realizzate con stampa 3D in PLA: lettere, numeri o composizioni con il nome del tuo bambino, rifinite a mano e personalizzabili in colore, dimensione e tema decorativo."}},
+    {"@type":"Question","name":"In quanto tempo ricevo la mia composizione?","acceptedAnswer":{"@type":"Answer","text":"Ogni composizione viene realizzata su ordinazione. I tempi sono di 7–10 giorni lavorativi. Spedizione tracciata in tutta Italia a €3."}},
+    {"@type":"Question","name":"Posso scegliere il colore della lettera?","acceptedAnswer":{"@type":"Answer","text":"Sì, puoi scegliere tra 16 colori disponibili: rosa antico, corallo, blu elettrico, verde smeraldo e molti altri."}},
+    {"@type":"Question","name":"Quali dimensioni sono disponibili?","acceptedAnswer":{"@type":"Answer","text":"Le lettere sono disponibili in due formati: 20 cm a €29,90 e 30 cm a €39,90."}},
+    {"@type":"Question","name":"Le lettere 3D sono adatte come regalo?","acceptedAnswer":{"@type":"Answer","text":"Assolutamente sì. Sono un regalo originale per nascita, battesimo, compleanno o prima comunione. Ogni pezzo è unico e realizzato su ordinazione."}},
+    {"@type":"Question","name":"Posso aggiungere decorazioni alla lettera?","acceptedAnswer":{"@type":"Answer","text":"Sì, puoi aggiungere fino a 4 decorazioni 3D a tema: animali safari, spazio, mare, principesse, sport, motori, natura e cibo."}}
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 
@@ -13,9 +82,12 @@
 
     <div class="hero-text">
       <span class="hero-badge">Realizzato artigianalmente in Italia</span>
-      <h1 class="hero-title" id="hero-heading">Le storie più belle iniziano da un nome.</h1>
+      <h1 class="hero-title" id="hero-heading">Lettere 3D personalizzate</h1>
       <p class="hero-subtitle">
-        Dai forma ai ricordi più importanti.
+        Stampate e rifinite a mano in Italia — con il nome, i colori e il tema che hai scelto tu.
+      </p>
+      <p class="hero-intro" style="font-size:0.92rem;color:var(--text2);margin-top:12px;line-height:1.7;max-width:420px;">
+        Lettere e numeri decorativi in stampa 3D: scegli la lettera iniziale, il colore, la dimensione e le decorazioni. Ogni composizione è unica e viene realizzata su ordinazione.
       </p>
       <div class="hero-actions">
         <a href="/ordina" class="btn-primary btn-lg" aria-label="Crea la tua composizione personalizzata">
@@ -58,10 +130,10 @@
 
     <header class="section-header centered">
       <span class="section-label">Temi</span>
-      <h2 class="section-title" id="themes-heading">Scegli il tema della tua composizione</h2>
+      <h2 class="section-title" id="themes-heading">Decorazioni 3D personalizzate: scegli il tuo tema</h2>
       <div class="divider" aria-hidden="true"></div>
-      <p class="section-desc">Dai forma alla tua storia con il tema che più ti rappresenta.</p>
-      <p class="section-note">Le decorazioni sono opzionali. Si aggiungono durante la personalizzazione della composizione.</p>
+      <p class="section-desc">Ogni lettera può essere abbinata a piccole decorazioni stampate in 3D — animali, spazio, mare, sport e molto altro.</p>
+      <p class="section-note">Le decorazioni sono opzionali e si aggiungono durante la personalizzazione.</p>
     </header>
 
     <div class="themes-grid" role="list">
@@ -176,8 +248,8 @@
   <div class="section-inner">
 
     <header class="section-header centered">
-      <span class="section-label">Formati</span>
-      <h2 class="section-title" id="formats-heading">Scegli il formato</h2>
+      <span class="section-label">Prezzi</span>
+      <h2 class="section-title" id="formats-heading">Lettere 3D: prezzi e dimensioni</h2>
       <div class="divider" aria-hidden="true"></div>
     </header>
 
@@ -259,8 +331,8 @@
   <div class="section-inner">
 
     <header class="section-header centered">
-      <span class="section-label">Il processo</span>
-      <h2 class="section-title" id="process-heading">Come nasce la tua composizione</h2>
+      <span class="section-label">Come funziona</span>
+      <h2 class="section-title" id="process-heading">Come ordinare una lettera 3D personalizzata</h2>
       <div class="divider" aria-hidden="true"></div>
     </header>
 
@@ -352,6 +424,42 @@
    CTA FINALE — CTA principale n. 3
    Sfondo: var(--c500), testo bianco, centrato
    ═══════════════════════════════════════════════════════ #}
+<section class="faq-section" id="faq" aria-labelledby="faq-heading">
+  <div class="section-inner" style="max-width:720px;">
+    <header class="section-header centered">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-title" id="faq-heading">Domande frequenti</h2>
+      <div class="divider" aria-hidden="true"></div>
+    </header>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary class="faq-q">Cosa sono le lettere 3D personalizzate?</summary>
+        <p class="faq-a">Sono decorazioni realizzate con stampa 3D in PLA: lettere, numeri o composizioni con il nome del tuo bambino, rifinite a mano e personalizzabili in colore, dimensione e tema decorativo. Perfette come regalo o come decorazione.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">In quanto tempo ricevo la mia composizione?</summary>
+        <p class="faq-a">Ogni composizione viene realizzata su ordinazione. I tempi di produzione e spedizione sono di 7–10 giorni lavorativi dalla conferma dell'ordine. La spedizione avviene con corriere tracciato in tutta Italia a €3.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Posso scegliere il colore della lettera?</summary>
+        <p class="faq-a">Sì, puoi scegliere tra 16 colori disponibili: dal rosa antico al blu elettrico, dal corallo al verde smeraldo. Puoi anche scegliere un colore diverso per la lettera e per il nome scritto sopra.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Quali dimensioni sono disponibili?</summary>
+        <p class="faq-a">Le lettere sono disponibili in due formati: 20 cm (€29,90) e 30 cm (€39,90). Le decorazioni aggiuntive hanno un costo a parte, da €8 per la prima.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Le lettere 3D sono adatte come regalo?</summary>
+        <p class="faq-a">Assolutamente sì. Sono uno dei regali più originali per nascita, battesimo, compleanno o prima comunione. Ogni pezzo è unico e viene realizzato appositamente per il destinatario.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Posso aggiungere decorazioni alla lettera?</summary>
+        <p class="faq-a">Sì, puoi aggiungere fino a 4 decorazioni 3D a tema: animali safari, spazio, mare, principesse, sport, motori, natura e cibo. Le decorazioni si scelgono direttamente durante la personalizzazione.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <section class="final-cta-section" aria-label="Crea la tua composizione">
   <div class="section-inner">
     <h2 class="final-cta-title">Ogni composizione è unica.</h2>
