@@ -4,6 +4,24 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}{{ config.get('nome_negozio', 'Filamento') }}{% endblock %}</title>
+
+  {# ── SEO & Social ── #}
+  {% block seo %}
+  <meta name="description" content="Filamento — lettere 3D personalizzate stampate e rifinite a mano in Italia. Decorazioni cameretta con nome, colori e temi a scelta. Consegna in 7–10 giorni.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://filamentoshop.it/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Filamento">
+  <meta property="og:title" content="Filamento — Lettere 3D personalizzate per la cameretta">
+  <meta property="og:description" content="Lettere e numeri 3D stampati a mano in Italia. Scegli lettera, colore, tema e nome — ricevi la tua composizione in 7–10 giorni.">
+  <meta property="og:url" content="https://filamentoshop.it/">
+  <meta property="og:image" content="https://filamentoshop.it/static/img/hero-esempio.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Filamento — Lettere 3D personalizzate per la cameretta">
+  <meta name="twitter:description" content="Lettere e numeri 3D stampati a mano in Italia. Scegli lettera, colore, tema e nome.">
+  <meta name="twitter:image" content="https://filamentoshop.it/static/img/hero-esempio.jpg">
+  {% endblock %}
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Dancing+Script:wght@600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
