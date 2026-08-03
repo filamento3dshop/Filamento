@@ -579,6 +579,10 @@ async def sitemap():
 </urlset>"""
     return FastAPIResponse(content=xml, media_type="application/xml")
 
+@app.get("/google19690eee5b182cfd.html")
+async def google_verify():
+    return FastAPIResponse(content="google-site-verification: google19690eee5b182cfd.html", media_type="text/html")
+
 @app.get("/robots.txt")
 async def robots():
     txt = """User-agent: *
