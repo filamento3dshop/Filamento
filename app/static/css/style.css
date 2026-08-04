@@ -106,6 +106,12 @@ nav {
 
 .nav-social { display: flex; align-items: center; gap: 10px; }
 
+.nav-hamburger { display: none; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; width: 36px; height: 36px; }
+.nav-hamburger span { display: block; height: 2px; background: var(--text); border-radius: 2px; transition: transform .25s, opacity .25s; }
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
 .nav-social a {
   display: flex;
   align-items: center;
@@ -1127,10 +1133,16 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 @media (max-width: 600px) {
   section { padding: 64px 20px; }
 
-  /* Nav */
-  .nav-links { display: none; }
+  /* Nav mobile */
+  .nav-hamburger { display: flex; }
+  .nav-links { display: none; flex-direction: column; gap: 0; position: absolute; top: 100%; left: 0; right: 0; background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.1); padding: 16px 0; z-index: 999; }
+  .nav-links.open { display: flex; }
+  .nav-links li { border-bottom: 1px solid var(--c150); }
+  .nav-links li:last-child { border-bottom: none; }
+  .nav-links a { display: block; padding: 14px 24px; font-size: 1rem; }
+  .nav-links a.btn-nav { margin: 12px 24px 4px; display: block; text-align: center; }
   .nav-social { flex-direction: column; gap: 6px; }
-  .nav-inner { height: auto; padding: 12px 20px; }
+  .nav-inner { height: auto; padding: 12px 20px; position: relative; }
   .nav-social a { width: 32px; height: 32px; font-size: 0.85rem; }
 
   /* Hero */
