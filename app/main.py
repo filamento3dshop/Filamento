@@ -68,6 +68,14 @@ GALLERY = [
         "colore_scritta": "Bianco",
         "tema": "",
     },
+    {
+        "img": "/static/img/gallery/b-salmone-mare.jpg",
+        "lettera": "B",
+        "dimensione": "20",
+        "colore_lettera": "Salmone",
+        "colore_scritta": "Bianco",
+        "tema": "Mare",
+    },
 ]
 
 CONFIG = {
