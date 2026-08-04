@@ -637,7 +637,17 @@ async def robots():
     txt = """User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /admin/
 Disallow: /conferma
+Disallow: /static/js/
+Disallow: /static/models/
+Crawl-delay: 2
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /conferma
+Crawl-delay: 0
 
 Sitemap: https://www.filamentoshop.it/sitemap.xml
 """
