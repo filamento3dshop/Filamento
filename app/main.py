@@ -44,15 +44,30 @@ PREZZI_SCRITTA = {
 SPEDIZIONE = 3.0
 
 GALLERY = [
-    # Esempio di struttura — aggiungi qui le tue foto
-    # {
-    #     "img": "/static/img/gallery/foto1.jpg",
-    #     "lettera": "A",
-    #     "dimensione": "20",
-    #     "colore_lettera": "Rosa antico",
-    #     "colore_scritta": "Bianco",
-    #     "tema": "Principesse",
-    # },
+    {
+        "img": "/static/img/gallery/vittorio-spazio.jpg",
+        "lettera": "2",
+        "dimensione": "30",
+        "colore_lettera": "Azzurro",
+        "colore_scritta": "Bianco",
+        "tema": "Spazio",
+    },
+    {
+        "img": "/static/img/gallery/uno-safari-corallo.jpg",
+        "lettera": "1",
+        "dimensione": "30",
+        "colore_lettera": "Corallo",
+        "colore_scritta": "Bianco",
+        "tema": "Safari",
+    },
+    {
+        "img": "/static/img/gallery/g-lilla.jpg",
+        "lettera": "G",
+        "dimensione": "30",
+        "colore_lettera": "Lilla",
+        "colore_scritta": "Bianco",
+        "tema": "",
+    },
 ]
 
 CONFIG = {
