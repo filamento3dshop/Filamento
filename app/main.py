@@ -43,6 +43,18 @@ PREZZI_SCRITTA = {
 }
 SPEDIZIONE = 3.0
 
+GALLERY = [
+    # Esempio di struttura — aggiungi qui le tue foto
+    # {
+    #     "img": "/static/img/gallery/foto1.jpg",
+    #     "lettera": "A",
+    #     "dimensione": "20",
+    #     "colore_lettera": "Rosa antico",
+    #     "colore_scritta": "Bianco",
+    #     "tema": "Principesse",
+    # },
+]
+
 CONFIG = {
     "nome_negozio": "Filamento",
     "stripe_publishable_key": os.getenv("STRIPE_PUBLISHABLE_KEY", ""),
@@ -553,6 +565,11 @@ async def scritte_post(
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy(request: Request):
     return templates.TemplateResponse("privacy.html", {"request": request, "config": CONFIG})
+
+
+@app.get("/gallery", response_class=HTMLResponse)
+async def gallery(request: Request):
+    return templates.TemplateResponse("gallery.html", {"request": request, "config": CONFIG, "gallery": GALLERY})
 
 
 @app.get("/termini", response_class=HTMLResponse)
