@@ -52,6 +52,22 @@ GALLERY = [
         "colore_scritta": "Bianco",
         "tema": "Spazio",
     },
+    {
+        "img": "/static/img/gallery/uno-safari-corallo.jpg",
+        "lettera": "1",
+        "dimensione": "30",
+        "colore_lettera": "Corallo",
+        "colore_scritta": "Bianco",
+        "tema": "Safari",
+    },
+    {
+        "img": "/static/img/gallery/g-lilla.jpg",
+        "lettera": "G",
+        "dimensione": "30",
+        "colore_lettera": "Lilla",
+        "colore_scritta": "Bianco",
+        "tema": "",
+    },
 ]
 
 CONFIG = {
