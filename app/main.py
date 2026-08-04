@@ -619,12 +619,12 @@ from fastapi.responses import Response as FastAPIResponse
 async def sitemap():
     xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://www.filamentoshop.it/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://www.filamentoshop.it/ordina</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://www.filamentoshop.it/gallery</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.filamentoshop.it/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://www.filamentoshop.it/termini</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://www.filamentoshop.it/spedizioni</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.filamentoshop.it/</loc><lastmod>2026-08-04</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://www.filamentoshop.it/ordina</loc><lastmod>2026-07-01</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.filamentoshop.it/gallery</loc><lastmod>2026-08-04</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.filamentoshop.it/privacy</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://www.filamentoshop.it/termini</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://www.filamentoshop.it/spedizioni</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
 </urlset>"""
     return FastAPIResponse(content=xml, media_type="application/xml")
 
@@ -637,7 +637,17 @@ async def robots():
     txt = """User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /admin/
 Disallow: /conferma
+Disallow: /static/js/
+Disallow: /static/models/
+Crawl-delay: 2
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /conferma
+Crawl-delay: 0
 
 Sitemap: https://www.filamentoshop.it/sitemap.xml
 """
