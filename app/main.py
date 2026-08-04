@@ -76,6 +76,14 @@ GALLERY = [
         "colore_scritta": "Bianco",
         "tema": "Mare",
     },
+    {
+        "img": "/static/img/gallery/leonardo-bluette-sport.jpg",
+        "lettera": "Leonardo",
+        "dimensione": "30",
+        "colore_lettera": "Bluette",
+        "colore_scritta": "Bianco",
+        "tema": "Sport",
+    },
 ]
 
 CONFIG = {
