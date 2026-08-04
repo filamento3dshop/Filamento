@@ -76,6 +76,14 @@ GALLERY = [
         "colore_scritta": "Bianco",
         "tema": "Mare",
     },
+    {
+        "img": "/static/img/gallery/leonardo-bluette-sport.jpg",
+        "lettera": "Leonardo",
+        "dimensione": "30",
+        "colore_lettera": "Bluette",
+        "colore_scritta": "Bianco",
+        "tema": "Sport",
+    },
 ]
 
 CONFIG = {
@@ -613,6 +621,7 @@ async def sitemap():
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.filamentoshop.it/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://www.filamentoshop.it/ordina</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.filamentoshop.it/gallery</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.filamentoshop.it/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://www.filamentoshop.it/termini</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://www.filamentoshop.it/spedizioni</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>

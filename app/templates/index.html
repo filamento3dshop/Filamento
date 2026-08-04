@@ -25,14 +25,31 @@
   "url": "https://www.filamentoshop.it",
   "logo": "https://www.filamentoshop.it/static/img/logo-filamento.png",
   "image": "https://www.filamentoshop.it/static/img/hero-esempio.jpg",
-  "description": "Lettere 3D personalizzate stampate e rifinite a mano in Italia. Realizzate a mano in Italia con nome, colori e temi a scelta.",
+  "description": "Lettere 3D personalizzate stampate e rifinite a mano in Italia. Realizzate a mano in Italia con nome, colori e temi a scelta. Consegna in 7–10 giorni.",
   "address": {
     "@type": "PostalAddress",
-    "addressCountry": "IT"
+    "addressCountry": "IT",
+    "addressRegion": "Emilia-Romagna"
   },
   "priceRange": "€€",
   "email": "filamento3d.shop@gmail.com",
   "telephone": "+393494167428",
+  "currenciesAccepted": "EUR",
+  "paymentAccepted": "Credit Card, PayPal",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "09:00",
+    "closes": "18:00"
+  },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Lettere 3D personalizzate",
+    "itemListElement": [
+      {"@type": "Offer", "itemOffered": {"@type": "Product", "name": "Lettera 3D 20 cm"}, "price": "29.90", "priceCurrency": "EUR"},
+      {"@type": "Offer", "itemOffered": {"@type": "Product", "name": "Lettera 3D 30 cm"}, "price": "39.90", "priceCurrency": "EUR"}
+    ]
+  },
   "sameAs": ["https://www.instagram.com/_filamento3d"]
 }
 </script>
@@ -179,97 +196,55 @@
     <div class="themes-grid" role="list">
 
       <a href="/ordina?tema=safari" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Safari">
-        <div class="theme-media">
-          {# IMMAGINE: foto reale decorazione stampata tema Safari (circa 8cm, ~180×180px) — sostituire con immagine definitiva #}
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-paw"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Leone.glb"></canvas></div>
         <div class="theme-name">Safari</div>
         <div class="theme-sub">Per piccoli esploratori.</div>
       </a>
 
       <a href="/ordina?tema=spazio" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Spazio">
-        <div class="theme-media">
-          {# IMMAGINE: foto reale decorazione stampata tema Spazio #}
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-rocket"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Astronauta.glb"></canvas></div>
         <div class="theme-name">Spazio</div>
         <div class="theme-sub">Per chi sogna in grande.</div>
       </a>
 
       <a href="/ordina?tema=mare" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Mare">
-        <div class="theme-media">
-          {# IMMAGINE: foto reale decorazione stampata tema Mare #}
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-fish"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Delfino.glb"></canvas></div>
         <div class="theme-name">Mare</div>
         <div class="theme-sub">Ispirato all'oceano.</div>
       </a>
 
       <a href="/ordina?tema=cielo" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Cielo">
-        <div class="theme-media">
-          {# IMMAGINE: foto reale decorazione stampata tema Cielo #}
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-cloud-sun"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Mongolfiera.glb"></canvas></div>
         <div class="theme-name">Cielo</div>
         <div class="theme-sub">Tra nuvole e meraviglia.</div>
       </a>
 
       <a href="/ordina?tema=principesse" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Principesse">
-        <div class="theme-media">
-          {# IMMAGINE: foto reale decorazione stampata tema Principesse #}
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-crown"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Castello.glb"></canvas></div>
         <div class="theme-name">Principesse</div>
         <div class="theme-sub">Un mondo da favola.</div>
       </a>
 
       <a href="/ordina?tema=sport" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Sport">
-        <div class="theme-media">
-          {# IMMAGINE: foto reale decorazione stampata tema Sport #}
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-futbol"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Pallone da basket.glb"></canvas></div>
         <div class="theme-name">Sport</div>
         <div class="theme-sub">Per chi ama mettersi in gioco.</div>
       </a>
 
       <a href="/ordina?tema=motori" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Motori">
-        <div class="theme-media">
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-car"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Macchinina.glb"></canvas></div>
         <div class="theme-name">Motori</div>
         <div class="theme-sub">Per i piccoli piloti.</div>
       </a>
 
       <a href="/ordina?tema=natura" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Natura">
-        <div class="theme-media">
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-leaf"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Farfalla.glb"></canvas></div>
         <div class="theme-name">Natura</div>
         <div class="theme-sub">Tra fiori e creature del bosco.</div>
       </a>
 
       <a href="/ordina?tema=cibo" class="theme-card" role="listitem" aria-label="Crea la tua composizione con tema Cibo">
-        <div class="theme-media">
-          <div class="theme-photo-placeholder" aria-hidden="true">
-            <i class="fas fa-ice-cream"></i>
-          </div>
-        </div>
+        <div class="theme-media"><canvas class="theme-glb" data-model="/static/models/decorazioni/Pizza.glb"></canvas></div>
         <div class="theme-name">Cibo</div>
         <div class="theme-sub">Dolce come un gelato.</div>
       </a>
@@ -508,5 +483,50 @@
     </a>
   </div>
 </section>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/loaders/GLTFLoader.js';
+
+const loader = new GLTFLoader();
+const BG = 0xF7F5F2;
+
+document.querySelectorAll('canvas.theme-glb').forEach(canvas => {
+  const url = canvas.dataset.model;
+  const w = canvas.parentElement.clientWidth || 280;
+  const h = canvas.parentElement.clientHeight || 210;
+  canvas.width = w; canvas.height = h;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.setClearColor(BG);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(BG);
+
+  const camera = new THREE.PerspectiveCamera(35, w / h, 0.01, 100);
+
+  const amb = new THREE.AmbientLight(0xffffff, 1.2);
+  scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.8);
+  dir.position.set(1, 2, 3);
+  scene.add(dir);
+
+  loader.load(url, gltf => {
+    const model = gltf.scene;
+    const box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    model.position.sub(center);
+    scene.add(model);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(0, 0, maxDim * 1.8);
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+  });
+});
+</script>
 
 {% endblock %}
