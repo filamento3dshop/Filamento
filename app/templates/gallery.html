@@ -5,10 +5,43 @@
 <meta name="description" content="Guarda le nostre lettere 3D personalizzate: dimensioni, colori, temi e decorazioni. Ogni pezzo è unico, realizzato a mano in Italia.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.filamentoshop.it/gallery">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Filamento">
 <meta property="og:title" content="Gallery — Lettere 3D Personalizzate — Filamento">
 <meta property="og:description" content="Guarda le nostre lettere 3D personalizzate: dimensioni, colori, temi e decorazioni.">
 <meta property="og:image" content="https://www.filamentoshop.it/static/img/hero-esempio.jpg">
 <meta property="og:url" content="https://www.filamentoshop.it/gallery">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gallery — Lettere 3D Personalizzate — Filamento">
+<meta name="twitter:description" content="Guarda le nostre lettere 3D personalizzate: dimensioni, colori, temi e decorazioni.">
+<meta name="twitter:image" content="https://www.filamentoshop.it/static/img/hero-esempio.jpg">
+{% if gallery %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ImageGallery",
+  "name": "Gallery lettere 3D personalizzate Filamento",
+  "description": "Composizioni di lettere e numeri 3D personalizzati realizzati a mano in Italia.",
+  "url": "https://www.filamentoshop.it/gallery",
+  "image": [
+    {%- for item in gallery %}
+    {
+      "@type": "ImageObject",
+      "contentUrl": "https://www.filamentoshop.it{{ item.img }}",
+      "name": "Lettera {{ item.lettera }} 3D personalizzata {{ item.dimensione }} cm {{ item.colore_lettera }}{% if item.tema %} tema {{ item.tema }}{% endif %}",
+      "description": "Lettera {{ item.lettera }} in stampa 3D alta {{ item.dimensione }} cm, colore {{ item.colore_lettera }}{% if item.colore_scritta %}, nome in {{ item.colore_scritta }}{% endif %}{% if item.tema %}, decorazioni a tema {{ item.tema }}{% endif %}. Realizzata a mano in Italia.",
+      "creditText": "Filamento",
+      "creator": { "@type": "Organization", "name": "Filamento" },
+      "copyrightNotice": "© Filamento",
+      "license": "https://www.filamentoshop.it/termini",
+      "acquireLicensePage": "https://www.filamentoshop.it/termini"
+    }{{ "," if not loop.last }}
+    {%- endfor %}
+  ]
+}
+</script>
+{% endif %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
