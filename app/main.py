@@ -6,7 +6,7 @@ import resend
 import stripe
 import psycopg
 from psycopg.rows import dict_row
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -617,14 +617,37 @@ from fastapi.responses import Response as FastAPIResponse
 
 @app.get("/sitemap.xml")
 async def sitemap():
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://www.filamentoshop.it/</loc><lastmod>2026-08-04</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://www.filamentoshop.it/ordina</loc><lastmod>2026-07-01</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://www.filamentoshop.it/gallery</loc><lastmod>2026-08-04</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.filamentoshop.it/privacy</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://www.filamentoshop.it/termini</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://www.filamentoshop.it/spedizioni</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
+    BASE = "https://www.filamentoshop.it"
+    oggi = date.today().isoformat()
+
+    # Immagini della gallery, dichiarate nella sitemap per l'indicizzazione su Google Images
+    gallery_images = "".join(
+        f'\n    <image:image><image:loc>{BASE}{item["img"]}</image:loc>'
+        f'<image:title>Lettera {item["lettera"]} 3D personalizzata {item["dimensione"]} cm '
+        f'{item["colore_lettera"]} tema {item.get("tema", "")}</image:title></image:image>'
+        for item in GALLERY
+    )
+
+    # Immagini dei temi decorativi mostrate in homepage
+    temi_images = "".join(
+        f'\n    <image:image><image:loc>{BASE}/static/img/temi/{t}.jpg</image:loc>'
+        f'<image:title>Decorazione 3D tema {t.capitalize()} per lettere personalizzate</image:title></image:image>'
+        for t in ["safari", "spazio", "mare", "cielo", "principesse", "sport", "motori", "natura", "cibo"]
+    )
+
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url><loc>{BASE}/</loc><lastmod>{oggi}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority>
+    <image:image><image:loc>{BASE}/static/img/hero-esempio.jpg</image:loc><image:title>Composizione di lettere 3D personalizzate Filamento</image:title></image:image>{temi_images}
+  </url>
+  <url><loc>{BASE}/ordina</loc><lastmod>{oggi}</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>{BASE}/scritte</loc><lastmod>{oggi}</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>{BASE}/gallery</loc><lastmod>{oggi}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority>{gallery_images}
+  </url>
+  <url><loc>{BASE}/spedizioni</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>{BASE}/privacy</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>{BASE}/termini</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>"""
     return FastAPIResponse(content=xml, media_type="application/xml")
 
