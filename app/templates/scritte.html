@@ -1,5 +1,64 @@
 {% extends "base.html" %}
-{% block title %}Scritte 3D — Filamento{% endblock %}
+{% block title %}Scritte 3D Personalizzate con Nome — Filamento{% endblock %}
+
+{% block seo %}
+<meta name="description" content="Scritte 3D personalizzate con il nome: stampate e rifinite a mano in Italia. Scegli font, colore e dimensione. Da €15,90, consegna in 7–10 giorni.">
+<meta name="keywords" content="scritte 3D personalizzate, nome in 3D, scritta nome bambino, lettere nome stampa 3D, scritta personalizzata cameretta, nome 3D decorativo">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.filamentoshop.it/scritte">
+<meta property="og:type" content="product">
+<meta property="og:site_name" content="Filamento">
+<meta property="og:title" content="Scritte 3D Personalizzate con Nome — Filamento">
+<meta property="og:description" content="Il nome di chi ami in grandi lettere 3D — stampato e rifinito a mano in Italia. Scegli font, colore e dimensione. Da €15,90.">
+<meta property="og:url" content="https://www.filamentoshop.it/scritte">
+<meta property="og:image" content="https://www.filamentoshop.it/static/img/hero-esempio.jpg">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Scritte 3D Personalizzate con Nome — Filamento">
+<meta name="twitter:description" content="Il nome di chi ami in grandi lettere 3D — stampato e rifinito a mano in Italia. Da €15,90.">
+<meta name="twitter:image" content="https://www.filamentoshop.it/static/img/hero-esempio.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.filamentoshop.it/"},
+    {"@type": "ListItem", "position": 2, "name": "Scritte 3D personalizzate", "item": "https://www.filamentoshop.it/scritte"}
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Scritta 3D Personalizzata con Nome",
+  "description": "Scritta decorativa stampata in 3D con il nome che scegli tu, rifinita a mano in Italia. Disponibile in altezza 5 cm e 10 cm, in 16 colori e con font a scelta.",
+  "brand": { "@type": "Brand", "name": "Filamento" },
+  "image": "https://www.filamentoshop.it/static/img/hero-esempio.jpg",
+  "url": "https://www.filamentoshop.it/scritte",
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "EUR",
+    "lowPrice": "15.90",
+    "highPrice": "29.90",
+    "offerCount": "4",
+    "availability": "https://schema.org/InStock",
+    "url": "https://www.filamentoshop.it/scritte",
+    "seller": { "@type": "Organization", "name": "Filamento" },
+    "shippingDetails": {
+      "@type": "OfferShippingDetails",
+      "shippingRate": { "@type": "MonetaryAmount", "value": "3.00", "currency": "EUR" },
+      "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IT" },
+      "deliveryTime": {
+        "@type": "ShippingDeliveryTime",
+        "handlingTime": { "@type": "QuantitativeValue", "minValue": 5, "maxValue": 7, "unitCode": "DAY" },
+        "transitTime": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 2, "unitCode": "DAY" }
+      }
+    }
+  }
+}
+</script>
+{% endblock %}
 
 {% block head %}
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Rokkitt:wght@700&family=Josefin+Sans:wght@700&display=swap" rel="stylesheet">
