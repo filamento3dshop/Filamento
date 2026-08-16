@@ -651,6 +651,22 @@ async def sitemap():
 </urlset>"""
     return FastAPIResponse(content=xml, media_type="application/xml")
 
+@app.get("/health")
+@app.head("/health")
+async def health():
+    """Endpoint leggero per il monitoraggio uptime (Better Stack).
+
+    Serve a impedire la sospensione del servizio su Render senza generare
+    l'intera homepage a ogni ping. Risposta di pochi byte, senza template,
+    query al database o accessi a disco.
+    """
+    return FastAPIResponse(
+        content="ok",
+        media_type="text/plain",
+        headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex"},
+    )
+
+
 @app.get("/google19690eee5b182cfd.html")
 async def google_verify():
     return FastAPIResponse(content="google-site-verification: google19690eee5b182cfd.html", media_type="text/html")
@@ -664,12 +680,14 @@ Disallow: /admin/
 Disallow: /conferma
 Disallow: /static/js/
 Disallow: /static/models/
+Disallow: /health
 Crawl-delay: 2
 
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
 Disallow: /conferma
+Disallow: /health
 Crawl-delay: 0
 
 Sitemap: https://www.filamentoshop.it/sitemap.xml
