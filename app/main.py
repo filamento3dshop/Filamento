@@ -1,5 +1,6 @@
 import os
 import secrets
+import time
 import uuid
 import threading
 import resend
@@ -651,20 +652,72 @@ async def sitemap():
 </urlset>"""
     return FastAPIResponse(content=xml, media_type="application/xml")
 
+# Supabase sospende i progetti free dopo 7 giorni senza query, Render dopo
+# 15 minuti senza richieste HTTP. Il ping di /health copre entrambi: risponde
+# subito per Render e tocca il database al massimo una volta all'ora, perche'
+# a impedire la sospensione di Supabase basta una query ogni tanto.
+INTERVALLO_PING_DB = 3600  # secondi
+# init_db() tocca gia' il database all'avvio: il primo ping parte da li'.
+_ultimo_ping_db = time.monotonic()
+_lock_ping_db = threading.Lock()
+
+
+def _tocca_database() -> None:
+    """Esegue una query minima per segnalare a Supabase che il progetto e' attivo."""
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+
+
+def _ping_db_se_scaduto() -> Optional[str]:
+    """Tocca il database se e' passata piu' di un'ora dall'ultima volta.
+
+    Restituisce None se tutto e' andato bene o se non era ancora il momento,
+    altrimenti il messaggio di errore.
+    """
+    global _ultimo_ping_db
+
+    if not DATABASE_URL:
+        return None
+
+    adesso = time.monotonic()
+    with _lock_ping_db:
+        if adesso - _ultimo_ping_db < INTERVALLO_PING_DB:
+            return None
+        # Aggiornato prima del tentativo: se il database e' irraggiungibile
+        # evitiamo di riprovare a ogni ping, che bloccherebbe la risposta.
+        _ultimo_ping_db = adesso
+
+    try:
+        _tocca_database()
+        return None
+    except Exception as exc:
+        return str(exc)
+
+
 @app.get("/health")
 @app.head("/health")
-async def health():
-    """Endpoint leggero per il monitoraggio uptime (Better Stack).
+def health():
+    """Endpoint per il monitoraggio uptime (Better Stack).
 
-    Serve a impedire la sospensione del servizio su Render senza generare
-    l'intera homepage a ogni ping. Risposta di pochi byte, senza template,
-    query al database o accessi a disco.
+    Impedisce la sospensione del servizio su Render senza generare l'intera
+    homepage a ogni ping, e tiene attivo il progetto Supabase toccando il
+    database una volta all'ora. Definito come funzione sincrona in modo che
+    FastAPI lo esegua nel threadpool: la connessione psycopg e' bloccante e
+    non deve fermare l'event loop.
     """
-    return FastAPIResponse(
-        content="ok",
-        media_type="text/plain",
-        headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex"},
-    )
+    errore = _ping_db_se_scaduto()
+    intestazioni = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex"}
+
+    if errore:
+        return FastAPIResponse(
+            content="database non raggiungibile",
+            media_type="text/plain",
+            status_code=503,
+            headers=intestazioni,
+        )
+
+    return FastAPIResponse(content="ok", media_type="text/plain", headers=intestazioni)
 
 
 @app.get("/google19690eee5b182cfd.html")
