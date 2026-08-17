@@ -11,6 +11,9 @@
       <p class="legal-meta" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
         <span>{{ orders|length }} ordini totali</span>
         <a href="/admin/sconti" style="color:var(--c600,#e55252);font-weight:600;font-size:.9rem;">🎟 Gestisci codici sconto →</a>
+        {% if orders %}
+        <a href="/admin/ordini.csv" download style="color:var(--c600,#e55252);font-weight:600;font-size:.9rem;">⬇ Scarica ordini in CSV</a>
+        {% endif %}
       </p>
     </div>
 

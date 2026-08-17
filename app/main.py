@@ -1,3 +1,5 @@
+import csv
+import io
 import os
 import secrets
 import time
@@ -775,6 +777,50 @@ async def admin_orders(request: Request, username: str = Depends(verify_admin)):
     return templates.TemplateResponse("admin.html", {
         "request": request, "config": CONFIG, "orders": orders,
     })
+
+
+@app.get("/admin/ordini.csv")
+async def admin_export_csv(username: str = Depends(verify_admin)):
+    """Esporta tutti gli ordini in CSV, come backup scaricabile a mano.
+
+    Il piano free di Supabase non fa backup automatici: questo permette di
+    conservare una copia locale degli ordini.
+    """
+    if not DATABASE_URL:
+        raise HTTPException(status_code=503, detail="Database non configurato.")
+
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM orders ORDER BY created_at DESC")
+        righe = [dict(r) for r in cur.fetchall()]
+        colonne = [d[0] for d in cur.description] if cur.description else []
+        cur.close()
+    finally:
+        conn.close()
+
+    buffer = io.StringIO()
+    # QUOTE_ALL evita che indirizzi e note contenenti virgole o a capo
+    # spezzino le colonne una volta aperto il file.
+    writer = csv.DictWriter(
+        buffer, fieldnames=colonne, quoting=csv.QUOTE_ALL, lineterminator="\r\n"
+    )
+    writer.writeheader()
+    writer.writerows(righe)
+
+    # BOM UTF-8: senza, Excel su Windows sbaglia gli accenti dei nomi italiani.
+    contenuto = "﻿" + buffer.getvalue()
+    nome_file = f"filamento-ordini-{date.today().isoformat()}.csv"
+
+    return FastAPIResponse(
+        content=contenuto,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{nome_file}"',
+            "Cache-Control": "no-store",
+            "X-Robots-Tag": "noindex",
+        },
+    )
 
 
 @app.get("/admin/sconti", response_class=HTMLResponse)
