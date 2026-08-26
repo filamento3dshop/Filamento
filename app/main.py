@@ -1,5 +1,8 @@
+import csv
+import io
 import os
 import secrets
+import time
 import uuid
 import threading
 import resend
@@ -651,6 +654,74 @@ async def sitemap():
 </urlset>"""
     return FastAPIResponse(content=xml, media_type="application/xml")
 
+# Supabase sospende i progetti free dopo 7 giorni senza query, Render dopo
+# 15 minuti senza richieste HTTP. Il ping di /health copre entrambi: risponde
+# subito per Render e tocca il database al massimo una volta all'ora, perche'
+# a impedire la sospensione di Supabase basta una query ogni tanto.
+INTERVALLO_PING_DB = 3600  # secondi
+# init_db() tocca gia' il database all'avvio: il primo ping parte da li'.
+_ultimo_ping_db = time.monotonic()
+_lock_ping_db = threading.Lock()
+
+
+def _tocca_database() -> None:
+    """Esegue una query minima per segnalare a Supabase che il progetto e' attivo."""
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+
+
+def _ping_db_se_scaduto() -> Optional[str]:
+    """Tocca il database se e' passata piu' di un'ora dall'ultima volta.
+
+    Restituisce None se tutto e' andato bene o se non era ancora il momento,
+    altrimenti il messaggio di errore.
+    """
+    global _ultimo_ping_db
+
+    if not DATABASE_URL:
+        return None
+
+    adesso = time.monotonic()
+    with _lock_ping_db:
+        if adesso - _ultimo_ping_db < INTERVALLO_PING_DB:
+            return None
+        # Aggiornato prima del tentativo: se il database e' irraggiungibile
+        # evitiamo di riprovare a ogni ping, che bloccherebbe la risposta.
+        _ultimo_ping_db = adesso
+
+    try:
+        _tocca_database()
+        return None
+    except Exception as exc:
+        return str(exc)
+
+
+@app.get("/health")
+@app.head("/health")
+def health():
+    """Endpoint per il monitoraggio uptime (Better Stack).
+
+    Impedisce la sospensione del servizio su Render senza generare l'intera
+    homepage a ogni ping, e tiene attivo il progetto Supabase toccando il
+    database una volta all'ora. Definito come funzione sincrona in modo che
+    FastAPI lo esegua nel threadpool: la connessione psycopg e' bloccante e
+    non deve fermare l'event loop.
+    """
+    errore = _ping_db_se_scaduto()
+    intestazioni = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex"}
+
+    if errore:
+        return FastAPIResponse(
+            content="database non raggiungibile",
+            media_type="text/plain",
+            status_code=503,
+            headers=intestazioni,
+        )
+
+    return FastAPIResponse(content="ok", media_type="text/plain", headers=intestazioni)
+
+
 @app.get("/google19690eee5b182cfd.html")
 async def google_verify():
     return FastAPIResponse(content="google-site-verification: google19690eee5b182cfd.html", media_type="text/html")
@@ -664,12 +735,14 @@ Disallow: /admin/
 Disallow: /conferma
 Disallow: /static/js/
 Disallow: /static/models/
+Disallow: /health
 Crawl-delay: 2
 
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
 Disallow: /conferma
+Disallow: /health
 Crawl-delay: 0
 
 Sitemap: https://www.filamentoshop.it/sitemap.xml
@@ -704,6 +777,50 @@ async def admin_orders(request: Request, username: str = Depends(verify_admin)):
     return templates.TemplateResponse("admin.html", {
         "request": request, "config": CONFIG, "orders": orders,
     })
+
+
+@app.get("/admin/ordini.csv")
+async def admin_export_csv(username: str = Depends(verify_admin)):
+    """Esporta tutti gli ordini in CSV, come backup scaricabile a mano.
+
+    Il piano free di Supabase non fa backup automatici: questo permette di
+    conservare una copia locale degli ordini.
+    """
+    if not DATABASE_URL:
+        raise HTTPException(status_code=503, detail="Database non configurato.")
+
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM orders ORDER BY created_at DESC")
+        righe = [dict(r) for r in cur.fetchall()]
+        colonne = [d[0] for d in cur.description] if cur.description else []
+        cur.close()
+    finally:
+        conn.close()
+
+    buffer = io.StringIO()
+    # QUOTE_ALL evita che indirizzi e note contenenti virgole o a capo
+    # spezzino le colonne una volta aperto il file.
+    writer = csv.DictWriter(
+        buffer, fieldnames=colonne, quoting=csv.QUOTE_ALL, lineterminator="\r\n"
+    )
+    writer.writeheader()
+    writer.writerows(righe)
+
+    # BOM UTF-8: senza, Excel su Windows sbaglia gli accenti dei nomi italiani.
+    contenuto = "﻿" + buffer.getvalue()
+    nome_file = f"filamento-ordini-{date.today().isoformat()}.csv"
+
+    return FastAPIResponse(
+        content=contenuto,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{nome_file}"',
+            "Cache-Control": "no-store",
+            "X-Robots-Tag": "noindex",
+        },
+    )
 
 
 @app.get("/admin/sconti", response_class=HTMLResponse)

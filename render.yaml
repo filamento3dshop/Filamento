@@ -5,11 +5,19 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: python run.py
     envVars:
+      - key: DATABASE_URL
+        sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
         sync: false
       - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: NEGOZIO_EMAIL
         sync: false
       - key: ADMIN_USERNAME
         sync: false
@@ -17,7 +25,3 @@ services:
         sync: false
       - key: PORT
         value: "10000"
-    disk:
-      name: filamento-data
-      mountPath: /var/data
-      sizeGB: 1
