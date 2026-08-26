@@ -154,7 +154,33 @@ def init_db():
     conn.close()
 
 
-init_db()
+# Vero se il database non rispondeva all'avvio: /health lo usa per decidere se
+# testarlo subito invece di aspettare il primo intervallo.
+_db_giu_all_avvio = False
+
+
+def init_db_sicuro():
+    """Avvia init_db senza far crashare il processo se il database non risponde.
+
+    Supabase mette in pausa i progetti free dopo 7 giorni di inattivita' e in
+    quello stato il pooler rifiuta le connessioni. Senza questa protezione
+    l'eccezione si propaga all'import del modulo, il processo esce con status 1
+    e Render considera fallito il deploy: il sito resta offline del tutto,
+    comprese le pagine che il database non lo usano nemmeno.
+
+    Meglio servire le pagine statiche e lasciare che falliscano le sole
+    funzioni che richiedono davvero il database: /health se ne accorge e
+    risponde 503, cosi' il monitoraggio segnala il problema.
+    """
+    global _db_giu_all_avvio
+    try:
+        init_db()
+    except Exception as exc:
+        _db_giu_all_avvio = True
+        print(f"[avvio] database non raggiungibile, si prosegue comunque: {exc}")
+
+
+init_db_sicuro()
 
 
 def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
@@ -659,8 +685,11 @@ async def sitemap():
 # subito per Render e tocca il database al massimo una volta all'ora, perche'
 # a impedire la sospensione di Supabase basta una query ogni tanto.
 INTERVALLO_PING_DB = 3600  # secondi
-# init_db() tocca gia' il database all'avvio: il primo ping parte da li'.
-_ultimo_ping_db = time.monotonic()
+# Se init_db() ha toccato il database con successo, il primo ping parte da li'.
+# Se invece il database era gia' giu' all'avvio, /health deve poterlo verificare
+# subito: aspettare un'ora lascerebbe il monitoraggio cieco proprio quando c'e'
+# un guasto in corso.
+_ultimo_ping_db = time.monotonic() - (INTERVALLO_PING_DB if _db_giu_all_avvio else 0)
 _lock_ping_db = threading.Lock()
 
 
