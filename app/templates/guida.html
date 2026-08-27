@@ -77,7 +77,16 @@
 
       <p>Le lettere 3D personalizzate sono decorazioni realizzate con la stampa tridimensionale: una lettera, un numero o un nome, costruiti strato dopo strato e rifiniti a mano. A differenza di una stampa su carta o di un adesivo hanno spessore e volume, quindi proiettano ombra e cambiano aspetto con la luce della stanza.</p>
 
-      <p>Questa guida raccoglie le domande che ci vengono poste più spesso: quanto costano, di che materiale sono, quale misura scegliere e come usarle. Se hai già le idee chiare puoi passare direttamente alla <a href="/ordina">personalizzazione</a>.</p>
+      <p>Questa guida raccoglie le domande che ci vengono poste più spesso: quanto costano, di che materiale sono, quale misura scegliere e come usarle.</p>
+
+      <figure class="guida-foto">
+        <img src="/static/img/hero-esempio.jpg" alt="Composizione di lettere e numeri 3D personalizzati Filamento" width="1000" height="1000" loading="lazy">
+      </figure>
+
+      <div class="guida-cta">
+        <p class="guida-cta-testo">Hai già le idee chiare?</p>
+        <a href="/ordina" class="btn-primary">Crea la tua composizione</a>
+      </div>
 
       <h2>Di che materiale sono</h2>
 
@@ -103,7 +112,22 @@
       <h3>30 cm — la misura da parete</h3>
       <p>Funziona come elemento principale: sopra il lettino, su una parete vuota, al centro di una composizione. È la misura che si sceglie quando la lettera <em>è</em> il regalo, non un complemento. Su una parete grande la 20 cm rischia di sparire, mentre la 30 cm regge il confronto.</p>
 
+      <div class="guida-foto-doppia">
+        <figure class="guida-foto">
+          <img src="/static/img/gallery/b-salmone-mare.jpg" alt="Lettera B 3D da 20 cm colore salmone con decorazioni tema mare" width="1200" height="1200" loading="lazy">
+          <figcaption>Lettera B da 20 cm, tema mare</figcaption>
+        </figure>
+        <figure class="guida-foto">
+          <img src="/static/img/gallery/uno-safari-corallo.jpg" alt="Numero 1 in 3D da 30 cm colore corallo con decorazioni tema safari" width="1182" height="1200" loading="lazy">
+          <figcaption>Numero 1 da 30 cm, tema safari</figcaption>
+        </figure>
+      </div>
+
       <p>Un criterio pratico: se la lettera va appoggiata, 20 cm; se va guardata da lontano, 30 cm.</p>
+
+      <div class="guida-cta">
+        <a href="/ordina" class="btn-primary">Scegli la tua misura</a>
+      </div>
 
       <h2>Quanto costano</h2>
 
@@ -123,6 +147,11 @@
 
       <p>Per le <a href="/scritte">scritte 3D con il nome completo</a> i prezzi partono da €15,90 per l'altezza 5 cm e da €25,90 per i 10 cm, a seconda della lunghezza del nome.</p>
 
+      <div class="guida-cta">
+        <p class="guida-cta-testo">Il prezzo finale lo vedi mentre personalizzi, senza sorprese.</p>
+        <a href="/ordina" class="btn-primary">Calcola il tuo prezzo</a>
+      </div>
+
       <h2>I colori disponibili</h2>
 
       <p>Sedici colori, pensati per stare bene insieme più che per coprire tutto lo spettro:</p>
@@ -137,21 +166,34 @@
 
       <p>Se sulla lettera va scritto anche il nome, puoi scegliere <strong>due colori diversi</strong>: uno per la lettera e uno per la scritta sopra. Le combinazioni che funzionano meglio sono quelle a forte contrasto — bianco su blu scuro, corallo su bianco — perché il nome resta leggibile anche da lontano.</p>
 
+      <figure class="guida-foto">
+        <img src="/static/img/gallery/g-lilla.jpg" alt="Lettera G 3D personalizzata da 30 cm color lilla" width="1174" height="1200" loading="lazy">
+        <figcaption>Lettera G da 30 cm nel colore lilla</figcaption>
+      </figure>
+
       <h2>Le decorazioni a tema</h2>
 
       <p>Su ogni lettera si possono applicare fino a quattro piccole decorazioni tridimensionali, scelte tra nove temi:</p>
 
-      <ul>
-        <li><a href="/ordina?tema=safari">Safari</a> — giraffa, leone, elefante, zebra</li>
-        <li><a href="/ordina?tema=spazio">Spazio</a> — astronauta, razzo, pianeti, stelle</li>
-        <li><a href="/ordina?tema=mare">Mare</a> — stella marina, granchio, balena, conchiglia</li>
-        <li><a href="/ordina?tema=cielo">Cielo</a> — sole, nuvole, arcobaleno, aeroplano</li>
-        <li><a href="/ordina?tema=principesse">Principesse</a> — castello, corona, unicorno</li>
-        <li><a href="/ordina?tema=sport">Sport</a> — palloni, skateboard, canestro</li>
-        <li><a href="/ordina?tema=motori">Motori</a> — vespa, auto, moto</li>
-        <li><a href="/ordina?tema=natura">Natura</a> — fiori, foglie, farfalle</li>
-        <li><a href="/ordina?tema=cibo">Cibo</a> — cocomero, gelato, cupcake</li>
-      </ul>
+      <div class="guida-temi">
+        {% for slug, nome, desc in [
+          ('safari','Safari','giraffa, leone, elefante'),
+          ('spazio','Spazio','astronauta, razzo, pianeti'),
+          ('mare','Mare','stella marina, granchio, balena'),
+          ('cielo','Cielo','sole, nuvole, arcobaleno'),
+          ('principesse','Principesse','castello, corona, unicorno'),
+          ('sport','Sport','palloni, skateboard, canestro'),
+          ('motori','Motori','vespa, auto, moto'),
+          ('natura','Natura','fiori, foglie, farfalle'),
+          ('cibo','Cibo','cocomero, gelato, cupcake'),
+        ] %}
+        <a href="/ordina?tema={{ slug }}" class="guida-tema-card" aria-label="Crea la tua composizione con tema {{ nome }}">
+          <img src="/static/img/temi/{{ slug }}.jpg" alt="Decorazione 3D tema {{ nome }}" width="400" height="400" loading="lazy">
+          <span class="guida-tema-nome">{{ nome }}</span>
+          <span class="guida-tema-desc">{{ desc }}</span>
+        </a>
+        {% endfor %}
+      </div>
 
       <p>Il tema non deve necessariamente rispecchiare una passione già dichiarata: per un neonato si sceglie di solito in base ai colori della cameretta o all'atmosfera che i genitori hanno immaginato.</p>
 
@@ -168,6 +210,22 @@
 
       <h3>Prima comunione</h3>
       <p>Iniziale del nome in tono sobrio, spesso bianco o blu scuro, con decorazione minima o assente. È un'età in cui il bambino comincia ad avere gusti propri, quindi conviene chiedere.</p>
+
+      <div class="guida-foto-doppia">
+        <figure class="guida-foto">
+          <img src="/static/img/gallery/vittorio-spazio.jpg" alt="Numero 2 in 3D azzurro con nome Vittorio e decorazioni tema spazio" width="1200" height="1195" loading="lazy">
+          <figcaption>Numero 2 con nome, tema spazio</figcaption>
+        </figure>
+        <figure class="guida-foto">
+          <img src="/static/img/gallery/leonardo-bluette-sport.jpg" alt="Composizione 3D bluette con nome Leonardo e decorazioni tema sport" width="1200" height="1200" loading="lazy">
+          <figcaption>Composizione con nome, tema sport</figcaption>
+        </figure>
+      </div>
+
+      <div class="guida-cta">
+        <p class="guida-cta-testo">Ogni pezzo è realizzato su ordinazione, solo per chi lo riceverà.</p>
+        <a href="/ordina" class="btn-primary">Personalizza il tuo regalo</a>
+      </div>
 
       <h2>Come decorare la cameretta</h2>
 
@@ -191,6 +249,10 @@
       </ol>
 
       <p>Da lì partono i <strong>7-10 giorni lavorativi</strong> di lavorazione e consegna. Non teniamo magazzino: ogni pezzo viene stampato dopo la conferma dell'ordine, ed è il motivo per cui i tempi non sono quelli di un articolo pronto a scaffale.</p>
+
+      <div class="guida-cta">
+        <a href="/ordina" class="btn-primary">Inizia a personalizzare</a>
+      </div>
 
       <h2>Come si puliscono</h2>
 
@@ -235,10 +297,15 @@
         </details>
       </div>
 
-      <div class="legal-footer-nav">
-        <a href="/ordina">Crea la tua lettera 3D →</a>
-        <a href="/gallery">Guarda la gallery</a>
-        <a href="/scritte">Scritte 3D con il nome</a>
+      <div class="guida-cta-finale">
+        <h2>Pronto a creare la tua?</h2>
+        <p>Scegli lettera, colore, dimensione e decorazioni. Il prezzo si aggiorna mentre personalizzi, e ricevi tutto in 7-10 giorni.</p>
+        <a href="/ordina" class="btn-primary btn-lg">Crea la tua composizione</a>
+        <div class="guida-cta-secondari">
+          <a href="/gallery">Guarda la gallery</a>
+          <a href="/scritte">Scritte 3D con il nome</a>
+          <a href="/">Torna alla home</a>
+        </div>
       </div>
 
     </div>
