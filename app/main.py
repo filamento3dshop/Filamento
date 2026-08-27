@@ -632,6 +632,11 @@ async def gallery(request: Request):
     return templates.TemplateResponse("gallery.html", {"request": request, "config": CONFIG, "gallery": GALLERY})
 
 
+@app.get("/guida-lettere-3d", response_class=HTMLResponse)
+async def guida(request: Request):
+    return templates.TemplateResponse("guida.html", {"request": request, "config": CONFIG})
+
+
 @app.get("/termini", response_class=HTMLResponse)
 async def termini(request: Request):
     return templates.TemplateResponse("termini.html", {"request": request, "config": CONFIG})
@@ -674,6 +679,7 @@ async def sitemap():
   <url><loc>{BASE}/scritte</loc><lastmod>{oggi}</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>{BASE}/gallery</loc><lastmod>{oggi}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority>{gallery_images}
   </url>
+  <url><loc>{BASE}/guida-lettere-3d</loc><lastmod>{oggi}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>{BASE}/spedizioni</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>{BASE}/privacy</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>{BASE}/termini</loc><lastmod>2026-06-01</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
