@@ -1227,9 +1227,16 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 .guida-cta { text-align: center; margin: 40px 0; padding: 32px 24px; background: var(--c100, #FAF8F6); border-radius: 3px; }
 .guida-cta-testo { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text); margin: 0 0 18px; font-style: italic; }
+/* .legal-body a colora i link di rosso, lo stesso rosso dello sfondo del
+   bottone, e ha specificita' maggiore di .btn-primary: senza queste regole
+   il testo dei pulsanti risulta invisibile. */
+.legal-body .btn-primary,
+.legal-body .btn-primary:hover { color: var(--white); text-decoration: none; }
 .guida-cta .btn-primary { display: inline-block; }
 
 .guida-temi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0; }
+.legal-body .guida-tema-card,
+.legal-body .guida-tema-card:hover { text-decoration: none; }
 .guida-tema-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 16px 12px; border: 1px solid var(--c200); border-radius: 3px; text-decoration: none; transition: border-color .2s, transform .2s; }
 .guida-tema-card:hover { border-color: var(--c500); transform: translateY(-2px); }
 .guida-tema-card img { width: 88px; height: 88px; object-fit: contain; margin-bottom: 10px; }
