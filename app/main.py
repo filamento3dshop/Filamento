@@ -316,7 +316,7 @@ async def ordina_post(
     # step 1
     lettera: str = Form(...),
     nome_bimbo: str = Form(...),
-    colore_lettera: str = Form("corallo"),
+    colore_lettera: str = Form("salmone"),
     colore_scritta: str = Form("bianco"),
     dimensione: str = Form("20"),
     note: Optional[str] = Form(None),
@@ -477,7 +477,7 @@ async def scritte_post(
     testo_maiuscolo: str = Form(""),
     font_style: str = Form("moderno"),
     dimensione: str = Form("10"),
-    colore: str = Form("corallo"),
+    colore: str = Form("salmone"),
     note: Optional[str] = Form(None),
     nome: str = Form(...),
     cognome: str = Form(...),

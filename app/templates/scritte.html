@@ -32,7 +32,7 @@
   "@context": "https://schema.org",
   "@type": "Product",
   "name": "Scritta 3D Personalizzata con Nome",
-  "description": "Scritta decorativa stampata in 3D con il nome che scegli tu, rifinita a mano in Italia. Disponibile in altezza 5 cm e 10 cm, in 16 colori e con font a scelta.",
+  "description": "Scritta decorativa stampata in 3D con il nome che scegli tu, rifinita a mano in Italia. Disponibile in altezza 5 cm e 10 cm, in 20 colori e con font a scelta.",
   "brand": { "@type": "Brand", "name": "Filamento" },
   "image": "https://www.filamentoshop.it/static/img/hero-esempio.jpg",
   "url": "https://www.filamentoshop.it/scritte",
@@ -202,22 +202,26 @@
 
           {# Colore #}
           {% set colori = [
-            ('rosa_antico',    '#E8B4A8', 'Rosa antico'),
-            ('corallo',        '#E8695A', 'Corallo'),
-            ('fucsia',         '#E5107A', 'Fucsia'),
-            ('magenta',        '#D84098', 'Magenta'),
-            ('viola',          '#8858C0', 'Viola'),
-            ('lilla',          '#C8A8D0', 'Lilla'),
-            ('giallo_burro',   '#F4E060', 'Giallo burro'),
-            ('ruggine',        '#B86040', 'Ruggine'),
-            ('menta',          '#A8D8C0', 'Menta'),
-            ('verde_smeraldo', '#38A068', 'Verde smeraldo'),
-            ('celeste',        '#A8CCE0', 'Celeste'),
-            ('blu_elettrico',  '#3858C0', 'Blu elettrico'),
-            ('blu_scuro',      '#1A2A6C', 'Blu scuro'),
-            ('grigio_nebbia',  '#B0ACAA', 'Grigio nebbia'),
-            ('bianco_puro',    '#F8F6F3', 'Bianco'),
-            ('nero',           '#1A1A1A', 'Nero'),
+            ('bianco',          '#F5F3F0',  'Bianco'),
+            ('rosa',            '#F2A6C0',  'Rosa'),
+            ('rosa_antico',     '#E8B4A8',  'Rosa antico'),
+            ('salmone',         '#F08A70',  'Salmone'),
+            ('fucsia',          '#E5107A',  'Fucsia'),
+            ('violetto',        '#8858C0',  'Violetto'),
+            ('giallo',          '#F4D93E',  'Giallo'),
+            ('arancione',       '#F07C24',  'Arancione'),
+            ('rosso',           '#D0342C',  'Rosso'),
+            ('marrone',         '#7A4A2C',  'Marrone'),
+            ('beige',           '#D9C3A5',  'Beige'),
+            ('verde',           '#3B9E52',  'Verde'),
+            ('celeste',         '#A8CCE0',  'Celeste'),
+            ('azzurro',         '#3FA9DE',  'Azzurro'),
+            ('bluette',         '#2E5FBF',  'Bluette'),
+            ('grigio_cadetto',  '#7C8B99',  'Grigio cadetto'),
+            ('blu',             '#1F3A93',  'Blu'),
+            ('nero_lucido',     '#111111',  'Nero lucido'),
+            ('nero_opaco',      '#2B2B2B',  'Nero opaco'),
+            ('grigio_scuro',    '#4A4A4A',  'Grigio scuro'),
           ] %}
           <div class="form-group">
             <label class="form-label">Colore della scritta <span class="req">*</span></label>
@@ -225,7 +229,7 @@
               {% for val, hex, label in colori %}
               <label class="color-opt" title="{{ label }}">
                 <input type="radio" name="colore" value="{{ val }}"
-                       {% if form.get('colore','corallo') == val %}checked{% endif %}
+                       {% if form.get('colore','salmone') == val %}checked{% endif %}
                        onchange="onColoreChange('{{ hex }}', '{{ label }}')">
                 <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
                 <span class="cname">{{ label }}</span>
@@ -729,12 +733,26 @@ const PREZZI = {
 const SPEDIZIONE = 3.00;
 const FONT_LABELS = { moderno: 'Moderno', slab: 'Slab', geometrico: 'Geometrico' };
 const COLOR_MAP = {
-  rosa_antico: '#E8B4A8', corallo: '#E8695A', fucsia: '#E5107A',
-  magenta: '#D84098', viola: '#8858C0', lilla: '#C8A8D0',
-  giallo_burro: '#F4E060', ruggine: '#B86040', menta: '#A8D8C0',
-  verde_smeraldo: '#38A068', celeste: '#A8CCE0', blu_elettrico: '#3858C0',
-  blu_scuro: '#1A2A6C', grigio_nebbia: '#B0ACAA', bianco_puro: '#F8F6F3',
-  nero: '#1A1A1A'
+  bianco:            '#F5F3F0',
+  rosa:              '#F2A6C0',
+  rosa_antico:       '#E8B4A8',
+  salmone:           '#F08A70',
+  fucsia:            '#E5107A',
+  violetto:          '#8858C0',
+  giallo:            '#F4D93E',
+  arancione:         '#F07C24',
+  rosso:             '#D0342C',
+  marrone:           '#7A4A2C',
+  beige:             '#D9C3A5',
+  verde:             '#3B9E52',
+  celeste:           '#A8CCE0',
+  azzurro:           '#3FA9DE',
+  bluette:           '#2E5FBF',
+  grigio_cadetto:    '#7C8B99',
+  blu:               '#1F3A93',
+  nero_lucido:       '#111111',
+  nero_opaco:        '#2B2B2B',
+  grigio_scuro:      '#4A4A4A',
 };
 
 let scontoPerc = 0;
@@ -750,7 +768,7 @@ function getSelectedDim() {
 }
 function getSelectedColore() {
   const r = document.querySelector('input[name="colore"]:checked');
-  return r ? r.value : 'corallo';
+  return r ? r.value : 'salmone';
 }
 function getTesto() {
   return (document.getElementById('testo_input').value || '').replace(/[^A-Za-zÀ-ú ]/g, '').toUpperCase().trim();
