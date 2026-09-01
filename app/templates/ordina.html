@@ -194,22 +194,26 @@
 
             {# Colore lettera #}
             {% set colori = [
-              ('rosa_antico',    '#E8B4A8', 'Rosa antico'),
-              ('corallo',        '#E8695A', 'Corallo'),
-              ('fucsia',         '#E5107A', 'Fucsia'),
-              ('magenta',        '#D84098', 'Magenta'),
-              ('viola',          '#8858C0', 'Viola'),
-              ('lilla',          '#C8A8D0', 'Lilla'),
-              ('giallo_burro',   '#F4E060', 'Giallo burro'),
-              ('ruggine',        '#B86040', 'Ruggine'),
-              ('menta',          '#A8D8C0', 'Menta'),
-              ('verde_smeraldo', '#38A068', 'Verde smeraldo'),
-              ('celeste',        '#A8CCE0', 'Celeste'),
-              ('blu_elettrico',  '#3858C0', 'Blu elettrico'),
-              ('blu_scuro',      '#1A2A6C', 'Blu scuro'),
-              ('grigio_nebbia',  '#B0ACAA', 'Grigio nebbia'),
-              ('bianco_puro',    '#F8F6F3', 'Bianco'),
-              ('nero',           '#1A1A1A', 'Nero'),
+              ('bianco',          '#F5F3F0',  'Bianco'),
+              ('rosa',            '#F2A6C0',  'Rosa'),
+              ('rosa_antico',     '#E8B4A8',  'Rosa antico'),
+              ('salmone',         '#F08A70',  'Salmone'),
+              ('fucsia',          '#E5107A',  'Fucsia'),
+              ('violetto',        '#8858C0',  'Violetto'),
+              ('giallo',          '#F4D93E',  'Giallo'),
+              ('arancione',       '#F07C24',  'Arancione'),
+              ('rosso',           '#D0342C',  'Rosso'),
+              ('marrone',         '#7A4A2C',  'Marrone'),
+              ('beige',           '#D9C3A5',  'Beige'),
+              ('verde',           '#3B9E52',  'Verde'),
+              ('celeste',         '#A8CCE0',  'Celeste'),
+              ('azzurro',         '#3FA9DE',  'Azzurro'),
+              ('bluette',         '#2E5FBF',  'Bluette'),
+              ('grigio_cadetto',  '#7C8B99',  'Grigio cadetto'),
+              ('blu',             '#1F3A93',  'Blu'),
+              ('nero_lucido',     '#111111',  'Nero lucido'),
+              ('nero_opaco',      '#2B2B2B',  'Nero opaco'),
+              ('grigio_scuro',    '#4A4A4A',  'Grigio scuro'),
             ] %}
 
             <div class="form-group">
@@ -218,7 +222,7 @@
                 {% for val, hex, label in colori %}
                 <label class="color-opt" title="{{ label }}">
                   <input type="radio" name="colore_lettera" value="{{ val }}"
-                         {% if form.get('colore_lettera','corallo') == val %}checked{% endif %}>
+                         {% if form.get('colore_lettera','salmone') == val %}checked{% endif %}>
                   <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
                   <span class="cname">{{ label }}</span>
                 </label>
@@ -285,7 +289,7 @@
                 {% for val, hex, label in colori %}
                 <label class="color-opt" title="{{ label }}">
                   <input type="radio" name="colore_scritta" value="{{ val }}"
-                         {% if form.get('colore_scritta','bianco_puro') == val %}checked{% endif %}>
+                         {% if form.get('colore_scritta','bianco') == val %}checked{% endif %}>
                   <span class="cswatch" style="background:{{ hex }};{% if hex in ('#F8F6F3','#A8D8C0','#A8CCE0','#F4E060','#E8B4A8') %}box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);{% endif %}"></span>
                   <span class="cname">{{ label }}</span>
                 </label>
@@ -1059,22 +1063,26 @@ textarea.form-control { resize: vertical; }
 <script>
 // ══ Color map ══
 const COLOR_HEX = {
-  rosa_antico:    '#E8B4A8',
-  corallo:        '#E8695A',
-  fucsia:         '#E5107A',
-  magenta:        '#D84098',
-  viola:          '#8858C0',
-  lilla:          '#C8A8D0',
-  giallo_burro:   '#F4E060',
-  ruggine:        '#B86040',
-  menta:          '#A8D8C0',
-  verde_smeraldo: '#38A068',
-  celeste:        '#A8CCE0',
-  blu_elettrico:  '#3858C0',
-  blu_scuro:      '#1A2A6C',
-  grigio_nebbia:  '#B0ACAA',
-  bianco_puro:    '#F8F6F3',
-  nero:           '#1A1A1A',
+  bianco:            '#F5F3F0',
+  rosa:              '#F2A6C0',
+  rosa_antico:       '#E8B4A8',
+  salmone:           '#F08A70',
+  fucsia:            '#E5107A',
+  violetto:          '#8858C0',
+  giallo:            '#F4D93E',
+  arancione:         '#F07C24',
+  rosso:             '#D0342C',
+  marrone:           '#7A4A2C',
+  beige:             '#D9C3A5',
+  verde:             '#3B9E52',
+  celeste:           '#A8CCE0',
+  azzurro:           '#3FA9DE',
+  bluette:           '#2E5FBF',
+  grigio_cadetto:    '#7C8B99',
+  blu:               '#1F3A93',
+  nero_lucido:       '#111111',
+  nero_opaco:        '#2B2B2B',
+  grigio_scuro:      '#4A4A4A',
 };
 
 // ══ Decoration emoji fallbacks ══
@@ -1167,7 +1175,7 @@ document.querySelectorAll('.deco-slot').forEach(slot => {
 });
 // ══ Deco colore preferito ══
 const DECO_COLORS = [
-  { nome: 'Rosso',        hex: '#E8695A' },
+  { nome: 'Rosso',        hex: '#F08A70' },
   { nome: 'Rosa',         hex: '#E8B4A8' },
   { nome: 'Fucsia',       hex: '#E5107A' },
   { nome: 'Viola',        hex: '#8858C0' },
@@ -1556,42 +1564,50 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
   // ── PBR props per colore — PLA opaco, roughness ~0.75 ──
   const MAT_PROPS = {
-    rosa_antico:    { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.55 },
-    corallo:        { roughness: 0.72, metalness: 0.0, envMapIntensity: 0.60 },
-    fucsia:         { roughness: 0.70, metalness: 0.0, envMapIntensity: 0.62 },
-    magenta:        { roughness: 0.71, metalness: 0.0, envMapIntensity: 0.60 },
-    viola:          { roughness: 0.73, metalness: 0.0, envMapIntensity: 0.58 },
-    lilla:          { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.55 },
-    giallo_burro:   { roughness: 0.76, metalness: 0.0, envMapIntensity: 0.52 },
-    ruggine:        { roughness: 0.76, metalness: 0.0, envMapIntensity: 0.50 },
-    menta:          { roughness: 0.75, metalness: 0.0, envMapIntensity: 0.54 },
-    verde_smeraldo: { roughness: 0.73, metalness: 0.0, envMapIntensity: 0.58 },
-    celeste:        { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.55 },
-    blu_elettrico:  { roughness: 0.72, metalness: 0.0, envMapIntensity: 0.60 },
-    blu_scuro:      { roughness: 0.70, metalness: 0.0, envMapIntensity: 0.65 },
-    grigio_nebbia:  { roughness: 0.78, metalness: 0.0, envMapIntensity: 0.48 },
-    bianco_puro:    { roughness: 0.68, metalness: 0.0, envMapIntensity: 0.72 },
-    nero:           { roughness: 0.65, metalness: 0.02, envMapIntensity: 0.80 },
+    bianco:          { roughness: 0.68, metalness: 0.0, envMapIntensity: 0.72 },
+    rosa:            { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.55 },
+    rosa_antico:     { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.55 },
+    salmone:         { roughness: 0.72, metalness: 0.0, envMapIntensity: 0.60 },
+    fucsia:          { roughness: 0.70, metalness: 0.0, envMapIntensity: 0.62 },
+    violetto:        { roughness: 0.73, metalness: 0.0, envMapIntensity: 0.58 },
+    giallo:          { roughness: 0.76, metalness: 0.0, envMapIntensity: 0.52 },
+    arancione:       { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.58 },
+    rosso:           { roughness: 0.71, metalness: 0.0, envMapIntensity: 0.62 },
+    marrone:         { roughness: 0.78, metalness: 0.0, envMapIntensity: 0.48 },
+    beige:           { roughness: 0.77, metalness: 0.0, envMapIntensity: 0.50 },
+    verde:           { roughness: 0.73, metalness: 0.0, envMapIntensity: 0.58 },
+    celeste:         { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.55 },
+    azzurro:         { roughness: 0.72, metalness: 0.0, envMapIntensity: 0.60 },
+    bluette:         { roughness: 0.71, metalness: 0.0, envMapIntensity: 0.62 },
+    grigio_cadetto:  { roughness: 0.76, metalness: 0.0, envMapIntensity: 0.52 },
+    blu:             { roughness: 0.70, metalness: 0.0, envMapIntensity: 0.65 },
+    nero_lucido:     { roughness: 0.42, metalness: 0.03, envMapIntensity: 1.00 },
+    nero_opaco:      { roughness: 0.85, metalness: 0.0, envMapIntensity: 0.35 },
+    grigio_scuro:    { roughness: 0.74, metalness: 0.0, envMapIntensity: 0.55 },
   };
 
   // ── Luce ambiente per colore ──
   const LIGHT_TINT = {
-    rosa_antico:    { key: 0xffece6, ambient: 0xfff0ea, exposure: 1.05 },
-    corallo:        { key: 0xfff0e0, ambient: 0xfff2e6, exposure: 1.08 },
-    fucsia:         { key: 0xffe0f0, ambient: 0xffeaf6, exposure: 1.07 },
-    magenta:        { key: 0xffe4f2, ambient: 0xffeaf8, exposure: 1.06 },
-    viola:          { key: 0xf0e8ff, ambient: 0xf6eeff, exposure: 1.05 },
-    lilla:          { key: 0xf2eeff, ambient: 0xf8f0ff, exposure: 1.04 },
-    giallo_burro:   { key: 0xfffbe0, ambient: 0xfffce8, exposure: 1.09 },
-    ruggine:        { key: 0xfff0e4, ambient: 0xfff4ea, exposure: 1.07 },
-    menta:          { key: 0xedfff6, ambient: 0xf2fff8, exposure: 1.04 },
-    verde_smeraldo: { key: 0xeaf8ee, ambient: 0xeef8f0, exposure: 1.06 },
-    celeste:        { key: 0xe8f4ff, ambient: 0xf0f6ff, exposure: 1.04 },
-    blu_elettrico:  { key: 0xe8eeff, ambient: 0xeef2ff, exposure: 1.06 },
-    blu_scuro:      { key: 0xe4eaff, ambient: 0xeaefff, exposure: 1.10 },
-    grigio_nebbia:  { key: 0xf4f4f4, ambient: 0xf8f8f8, exposure: 1.03 },
-    bianco_puro:    { key: 0xfff8f4, ambient: 0xfff8f8, exposure: 1.02 },
-    nero:           { key: 0xffe8d8, ambient: 0xffeedd, exposure: 1.14 },
+    bianco:          { key: 0xfff8f4, ambient: 0xfff8f8, exposure: 1.02 },
+    rosa:            { key: 0xffeef4, ambient: 0xfff2f7, exposure: 1.05 },
+    rosa_antico:     { key: 0xffece6, ambient: 0xfff0ea, exposure: 1.05 },
+    salmone:         { key: 0xfff0e6, ambient: 0xfff4ec, exposure: 1.07 },
+    fucsia:          { key: 0xffe0f0, ambient: 0xffeaf6, exposure: 1.07 },
+    violetto:        { key: 0xf0e8ff, ambient: 0xf6eeff, exposure: 1.05 },
+    giallo:          { key: 0xfffbe0, ambient: 0xfffce8, exposure: 1.09 },
+    arancione:       { key: 0xfff2e2, ambient: 0xfff6e8, exposure: 1.08 },
+    rosso:           { key: 0xffe8e4, ambient: 0xffeeea, exposure: 1.07 },
+    marrone:         { key: 0xf6ece2, ambient: 0xf8f0e8, exposure: 1.04 },
+    beige:           { key: 0xfff6ea, ambient: 0xfff8f0, exposure: 1.04 },
+    verde:           { key: 0xeaf8ee, ambient: 0xeef8f0, exposure: 1.06 },
+    celeste:         { key: 0xe8f4ff, ambient: 0xf0f6ff, exposure: 1.04 },
+    azzurro:         { key: 0xe6f2ff, ambient: 0xeef6ff, exposure: 1.06 },
+    bluette:         { key: 0xe8eeff, ambient: 0xeef2ff, exposure: 1.07 },
+    grigio_cadetto:  { key: 0xf0f3f6, ambient: 0xf4f7fa, exposure: 1.04 },
+    blu:             { key: 0xe4eaff, ambient: 0xeaefff, exposure: 1.10 },
+    nero_lucido:     { key: 0xffe8d8, ambient: 0xffeedd, exposure: 1.16 },
+    nero_opaco:      { key: 0xf6efe8, ambient: 0xf8f2ec, exposure: 1.10 },
+    grigio_scuro:    { key: 0xf2f2f2, ambient: 0xf6f6f6, exposure: 1.06 },
   };
 
   // Renderer
@@ -1717,7 +1733,7 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
   scene.add(letterGroup);
 
   const letterMat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color('#E8695A'),
+    color: new THREE.Color('#F08A70'),
     roughness: 0.72,
     metalness: 0.0,
     envMapIntensity: 0.60,
@@ -2048,14 +2064,14 @@ document.querySelectorAll('input[name="dimensione"]').forEach(r => r.addEventLis
 
   // ── Cambio colore con aggiornamento PBR + luce ──
   function setLetterColor(colorName, hex) {
-    targetLetterColor = new THREE.Color(hex || '#E8695A');
-    const props = MAT_PROPS[colorName] || MAT_PROPS.corallo;
+    targetLetterColor = new THREE.Color(hex || '#F08A70');
+    const props = MAT_PROPS[colorName] || MAT_PROPS.salmone;
     letterMat.roughness = props.roughness;
     letterMat.metalness = props.metalness;
     letterMat.envMapIntensity = props.envMapIntensity;
     letterMat.needsUpdate = true;
 
-    const tint = LIGHT_TINT[colorName] || LIGHT_TINT.corallo;
+    const tint = LIGHT_TINT[colorName] || LIGHT_TINT.salmone;
     tKeyColor = new THREE.Color(tint.key);
     tAmbColor = new THREE.Color(tint.ambient);
     tExposure = tint.exposure;
@@ -2360,22 +2376,26 @@ const FORMA_DESC = {
   scatola: 'Struttura aperta, perfetta per inserire luci LED dall\'interno. Effetto più scenografico.'
 };
 const COLOR_DESC = {
-  rosa_antico:    'Delicato e romantico. Un rosa che scalda senza sopraffare.',
-  corallo:        'La tonalità più amata per le camerette — vivace ma mai eccessiva.',
-  fucsia:         'Energico e deciso. Per chi vuole osare con stile.',
-  magenta:        'Intenso e vibrante. Cattura l\'attenzione al primo sguardo.',
-  viola:          'Misterioso e creativo. Perfetto per personalità fuori dagli schemi.',
-  lilla:          'Un tocco di fantasia leggero e sognante. Universalmente amato.',
-  giallo_burro:   'Caldo e luminoso come un raggio di sole. Porta allegria in ogni stanza.',
-  ruggine:        'Terroso e autentico. Un arancio maturo dall\'anima artigianale.',
-  menta:          'Fresco e rilassante. Porta un soffio di natura all\'interno.',
-  verde_smeraldo: 'Ricco e profondo. Un verde che non smette mai di sorprendere.',
-  celeste:        'Calmo e sereno come un cielo d\'estate. Leggero e senza tempo.',
-  blu_elettrico:  'Audace e moderno. Un blu pieno di carattere e personalità.',
-  blu_scuro:      'Elegante e raffinato. La profondità di un cielo notturno.',
-  grigio_nebbia:  'Neutro e sofisticato. Si abbina a qualsiasi palette con naturalezza.',
-  bianco_puro:    'Essenziale e puro. Il bianco che non è mai freddo.',
-  nero:           'Elegante e deciso. Per un effetto grafico e sofisticato.',
+  bianco:          'Essenziale e puro. Il bianco che non è mai freddo.',
+  rosa:            'Dolce e luminoso. Il classico delle camerette, sempre attuale.',
+  rosa_antico:     'Delicato e romantico. Un rosa che scalda senza sopraffare.',
+  salmone:         'La tonalità più amata per le camerette — vivace ma mai eccessiva.',
+  fucsia:          'Energico e deciso. Per chi vuole osare con stile.',
+  violetto:        'Misterioso e creativo. Perfetto per personalità fuori dagli schemi.',
+  giallo:          'Caldo e luminoso come un raggio di sole. Porta allegria in ogni stanza.',
+  arancione:       'Solare e allegro. Un colore che si fa notare senza stancare.',
+  rosso:           'Deciso e pieno di energia. Il colore che cattura subito lo sguardo.',
+  marrone:         'Terroso e autentico. Un tono naturale dall'anima artigianale.',
+  beige:           'Neutro e caldo. Si abbina a qualsiasi arredo con naturalezza.',
+  verde:           'Fresco e rilassante. Porta un soffio di natura all'interno.',
+  celeste:         'Calmo e sereno come un cielo d'estate. Leggero e senza tempo.',
+  azzurro:         'Limpido e vivace. Il blu che illumina senza appesantire.',
+  bluette:         'Audace e moderno. Un blu pieno di carattere e personalità.',
+  grigio_cadetto:  'Sobrio e discreto. Un grigio con una punta di azzurro.',
+  blu:             'Elegante e raffinato. La profondità di un cielo notturno.',
+  nero_lucido:     'Grafico e sofisticato, con una finitura che riflette la luce.',
+  nero_opaco:      'Deciso e vellutato. Il nero che assorbe la luce, senza riflessi.',
+  grigio_scuro:    'Contemporaneo e versatile. Perfetto per un effetto essenziale.',
 };
 
 function fadeText(el, newText) {
