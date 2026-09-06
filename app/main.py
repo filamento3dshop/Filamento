@@ -735,25 +735,51 @@ def _ping_db_se_scaduto() -> Optional[str]:
 @app.get("/health")
 @app.head("/health")
 def health():
-    """Endpoint per il monitoraggio uptime (Better Stack).
+    """Endpoint di keep-alive: risponde 200 finche' il processo e' vivo.
 
     Impedisce la sospensione del servizio su Render senza generare l'intera
     homepage a ogni ping, e tiene attivo il progetto Supabase toccando il
     database una volta all'ora. Definito come funzione sincrona in modo che
     FastAPI lo esegua nel threadpool: la connessione psycopg e' bloccante e
     non deve fermare l'event loop.
+
+    Non restituisce mai un errore per colpa del database. La versione
+    precedente rispondeva 503 quando la query falliva, e questo ha disattivato
+    il cronjob del keep-alive: cron-job.org conta ogni 503 come esecuzione
+    fallita e dopo una serie consecutiva disabilita il job da solo. Il
+    risultato era il peggiore possibile - un problema temporaneo del database
+    spegneva in modo permanente cio' che tiene sveglio il sito.
+
+    Lo stato del database resta consultabile su /health/db, che non e' il
+    bersaglio del keep-alive e quindi puo' segnalare il guasto liberamente.
     """
     errore = _ping_db_se_scaduto()
+    corpo = "ok" if not errore else "ok (database non raggiungibile)"
+    return FastAPIResponse(
+        content=corpo,
+        media_type="text/plain",
+        headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex"},
+    )
+
+
+@app.get("/health/db")
+@app.head("/health/db")
+def health_db():
+    """Stato del database, per il monitoraggio vero e proprio.
+
+    Separato da /health apposta: qui un 503 e' informazione utile, mentre
+    sull'endpoint di keep-alive sarebbe autodistruttivo.
+    """
     intestazioni = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex"}
 
-    if errore:
-        return FastAPIResponse(
-            content="database non raggiungibile",
-            media_type="text/plain",
-            status_code=503,
-            headers=intestazioni,
-        )
-
+    if not DATABASE_URL:
+        return FastAPIResponse(content="database non configurato", media_type="text/plain",
+                               headers=intestazioni)
+    try:
+        _tocca_database()
+    except Exception as exc:
+        return FastAPIResponse(content=f"database non raggiungibile: {exc}", media_type="text/plain",
+                               status_code=503, headers=intestazioni)
     return FastAPIResponse(content="ok", media_type="text/plain", headers=intestazioni)
 
 
