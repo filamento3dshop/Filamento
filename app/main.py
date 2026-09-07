@@ -107,8 +107,14 @@ EMAIL_FROM = os.getenv("EMAIL_FROM", "Filamento <noreply@filamentoshop.it>")
 security = HTTPBasic()
 
 
+# Un database irraggiungibile deve fallire in fretta, non tenere occupata la
+# richiesta finche' scade il timeout di rete: durante una partenza a freddo
+# ogni secondo speso qui ritarda il momento in cui il sito risponde.
+TIMEOUT_DB = 8
+
+
 def get_db():
-    conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+    conn = psycopg.connect(DATABASE_URL, row_factory=dict_row, connect_timeout=TIMEOUT_DB)
     return conn
 
 
@@ -180,7 +186,20 @@ def init_db_sicuro():
         print(f"[avvio] database non raggiungibile, si prosegue comunque: {exc}")
 
 
-init_db_sicuro()
+# init_db in un thread separato, non durante l'import del modulo.
+#
+# Chiamandola qui in modo sincrono, uvicorn non apriva la porta finche' non
+# aveva finito di connettersi a Supabase, creare le tabelle e tentare le
+# migrazioni: diversi secondi, e molti di piu' se il database e' in pausa.
+# Su una partenza a freddo di Render quel ritardo si somma all'avvio, e il
+# servizio risulta irraggiungibile piu' a lungo di quanto un ping di
+# keep-alive sia disposto ad aspettare - trenta secondi su cron-job.org.
+# Il risultato era un sito che al mattino non si risvegliava piu' da solo.
+#
+# In un thread il server apre la porta subito e risponde mentre il database
+# si prepara. Le sole rotte che richiedono le tabelle sono ordini e admin, e
+# arrivano comunque dopo.
+threading.Thread(target=init_db_sicuro, daemon=True).start()
 
 
 def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
@@ -701,7 +720,7 @@ _lock_ping_db = threading.Lock()
 
 def _tocca_database() -> None:
     """Esegue una query minima per segnalare a Supabase che il progetto e' attivo."""
-    with psycopg.connect(DATABASE_URL) as conn:
+    with psycopg.connect(DATABASE_URL, connect_timeout=TIMEOUT_DB) as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT 1")
 
