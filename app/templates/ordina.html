@@ -376,7 +376,7 @@
                   ('<i class="fas fa-fish"></i>',      'Mare',        ['Pesce','Polpo','Stella marina','Conchiglia','Granchio','Delfino','Balena','Medusa','Tartaruga','Corallo','Cavalluccio marino'], ['Pesce','Stella marina','Granchio','Balena','Medusa','Corallo','Cavalluccio marino']),
                   ('<i class="fas fa-cloud-sun"></i>', 'Cielo',       ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino'], ['Nuvola','Sole','Arcobaleno','Farfalla','Uccellino','Mongolfiera','Luna','Aquilone','Palloncino']),
                   ('<i class="fas fa-crown"></i>',     'Principessa', ['Corona','Bacchetta magica','Castello','Unicorno','Fiocco','Fatina','Scarpa col tacco','Rossetto','Carrozza'], ['Bacchetta magica','Unicorno','Fiocco','Fatina','Carrozza']),
-                  ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone da basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da calcio','Pallone da basket','Guantone boxe','Bicicletta','Palla da football']),
+                  ('<i class="fas fa-futbol"></i>',    'Sport',       ['Pallone da calcio','Pallone da basket','Porta da calcio','Canestro','Guantone boxe','Racchetta tennis','Pallina tennis','Bicicletta','Skateboard','Racchetta da padel','Palla da football','Arrampicata'], ['Pallone da basket','Guantone boxe','Bicicletta','Palla da football']),
                   ('<i class="fas fa-car"></i>',       'Motori',      ['Macchinina','Moto','Trattore','Aeroplano','Camion','Vespa','Treno'],               []),
                   ('<i class="fas fa-leaf"></i>',      'Natura',      ['Fiore','Foglia','Fungo','Ape','Coccinella'],                                     ['Fiore','Foglia','Fungo','Ape','Coccinella']),
                   ('<i class="fas fa-ice-cream"></i>', 'Cibo',        ['Cono gelato','Pizza','Fragola','Fetta cocomero','Ciliege','More','Fetta torta'], ['Cono gelato','Pizza','Fetta cocomero','Fetta torta']),
@@ -2564,10 +2564,11 @@ updateTotal();
   tipoBadge.style.cssText = 'display:inline-block;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;padding:2px 7px;border-radius:3px;margin-left:8px;vertical-align:middle;';
   nameEl.after(tipoBadge);
 
-  // Decorazioni con anteprima immagine (PNG flat) invece del viewer 3D
-  const DECO_IMG = {
-    'Pallone da calcio': '/static/img/deco-pallone-calcio.png',
-  };
+  // Decorazioni con anteprima immagine (PNG flat) invece del viewer 3D.
+  // 'Pallone da calcio' e' passata a un vero modello .glb: non serve piu' il
+  // fallback immagine, che soffriva di artefatti di trasparenza sull'ombra
+  // e sui pannelli bianchi del pallone (vedi PR #125 e #126).
+  const DECO_IMG = {};
 
   window.loadDecoPreview = function(name, isFlat) {
     const url = `/static/models/decorazioni/${encodeURIComponent(name)}.glb`;
